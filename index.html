@@ -703,6 +703,11 @@ h2 .hearbtn,h3 .hearbtn{width:28px;height:28px}
 .hearagain .ha-bud svg{width:34px;height:34px}
 .hearagain:active{transform:translateY(3px);box-shadow:0 1px 0 var(--sea-d)}
 
+/* ---------- v9 ---------- */
+.hearbtn{width:38px;height:38px;background:#DDF1FF;box-shadow:0 3px 0 #B9DDF5}
+.hearbtn svg{width:20px;height:20px}
+.hearbtn.playing{background:var(--sea);color:#fff}
+#hearAgain{display:none!important}
 /* ---------- v8 ---------- */
 .world-wrap{overflow:hidden;overflow:clip}
 .mbtn.need{background:var(--grape);color:#fff;animation:needp 1.2s ease-in-out infinite}
@@ -5474,6 +5479,138 @@ document.addEventListener('submit', async e => {
   try { const { error } = await CL.client.auth.signInWithPassword({ email: CL.user.email, password: $('#puPw').value }); if (error) throw error; closeSheet(); DB.session = { role: 'parent' }; render(); }
   catch (err){ ui.err = 'That password is not right.'; openSheet(parentGate()); }
 }, true);
+
+// =====================================================================
+//  v9 — a natural AI voice (Kokoro “Heart”, pre-recorded) and tap-to-hear only
+// =====================================================================
+const vnorm = s => String(s).toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const vsplit = t => cleanSpeech(t).split(/(?<=[.!?])\s+/).map(x => x.trim()).filter(Boolean);
+const VP = { man: null, manP: null, packs: {}, packP: {}, bufs: {}, srcs: [], gain: null };
+VPREF.engine = VPREF.engine || 'ai'; if (VPREF.rate > .9) VPREF.rate = .85; if (VPREF.pitch > 1.05) VPREF.pitch = 1;
+function vpManifest(){
+  if (VP.man) return Promise.resolve(VP.man);
+  if (!VP.manP) VP.manP = fetch('voice/manifest.json').then(r => r.ok ? r.json() : null).then(m => (VP.man = m)).catch(() => null);
+  return VP.manP;
+}
+function vpPack(i){ if (VP.packs[i]) return Promise.resolve(VP.packs[i]); if (!VP.packP[i]) VP.packP[i] = fetch(VP.man.packs[i]).then(r => r.json()).then(p => (VP.packs[i] = p)); return VP.packP[i]; }
+function planSpeech(text, keys){
+  const out = [];
+  for (const s of vsplit(text)){
+    const n = vnorm(s); if (!n) continue;
+    if (keys[n] != null){ out.push({ k: n, gap: .2 }); continue; }
+    const w = n.split(' '), L = w.length, best = Array(L + 1).fill(Infinity), back = Array(L + 1).fill(-1); best[0] = 0;
+    for (let i = 0; i < L; i++){ if (best[i] === Infinity) continue; for (let j = Math.min(L, i + 16); j > i; j--){ if (keys[w.slice(i, j).join(' ')] != null && best[i] + 1 < best[j]){ best[j] = best[i] + 1; back[j] = i; } } }
+    if (best[L] === Infinity) return null;
+    const seg = []; for (let j = L; j > 0; j = back[j]) seg.unshift(w.slice(back[j], j).join(' '));
+    seg.forEach(k => out.push({ k, gap: .05 }));
+    if (out.length) out[out.length - 1].gap = .2;
+  }
+  return out.length ? out : null;
+}
+function b64buf(b64){ const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
+async function vpBuffer(k){
+  if (VP.bufs[k]) return VP.bufs[k];
+  const pack = await vpPack(VP.man.keys[k]); const b64 = pack[k]; if (!b64) throw new Error('missing clip');
+  const buf = await new Promise((res, rej) => MUS.ctx.decodeAudioData(b64buf(b64), res, rej));
+  return (VP.bufs[k] = buf);
+}
+function stopSpeech(){ SAY.seq = (SAY.seq || 0) + 1; VP.srcs.forEach(s => { try { s.stop(); } catch (e) {} }); VP.srcs = []; try { speechSynthesis.cancel(); } catch (e) {} duck(false); }
+async function vpSpeak(t){
+  const man = await vpManifest(); if (!man) return false;
+  const plan = planSpeech(t, man.keys); if (!plan) return false;
+  audioStart(); if (!MUS.ctx) return false;
+  const id = SAY.seq;
+  let bufs; try { bufs = await Promise.all(plan.map(p => vpBuffer(p.k))); } catch (e) { return false; }
+  if (id !== SAY.seq) return true;
+  const c = MUS.ctx; if (!VP.gain){ VP.gain = c.createGain(); VP.gain.gain.value = 1; VP.gain.connect(c.destination); }
+  let at = c.currentTime + .03;
+  bufs.forEach((b, i) => { const s = c.createBufferSource(); s.buffer = b; s.connect(VP.gain); s.start(at); VP.srcs.push(s); at += b.duration + plan[i].gap; });
+  duck(true); clearTimeout(SAY.duckT); SAY.duckT = setTimeout(() => duck(false), (at - c.currentTime) * 1000 + 200);
+  return true;
+}
+function deviceSay(t){
+  try {
+    const ss = window.speechSynthesis; if (!ss) return; ss.cancel();
+    const u = new SpeechSynthesisUtterance(t); if (!SAY.voice) pickVoice(); if (SAY.voice){ u.voice = SAY.voice; u.lang = SAY.voice.lang; }
+    u.rate = VPREF.rate; u.pitch = VPREF.pitch; u.onstart = () => duck(true); u.onend = () => duck(false); u.onerror = () => duck(false);
+    clearTimeout(SAY.duckT); SAY.duckT = setTimeout(() => duck(false), 1500 + t.length * 90 / VPREF.rate); ss.speak(u);
+  } catch (e) {}
+}
+// Only speak when a kid taps something. Nothing reads itself out loud anymore.
+function say(text, o = {}){
+  if (!o.force) return;
+  const t = cleanSpeech(text); if (!t) return;
+  SAY.last = t; stopSpeech();
+  if (VPREF.engine === 'device') return deviceSay(t);
+  vpSpeak(t).then(ok => { if (!ok) deviceSay(t); });
+}
+function narrate(){}
+const tapSay = t => say(t, { force: true });
+
+// ---------- shorter things to hear ----------
+function questSpeech(q){
+  const title = (q.querySelector('h3') || {}).textContent || '', coins = ((q.querySelector('.coinchip') || {}).textContent || '').trim();
+  const st = q.querySelector('.pill.wait') ? 'Waiting for your grown-up.' : q.querySelector('.pill.ok') ? 'Done! Great job!' : q.querySelector('.pill.miss') ? 'This one was missed.' : 'Tap Start!';
+  return `${title}. ${coins} ${coins === '1' ? 'coin' : 'coins'}. ${st}`;
+}
+function talkSpeech(){
+  const kid = K(); if (unreadFor(kid.id, 'parent')) return `${pname()} sent you a message!`;
+  const w = workTask(kid.id); if (w) return w.status === 'waiting' ? `I told ${pname()}. Fingers crossed!` : `You're doing ${w.title}!`;
+  const next = todays(kid.id).filter(t => t.status === 'todo').sort((a, b) => a.due.localeCompare(b.due))[0];
+  return next ? `Next chore: ${next.title}.` : `All done today! Let's play!`;
+}
+const firstText = el => { if (!el) return ''; const c = el.cloneNode(true); c.querySelectorAll('small, .hearbtn, .coinchip, .tagx, .pill, .row, i, button').forEach(x => x.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+function addHears(){
+  const ha = $('#hearAgain'); if (ha) ha.hidden = true;
+  if (!RA()) return;
+  const put = (el, text, where = 'afterbegin') => { if (!el || !text || el.querySelector(':scope > .hearbtn')) return; el.insertAdjacentHTML(where, hearBtn(text)); el.classList.add('has-hear'); };
+  document.querySelectorAll('.quest').forEach(q => put(q, questSpeech(q)));
+  document.querySelectorAll('.talk').forEach(t => put(t, talkSpeech(), 'beforeend'));
+  document.querySelectorAll('.rmsay-wrap').forEach(w => put(w, txt(w.querySelector('.rmsay')), 'beforeend'));
+  document.querySelectorAll('#view .item').forEach(it => { const n = firstText(it.querySelector('h4')), p = ((it.querySelector('.coinchip') || {}).textContent || '').trim(); put(it, p ? `${n}. ${p} coins.` : n); });
+  document.querySelectorAll('.furbtn, .wtile, .seed, .topbtn').forEach(it => put(it, firstText(it)));
+  document.querySelectorAll('.evrw-i, .evch').forEach(it => put(it, firstText(it.querySelector('b'))));
+  document.querySelectorAll('.lvbar').forEach(it => put(it, txt(it.querySelector('.lv-head'))));
+  document.querySelectorAll('.evcard').forEach(it => put(it, firstText(it.querySelector('.evtx b'))));
+  document.querySelectorAll('.evhunt').forEach(it => put(it, firstText(it.querySelector('b'))));
+  document.querySelectorAll('.robo').forEach(r => put(r, `${firstText(r.querySelector('b'))}. ${(r.querySelector('small') || {}).textContent || ''}`));
+  document.querySelectorAll('.thread .mb').forEach(m => put(m, txt(m.querySelector('.bt')) || 'A sticker!'));
+  document.querySelectorAll('.lesson').forEach(l => { const b = l.querySelector('[data-act="speak"]'); if (b) b.remove(); put(l, txt(l.querySelector('p')), 'beforeend'); });
+  document.querySelectorAll('.answers').forEach(a => { if (a.classList.contains('ra')) return; a.classList.add('ra'); [...a.children].forEach(b => { if (b.tagName !== 'BUTTON') return; const row = document.createElement('div'); row.className = 'ansrow'; b.replaceWith(row); row.innerHTML = hearBtn(b.textContent); row.appendChild(b); }); });
+  document.querySelectorAll('.sheet h3, .rm-title h2, .sec-h h2').forEach(h => { if (h.querySelector('.hearbtn') || h.closest('.has-hear')) return; h.insertAdjacentHTML('beforeend', ' ' + hearBtn(firstText(h))); });
+}
+// tap-started speech only
+A.hear = (el, e) => { e && e.stopPropagation(); tapSay(el.dataset.v); };
+A.speak = el => tapSay(el.dataset.v);
+A.voiceTest = () => tapSay(`Hi! I'm your buddy. Let's have so much fun together!`);
+A.voiceRate = el => { VPREF.rate = +el.dataset.v; saveVoice(); render(); VPREF.engine === 'device' ? tapSay('This is how fast I talk!') : toast('Speed changes the phone voice. The AI voice is already calm and slow.'); };
+A.voicePitch = el => { VPREF.pitch = +el.dataset.v; saveVoice(); render(); tapSay('Hello there, friend!'); };
+A.voiceEngine = el => { VPREF.engine = el.dataset.v; saveVoice(); render(); tapSay(`Hi! I'm your buddy. Let's have so much fun together!`); };
+const _petV = A.petBuddy; A.petBuddy = function(el, e){ _petV(el, e); if (RA()) tapSay(txt('.talk .say')); };
+const _pinV = A.pinKey; A.pinKey = function(el, e){ const k = kidOf(ui.pinKid); _pinV(el, e); if (raFor(k)) tapSay(el.dataset.v === '⌫' ? 'Oops, undo' : el.dataset.v); };
+const _pickV = A.pickKid; A.pickKid = function(el, e){ const k = kidOf(el.dataset.v); if (raFor(k)) tapSay('Hi ' + k.name + '!'); _pickV(el, e); };
+const _tapNpcV = worldTap; worldTap = function(e){ const before = sim.npcs ? sim.npcs.map(n => n.sayUntil) : []; _tapNpcV(e); if (RA() && sim.npcs){ const n = sim.npcs.find((x, i) => x.sayUntil !== before[i]); if (n) tapSay(`${BUDDIES[n.t].name} says: ${n.line}`); } };
+const _voiceCtlV = voiceControls;
+voiceControls = function(){
+  return _voiceCtlV().replace('<div class="field" style="padding:6px 0">', `<div class="chips" style="padding-top:6px">${[['ai', 'AI voice (natural)'], ['device', 'Phone voice']].map(([k, l]) => `<button class="chip" data-act="voiceEngine" data-v="${k}" aria-pressed="${VPREF.engine === k}">${l}</button>`).join('')}</div><p class="note-s">The AI voice is a recorded, natural “Heart” voice. Kids tap a speaker to hear something; nothing reads itself out loud. Words the AI voice hasn’t recorded (like a brand new chore name) use the phone voice below.</p><div class="field" style="padding:6px 0">`);
+};
+
+// ---------- the list of everything the AI voice records ----------
+const VFRAGS = ['Tap Start!', 'Waiting for your grown-up.', 'Done! Great job!', 'This one was missed.', 'coins', 'coin', 'Next chore', "You're doing", 'I told', 'Fingers crossed!', 'sent you a message!', "All done today! Let's play!", 'Level', 'Hi', 'Parent', 'Mom', 'Dad', 'Grandma', 'Grandpa', 'Find the hidden', 'A sticker!', 'says', 'Oops, undo', 'Hello there, friend!', "Hi! I'm your buddy. Let's have so much fun together!", 'Hi! Do you like my voice?', 'This is how fast I talk!', 'Chore Time!', 'I finished!', 'Today’s quests', 'Places to play', 'Robot teachers', 'Market', 'Me', 'Buddies', 'My closet', 'Explore', 'Build mode', 'Your bag', 'Daily surprise!', 'Tap the present 3 times to open it', 'Weather', 'Pasta Palace', 'A customer wants', 'Perfect pizzas', 'Serve', 'perfect pizzas', 'Find', 'pairs', 'in', 'moves', 'Stack', 'scoops', 'Score', 'points in 30 seconds', 'Swing up to the star line', 'Catch', 'fish', 'reel within', 'seconds', 'Catch', 'in 30 seconds', 'Which number is bigger', 'or', 'What is', 'plus', 'minus', 'times', 'Is it', 'heart', 'star', 'trophy', 'rainbow', 'sun', 'party', 'Thank you!', 'Love you!', 'On it!', 'All done!', 'Can I have more time?', 'Come see my world!'];
+const KIDNAMES = 'Ava Leo Rosie Mia Emma Olivia Liam Noah Sophia Isabella Lucas Mason Ethan Amelia Harper Evelyn Abigail Emily Ella Elizabeth Camila Luna Sofia Avery Mila Aria Scarlett Penelope Layla Chloe Victoria Madison Eleanor Grace Nora Riley Zoey Hannah Hazel Lily Ellie Violet Lillian Zoe Stella Aurora Natalie Emilia Everly Leah Aubrey Willow Addison Lucy Audrey Bella Nova Brooklyn Paisley Savannah Claire Skylar Isla Genesis Naomi Elena Caroline Eliana Anna Maya Valentina Ruby Kennedy Ivy Ariana Aaliyah Cora Madelyn Alice Kinsley Hailey Gabriella Allison Gianna Serenity Samantha Sarah Autumn Quinn Eva Piper Sophie Sadie Delilah Josephine Nevaeh Adeline Arya Emery Lydia Clara Vivian Madeline Peyton Julia Rylee Brielle Reagan Natalia Jade Athena Maria Leilani Everleigh Liliana Melanie Mackenzie Hadley Raelynn Kaylee Rose Arianna Isabelle Melody Eliza Lyla Katherine Aubree Adalynn Kylie Faith Mary Margaret Ximena Iris Alexandra Jasmine Charlotte Oliver Elijah James William Benjamin Henry Alexander Michael Daniel Jacob Logan Jackson Sebastian Jack Aiden Owen Samuel Matthew Joseph Levi Mateo David John Wyatt Carter Julian Luke Grayson Isaac Jayden Theodore Gabriel Anthony Dylan Leo Lincoln Jaxon Asher Christopher Josiah Andrew Thomas Joshua Ezra Hudson Charles Caleb Isaiah Ryan Nathan Adrian Christian Maverick Colton Elias Aaron Eli Landon Jonathan Nolan Hunter Cameron Connor Santiago Jeremiah Ezekiel Angel Roman Easton Miles Robert Jameson Nicholas Greyson Cooper Ian Carson Axel Jaxson Dominic Leonardo Luca Austin Jordan Adam Xavier Jose Jace Everett Declan Evan Kayden Parker Wesley Kai Thiago Tiago Theo Max Sam Ben Finn Milo Felix Oscar Arthur Hugo Ollie Archie Teddy Toby Rory Lola Poppy Daisy Freya Evie Millie Florence Matilda Isabel Lucia Martina Valeria Camille Inès Sara Zara Aisha Fatima Amir Omar Yusuf Ali Hana Kenji Yuki Mei Chen Wei Priya Arjun Ravi Diego Pablo Carlos Javier Mariana Gabriel Rafael Bruno Davi Pedro Joao Lara Bia Manu Duda'.split(' ');
+const CHORE_TITLES = ['Make your bed', 'Brush teeth', 'Brush your teeth', 'Put toys away', 'Put toys in the box', 'Pick up toys', 'Help with the dishes', 'Wash the dishes', 'Dry the dishes', 'Feed the pet', 'Feed the dog', 'Feed the cat', 'Feed the fish', 'Walk the dog', 'Water the plants', 'Water the garden', 'Tidy your room', 'Clean your room', 'Tidy your closet', 'Set the table', 'Clear the table', 'Wipe the table', 'Take out the trash', 'Recycle', 'Fold laundry', 'Put away laundry', 'Put dirty clothes in the hamper', 'Finish homework', 'Do homework', 'Read a book', 'Practice piano', 'Practice reading', 'Get dressed', 'Pack your backpack', 'Sweep the floor', 'Vacuum', 'Help cook dinner', 'Make lunch', 'Put shoes away', 'Hang up your coat', 'Brush your hair', 'Take a bath', 'Wash your hands', 'Help with groceries', 'Clean the sink', 'Dust the shelves', 'Empty the dishwasher', 'Load the dishwasher', 'Clean your desk', 'Help your sibling', 'Go to bed on time', 'Make a card for someone', 'Share your toys', 'Say thank you', 'Eat your veggies'];
+function voiceCatalog(){
+  const out = new Set(), add = s => { if (s != null && s !== '') vsplit(String(s)).forEach(x => out.add(x)); };
+  Object.values(LESSONS).forEach(b => Object.values(b).forEach(list => list.forEach(l => { add(l.t); add(l.q); l.a.forEach(add); add(l.why); })));
+  [...Object.values(CHEERS).flat(), ...CHEER_ALL, ...NPC_LINES, ...PET_LINES, ...KID_SAYS, ...WISHES].forEach(add);
+  Object.values(NAMES).forEach(add); CATALOG.forEach(c => add(c.name)); Object.values(BUDDIES).forEach(b => { add(b.name); add(b.kind); add(b.about); }); Object.values(ROBOTS).forEach(r => { add(r.name); add(r.topic); add(`Hi, I'm ${r.name}!`); });
+  Object.values(ACT).forEach(a => { add(a.name); add(a.place); }); Object.values(ROOMS).forEach(r => { add(r.title); add(r.play); }); Object.values(WEATHERS).forEach(w => add(w.n));
+  Object.values(EVENTS).forEach(E => { add(E.name); add(E.tag); E.ch.forEach(c => add(c[3])); E.rw.forEach(r => add(r[3])); add('Hidden ' + E.huntN); });
+  Object.values(TOPS).forEach(t => add(t.name)); Object.values(SEEDS).forEach(s => add(s.name)); FISH.forEach(f => add(f.name)); CLOTHES.forEach(c => add(c.name)); Object.values(ACCN).forEach(add); Object.values(FURN).forEach(f => add(f.name)); THEMES.forEach(t => add(t.name)); PLACES.forEach(p => add(p[0]));
+  [...VFRAGS, ...CHORE_TITLES, ...KIDNAMES].forEach(add); CHORE_TITLES.forEach(t => { add(`You're doing ${t}!`); add(`Next chore: ${t}.`); });
+  for (let i = 0; i <= 200; i++) add(String(i));
+  return [...out];
+}
 
 injectDefs();
 injectDefs2();

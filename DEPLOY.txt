@@ -1,0 +1,16 @@
+Chore Buddies — how to put it on your own website
+
+Upload these together (for example to Cloudflare Pages, drag and drop the folder):
+  index.html          the whole app
+  voice/              the natural AI voice clips (Kokoro "Heart"); keep the folder name
+Without the voice folder the app still works and uses the phone's built-in voice.
+
+Cloud accounts for several phones: see supabase/002_cloud_sync.txt.
+
+Re-recording the voice after adding new phrases (needs Python 3):
+  pip install kokoro-onnx soundfile lameenc
+  download kokoro-v1.0.int8.onnx and voices-v1.0.bin from
+  github.com/thewh1teagle/kokoro-onnx/releases (model-files-v1.0) into a kmodel/ folder
+  tools/collect_phrases.js  (Playwright) lists every phrase the app can speak
+  tools/record_voice.py     records them all; tools/record_missing.py adds any gaps
+  (the scripts expect the model and phrase list next to them; adjust the paths at the top)
