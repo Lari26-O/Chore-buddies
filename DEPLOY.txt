@@ -1,11 +1,44 @@
-Chore Buddies — how to put it on your own website
+Chore Buddies — put it on its own website (works on any phone, no Claude needed)
 
-Upload these together (for example to Cloudflare Pages, drag and drop the folder):
-  index.html          the whole app
-  voice/              the natural AI voice clips (Kokoro "Heart"); keep the folder name
+EASIEST: Cloudflare Pages connected to GitHub (free, about 10 minutes, works from an iPad)
+  It updates itself every time new changes are pushed to GitHub.
+  1. Go to dash.cloudflare.com and make a free account.
+  2. Workers & Pages → Create → Pages → Connect to Git → sign in with GitHub
+     → pick the repository "Weeklan".
+  3. Settings:
+       Production branch:      claude/chore-buddies   (or main, once it is merged)
+       Framework preset:       None
+       Build command:          (leave empty)
+       Build output directory: chore-buddies
+  4. Save and Deploy. You get an address like https://weeklan.pages.dev
+     (you can rename the project to get e.g. https://chore-buddies.pages.dev).
+
+ON MOM'S PHONE (iPhone)
+  1. Open the address in Safari.
+  2. Tap Share (the square with the arrow) → "Add to Home Screen" → Add.
+  3. Chore Buddies now has its own icon and opens full screen like a real app.
+     After the first visit it also works with no internet (the music and voice clips are saved on the phone).
+  On Android: open it in Chrome → ⋮ menu → "Add to Home screen" / "Install app".
+
+IMPORTANT: each phone keeps its own family until cloud sync is connected.
+  To have the iPad and Mom's phone share the SAME kids, coins and worlds,
+  set up the free cloud account in supabase/002_cloud_sync.txt, then
+  Parent → Controls → "Use on several phones".
+
+"I DON'T GET IT" HELPER
+  Inside the Claude app it uses Claude automatically (it asks once for permission).
+  On your own website it uses built-in hints (cross out a wrong answer, count with fingers, a clue)
+  unless you add the optional cloud helper: supabase/functions/helper/index.ts (steps are at the top of that file).
+  A grown-up can turn the helper off in Parent → Controls.
+
+WHAT IS IN THIS FOLDER
+  index.html            the whole app (made from app.html by build.sh)
+  voice/                the natural voice clips; keep the folder name
+  manifest.webmanifest, sw.js, icon-*.png   make "Add to Home Screen" and offline work
 Without the voice folder the app still works and uses the phone's built-in voice.
 
-Cloud accounts for several phones: see supabase/002_cloud_sync.txt.
+OTHER WAYS TO HOST: Netlify Drop (app.netlify.com/drop) or Cloudflare Pages "Upload assets":
+  drag the whole chore-buddies folder in. These do not update by themselves.
 
 Re-recording the voice after adding new phrases (needs Python 3):
   pip install kokoro-onnx soundfile lameenc

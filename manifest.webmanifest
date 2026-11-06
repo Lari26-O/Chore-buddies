@@ -1,0 +1,16 @@
+{
+  "name": "Chore Buddies",
+  "short_name": "Chore Buddies",
+  "description": "Chores earn coins that build a cute little world.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E9F6FF",
+  "theme_color": "#E9F6FF",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

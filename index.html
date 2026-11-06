@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#E9F6FF">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Chore Buddies"><meta name="theme-color" content="#E9F6FF"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
 <title>Chore Buddies</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -794,6 +794,41 @@ body.worldfull nav#tabs{visibility:hidden}
 .grabme{cursor:grab}
 .tapme{cursor:pointer;animation:tapGlow 1.3s ease-in-out infinite}
 @keyframes tapGlow{50%{opacity:.75}}
+.buyask{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(43,37,80,.45);animation:fadeIn .18s ease-out}
+.buyask.out{opacity:0;transition:opacity .18s}
+.buyask-card{width:100%;max-width:340px;background:#fff;border-radius:28px;padding:18px 18px 14px;text-align:center;box-shadow:0 20px 50px rgba(43,37,80,.35);animation:popIn .25s cubic-bezier(.3,1.5,.6,1)}
+.buyask-pic{width:120px;height:110px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center}
+.buyask-pic svg{max-width:100%;max-height:100%}
+.buyask-card h3{font-size:21px;margin:4px 0 6px}
+.buyask-name{display:flex;gap:8px;justify-content:center;align-items:center;margin:0 0 2px;font-size:16px}
+.buyask-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 8px}
+.buyask-btns button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 8px;border-radius:22px;font-size:34px;font-weight:900;line-height:1;color:#fff}
+.buyask-btns button span{font-size:19px;font-family:var(--display)}
+.buyyes{background:#2FBF5B;box-shadow:0 5px 0 #1E8E40}
+.buyno{background:#F0454F;box-shadow:0 5px 0 #B42A33}
+.buyask-btns button:active{transform:translateY(4px);box-shadow:none}
+@keyframes fadeIn{from{opacity:0}}
+@keyframes popIn{from{transform:scale(.8);opacity:0}}
+.helpme{font-size:15px}
+.helpchips{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.helpchips .chip.big{padding:12px 10px;font-size:14px;justify-content:center;text-align:center;border-radius:18px}
+.micbtn.on{animation:stepPulse 1s ease-in-out infinite}
+.helptype{display:flex;gap:8px;align-items:center}
+.helptype .text{flex:1}
+.helpheard{font-size:13px;color:var(--ink-2);margin:0;text-align:center;font-style:italic}
+.helpans{display:flex;gap:8px;align-items:flex-end}
+.helpav{width:54px;flex:none}
+.helpbub{position:relative;flex:1;background:#F3EEFF;border-radius:20px 20px 20px 6px;padding:12px 40px 12px 14px;font-size:16px;font-weight:700;line-height:1.35}
+.helpbub p{margin:0}
+.helpbub .hearbtn{position:absolute;right:6px;top:6px}
+.helpdots{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.helpdots span{display:flex;flex-wrap:wrap;gap:4px;max-width:120px}
+.helpdots i{width:16px;height:16px;border-radius:50%;display:block}
+.helpdots b{font-size:18px}
+.dots{display:inline-flex;gap:3px;margin-right:4px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--grape);animation:hintBob .9s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+.pill.off{background:#F1F1F6;color:#8A86A8}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -1794,10 +1829,10 @@ const kidOf = id => S.kids[id];
 const K = () => (S && (S.kids[DB.session && DB.session.kid] || S.kids[S.order[0]])) || null;
 const todays = kid => S.tasks.filter(t => t.kid === kid && (t.status !== 'todo' || appliesToday(t)));
 function appliesToday(t){ if (t.repeat === 'weekdays') return DOW >= 1 && DOW <= 5; if (t.repeat === 'weekly' || t.repeat === 'custom') return (t.days || []).includes(DOW); return true; }
-const overdue = t => t.status === 'todo' && Date.now() > dueTs(t);
+const overdue = t => t.status === 'todo' && appliesToday(t) && Date.now() > dueTs(t);
 const placed = (kid, t) => kid.world.some(o => o.t === t);
 const owns = (kid, t) => placed(kid, t) || kid.inv.some(o => o.t === t);
-const repeatTxt = t => t.repeat === 'once' ? 'One time' : t.repeat === 'daily' ? 'Every day' : t.repeat === 'weekdays' ? 'Weekdays' : (t.days || []).slice().sort().map(d => DAYN[d]).join(', ') || 'Pick days';
+const repeatTxt = t => repeatNice(t);
 const pname = () => (S && S.parentName) || 'Parent';
 const doy = () => Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
 const learnedToday = kid => (kid.learned || (kid.learned = {}))[dayKey()] || {};
@@ -2074,12 +2109,12 @@ function vTasks(){
   <div class="tlist">${ts.map(t => {
     const kid = kidOf(t.kid);
     const st = { todo: isDoing(t) ? '<span class="pill wait">Doing it now</span>' : overdue(t) ? '<span class="pill miss">Late</span>' : '<span class="pill" style="background:#EEF2FB;color:#5F5A86">To do</span>', waiting: '<span class="pill wait">Check it</span>', approved: '<span class="pill ok">Done</span>', missed: '<span class="pill miss">Missed</span>' }[t.status];
-    return `<button class="trow" data-act="editTask" data-id="${t.id}" style="text-align:left;width:100%">${icon(t.icon)}<div style="flex:1;min-width:0"><h4>${esc(t.title)}</h4><div class="qmeta"><span>${esc(kid.name)}</span><span>· ${repeatTxt(t)} by ${fmtTime(t.due)}</span><span class="coinchip">${COIN(15)}${t.coins}</span><span style="color:var(--danger)">−${t.penalty}</span></div></div>${st}</button>`;
+    return `<button class="trow" data-act="editTask" data-id="${t.id}" style="text-align:left;width:100%">${icon(t.icon)}<div style="flex:1;min-width:0"><h4>${esc(t.title)}</h4><div class="qmeta"><span>${esc(kid.name)}</span><span>· ${repeatTxt(t)} by ${fmtTime(t.due)}</span><span class="coinchip">${COIN(15)}${t.coins}</span><span style="color:var(--danger)">−${t.penalty}</span></div></div>${t.status === 'todo' && !appliesToday(t) ? '<span class="pill off">Not today</span>' : st}</button>`;
   }).join('') || '<div class="card empty"><h3>No tasks yet</h3><p>Tap “New task” to add one.</p></div>'}</div>`;
 }
 function taskSheet(){
   const d = ui.draft, kid = kidOf(d.kid);
-  const repeats = [['once', 'One time'], ['daily', 'Every day'], ['weekdays', 'Weekdays'], ['weekly', 'Weekly'], ['custom', 'Custom']];
+  const repeats = [['once', 'Just once'], ['daily', 'Every day'], ['weekdays', 'School days'], ['weekends', 'Weekends'], ['custom', 'Pick days']];
   return `<div class="grab"></div><div><h3>${d.isNew ? 'New task' : 'Edit task'}</h3><p class="sub">Kids see this as a quest with a coin reward.</p></div>
   <div class="field"><span class="flabel">For</span><div class="chips">${S.order.map(k => `<button class="chip" data-act="dk" data-v="${k}" aria-pressed="${d.kid === k}">${esc(kidOf(k).name)}</button>`).join('')}</div></div>
   <div class="field"><label for="dTitle">Title</label><input class="text" id="dTitle" data-f="title" value="${esc(d.title)}" placeholder="Feed the dog" maxlength="40"></div>
@@ -2087,8 +2122,8 @@ function taskSheet(){
   <div class="row2"><div class="field"><span class="flabel">Coins earned</span><div class="stepper"><button data-act="step" data-f="coins" data-v="-1" aria-label="Less">−</button><output id="dCoins">${d.coins}</output><button data-act="step" data-f="coins" data-v="1" aria-label="More">+</button></div></div>
     <div class="field"><span class="flabel">Coins lost if skipped</span><div class="stepper"><button data-act="step" data-f="penalty" data-v="-1" aria-label="Less">−</button><output id="dPen">${d.penalty}</output><button data-act="step" data-f="penalty" data-v="1" aria-label="More">+</button></div></div></div>
   <div class="field"><label for="dDue">Due by</label><input type="time" class="text" id="dDue" data-f="due" value="${d.due}"></div>
-  <div class="field"><span class="flabel">Repeats</span><div class="chips">${repeats.map(([k, l]) => `<button class="chip" data-act="dRep" data-v="${k}" aria-pressed="${d.repeat === k}">${l}</button>`).join('')}</div>
-    ${d.repeat === 'weekly' || d.repeat === 'custom' ? `<div class="chips">${DAYN.map((n, k) => `<button class="chip" data-act="dDay" data-v="${k}" aria-pressed="${d.days.includes(k)}">${n}</button>`).join('')}</div>` : ''}</div>
+  <div class="field"><span class="flabel">Repeats</span><div class="chips">${repeats.map(([k, l]) => `<button class="chip" data-act="dRep" data-v="${k}" aria-pressed="${d.repeat === k || (k === 'custom' && d.repeat === 'weekly')}">${l}</button>`).join('')}</div>
+    ${d.repeat === 'weekly' || d.repeat === 'custom' ? `<p class="note-s">Tap the days it should show up. Only Friday? Just tap Fri.</p><div class="chips">${DAYN.map((n, k) => `<button class="chip" data-act="dDay" data-v="${k}" aria-pressed="${d.days.includes(k)}">${n}</button>`).join('')}</div>` : ''}<p class="note-s">Shows up: <b>${repeatNice(d)}</b>${d.repeat !== 'once' ? '. It comes back fresh each time.' : '.'}</p></div>
   <div class="field"><span class="flabel">Job in the world</span><div class="actgrid">${Object.keys(ACT).map(a => { const ok = a === 'home' || placed(kid, ACT[a].b); return `<button data-act="dAct" data-v="${a}" aria-pressed="${d.act === a}" ${ok ? '' : 'disabled'}><div class="thumb">${thumbBox(ACT[a].b)}</div>${ACT[a].name}${ok ? '' : `<small>${esc(kid.name)} needs this building</small>`}</button>`; }).join('')}</div></div>
   <div class="field"><span class="flabel">Example photo (optional)</span><label class="photo-in" for="dPhoto">${d.example ? `<img src="${d.example}" alt="">` : `<span class="cam">${CAM}</span>`}<span>${d.example ? 'Change photo' : 'Show what “done” looks like'}</span><input type="file" accept="image/*" id="dPhoto" data-photo="draft"></label></div>
   <button class="btn big" data-act="saveTask">${d.isNew ? 'Add task' : 'Save changes'}</button>
@@ -6050,6 +6085,204 @@ DRAG.lib = {
 };
 A.sortAgain = () => { sortNew(); reBody(sortHTML()); };
 ROOMS.library.tabs.push(['sort', 'Sort books', sortHTML]);
+
+// =====================================================================
+//  v12 — "Are you sure?" before buying, a helper for tricky questions,
+//        clearer repeating tasks, and install-as-an-app support
+// =====================================================================
+
+// ---------- 1. ARE YOU SURE YOU WANT TO BUY THIS? ----------
+function askBuy(o, yes){
+  const old = document.querySelector('.buyask'); if (old) old.remove();
+  const kid = K(), left = kid.coins - o.price;
+  const ov = document.createElement('div'); ov.className = 'buyask';
+  ov.innerHTML = `<div class="buyask-card" role="dialog" aria-modal="true" aria-labelledby="buyAskT">
+    <div class="buyask-pic">${o.pic || ''}</div>
+    <h3 id="buyAskT">Are you sure you want to buy this?</h3>
+    <p class="buyask-name"><b>${esc(o.name)}</b><span class="coinchip">${COIN()}${o.price}</span></p>
+    <p class="note-s">You have ${kid.coins} coins. After this you will have ${Math.max(0, left)}.</p>
+    <div class="buyask-btns"><button class="buyyes" data-b="y" aria-label="Yes, buy it">✓<span>Yes</span></button><button class="buyno" data-b="n" aria-label="No, go back">✕<span>No</span></button></div>
+    <button class="btn small ghost buyask-hear" data-b="h" aria-label="Hear it again">🔊 Hear it again</button>
+  </div>`;
+  const close = () => { ov.classList.add('out'); setTimeout(() => ov.remove(), 180); document.removeEventListener('keydown', key, true); };
+  const key = e => { if (e.key === 'Escape'){ e.preventDefault(); close(); } };
+  ov.addEventListener('click', e => {
+    e.stopPropagation(); const b = e.target.closest('[data-b]');
+    if (!b){ if (e.target === ov){ close(); } return; }
+    if (b.dataset.b === 'y'){ close(); sfx('pop'); yes(); }
+    else if (b.dataset.b === 'n'){ close(); sfx('boop'); say('Okay! Maybe later.', { force: true }); }
+    else say('Are you sure you want to buy this?', { force: true });
+  });
+  document.addEventListener('keydown', key, true);
+  document.body.appendChild(ov);
+  setTimeout(() => { const y = ov.querySelector('.buyno'); if (y) y.focus({ preventScroll: true }); }, 60);
+  say('Are you sure you want to buy this?', { force: true });
+}
+const _buyAsk = A.buy;
+A.buy = function(el, e){
+  const it = CAT[el.dataset.id], kid = K();
+  if (!it || it.gift || kid.coins < it.price || (it.lvl && pLevel(kid) < it.lvl)) return _buyAsk(el, e);
+  const card = el.closest('.item'), th = card && card.querySelector('.thumb');
+  askBuy({ name: it.name, price: it.price, pic: th ? th.innerHTML : '' }, () => _buyAsk(el, e));
+};
+const _decBuyAsk = A.decBuy;
+A.decBuy = function(el, e){
+  const f = el.dataset.v, it = FURN[f], kid = K();
+  if (!it || kid.coins < it.price) return _decBuyAsk(el, e);
+  const ft = el.querySelector('.ft');
+  askBuy({ name: it.name, price: it.price, pic: ft ? ft.innerHTML : '' }, () => _decBuyAsk(el, e));
+};
+
+// ---------- 2. "I DON'T GET IT" HELPER ----------
+// Uses Claude when the app is opened as a Claude artifact, the family's own
+// cloud helper when connected (supabase/functions/helper), otherwise built-in hints.
+const AIH = { sampleP: null, busy: false, ctl: null };
+function aiSample(){
+  if (!AIH.sampleP) AIH.sampleP = (window.claude && typeof window.claude.use === 'function') ? Promise.resolve(window.claude.use('sample')).catch(() => null) : Promise.resolve(null);
+  return AIH.sampleP;
+}
+setTimeout(aiSample, 0);
+const aiOn = () => !S || !S.settings || S.settings.aiHelp !== false;
+const MIC = (() => { try { return window.SpeechRecognition || window.webkitSpeechRecognition || null; } catch (e) { return null; } })();
+const _robotSheetH = robotSheet;
+robotSheet = function(id){
+  const h = _robotSheetH(id), st = ui.lesson;
+  if (!st || st.right) return h;
+  const btn = `<button class="btn sun helpme" data-act="helpOpen" data-v="${id}">🙋 I don't get it</button>`;
+  return h.replace('<div class="actions">', `<div class="actions">${btn}`);
+};
+function helpSheet(){
+  const kid = K(), st = ui.lesson, les = st && st.cur, hp = ui.help; if (!les || !hp) return '';
+  const r = ROBOTS[st.id], young = raFor(kid), nums = /\d/.test(les.q);
+  const chips = [['slow', '🐢 Say it slowly'], ['mean', '🤔 What does it mean?'], ['hint', '💡 Give me a hint'], ...(nums ? [['count', '🖐️ Help me count']] : [])];
+  return `<div class="grab"></div>
+  <div class="robohead"><div class="rbig">${robotBox(st.id, { happy: 1 })}</div><div><h3>Let's figure it out together!</h3><p class="sub">${esc(r.name)} is here to help, ${esc(kid.name)}.</p></div></div>
+  <div class="lesson"><p><b>${esc(les.q)}</b></p><p class="note-s">${les.a.map((a, k) => st.picked.includes(k) || (hp.cross || []).includes(k) ? `<s>${esc(a)}</s>` : esc(a)).join(' · ')}</p></div>
+  <div class="helpchips">${chips.map(([k, l]) => `<button class="chip big" data-act="helpAsk" data-v="${k}" ${hp.busy ? 'disabled' : ''}>${l}</button>`).join('')}</div>
+  ${MIC ? `<button class="btn grape big micbtn ${hp.listening ? 'on' : ''}" data-act="helpMic" ${hp.busy ? 'disabled' : ''}>${hp.listening ? '👂 I’m listening… tap when done' : '🎤 Tell me what’s tricky'}</button>` : ''}
+  ${!young || !MIC ? `<div class="helptype"><input class="text" id="helpTxt" maxlength="160" placeholder="${young ? 'Ask a grown-up to type here' : 'Type what is tricky…'}" value="${esc(hp.draft || '')}"><button class="btn small grape" data-act="helpSend" ${hp.busy ? 'disabled' : ''}>Ask</button></div>` : ''}
+  ${hp.heard ? `<p class="helpheard">You said: “${esc(hp.heard)}”</p>` : ''}
+  <div class="helpans" id="helpAns" ${hp.ans || hp.busy ? '' : 'hidden'}><div class="helpav">${robotBox(st.id, { happy: 1 })}</div><div class="helpbub"><p id="helpAnsT">${hp.busy && !hp.ans ? '<span class="dots"><i></i><i></i><i></i></span> Thinking…' : esc(hp.ans || '')}</p>${hp.dots ? hp.dots : ''}${hp.ans ? `<button class="hearbtn" data-act="speak" data-v="${esc(hp.ans)}" aria-label="Hear it">🔊</button>` : ''}</div></div>
+  <div class="actions"><button class="btn sea" data-act="helpBack" data-v="${st.id}">← Back to the question</button></div>
+  ${hp.src === 'ai' ? '<p class="note-s center">A computer helper wrote this. If something seems odd, ask a grown-up.</p>' : ''}`;
+}
+function helpRedraw(){ if (ui.help) openSheet(helpSheet()); }
+A.helpOpen = function(el){ const st = ui.lesson; if (!st || !st.cur) return; ui.help = { n: 0, cross: [], log: [] }; openSheet(helpSheet()); say('What is tricky? Tap a button, or tell me.', { force: true }); };
+A.helpBack = function(el){ stopMic(); const st = ui.lesson; (ui.help && ui.help.cross || []).forEach(k => { if (st && st.cur && k !== st.cur.ok && !st.picked.includes(k)) st.picked.push(k); }); ui.help = null; openSheet(robotSheet(el.dataset.v)); };
+A.helpAsk = function(el){ helpRun(el.dataset.v, ''); };
+A.helpSend = function(){ const i = $('#helpTxt'); const t = i ? i.value.trim() : ''; if (!t) return toast('Type what is tricky first.'); ui.help.draft = ''; ui.help.heard = t; helpRun('free', t); };
+document.addEventListener('input', e => { if (e.target.id === 'helpTxt' && ui.help) ui.help.draft = e.target.value; });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'helpTxt'){ e.preventDefault(); A.helpSend(); } });
+let micRec = null;
+function stopMic(){ if (micRec){ try { micRec.stop(); } catch (e) {} micRec = null; } if (ui.help) ui.help.listening = false; }
+A.helpMic = function(){
+  const hp = ui.help; if (!hp || !MIC) return;
+  if (hp.listening){ stopMic(); helpRedraw(); return; }
+  stopSpeech();
+  try {
+    micRec = new MIC(); micRec.lang = 'en-US'; micRec.interimResults = true; micRec.maxAlternatives = 1; micRec.continuous = false;
+    let got = '';
+    micRec.onresult = ev => { got = [...ev.results].map(r => r[0].transcript).join(' ').trim(); hp.heard = got; const p = document.querySelector('.helpheard'); if (p) p.textContent = `You said: “${got}”`; else helpRedraw(); };
+    micRec.onerror = ev => { hp.listening = false; micRec = null; helpRedraw(); toast(ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? 'The microphone is turned off. A grown-up can allow it in the phone settings.' : 'I didn’t hear that. Try again!'); };
+    micRec.onend = () => { const was = hp.listening; hp.listening = false; micRec = null; if (was && got) helpRun('free', got); else helpRedraw(); };
+    micRec.start(); hp.listening = true; hp.heard = ''; helpRedraw();
+  } catch (e) { hp.listening = false; toast('The microphone isn’t available here. Tap a button instead!'); helpRedraw(); }
+};
+const isTakeAway = q => /\bleft\b|take away|taken|minus|−| - |\beat|\bate\b|gave|give away|fly away|flew|ran away|popped|fewer|less|lost|broke/i.test(q);
+function dotsSVG(q){
+  const ns = (q.match(/\d+/g) || []).map(Number).filter(n => n > 0 && n <= 12).slice(0, 3); if (!ns.length) return '';
+  const cols = ['#FF5A8C', '#34B2F0', '#3EC46B'];
+  if (ns.length >= 2 && isTakeAway(q) && ns[1] <= ns[0]) return `<div class="helpdots"><span style="max-width:200px">${[...Array(ns[0])].map((_, k) => `<i style="background:${k >= ns[0] - ns[1] ? '#D5DCEE' : cols[0]}${k >= ns[0] - ns[1] ? ';outline:2px dashed #9AA3B8' : ''}"></i>`).join('')}</span></div><p class="note-s">The grey ones went away. Count the pink ones!</p>`;
+  return `<div class="helpdots">${ns.map((n, g) => `<span>${[...Array(n)].map(() => `<i style="background:${cols[g]}"></i>`).join('')}</span>`).join('<b>+</b>')}</div>`;
+}
+function helpLocal(kind, les, hp){
+  const wrong = [0, 1, 2].filter(k => k !== les.ok && !(ui.lesson.picked || []).includes(k) && !hp.cross.includes(k));
+  if (kind === 'slow') return { t: `${les.q} ... Is it ${les.a.join(', or ')}?` };
+  if (kind === 'mean') return { t: les.t ? `Here is a clue. ${les.t}` : `Let's read it again. ${les.q}` };
+  if (kind === 'count'){ const ns = (les.q.match(/\d+/g) || []).slice(0, 3); return { t: ns.length > 1 && isTakeAway(les.q) ? `Let's use our fingers! Hold up ${ns[0]} fingers. Now fold down ${ns[1]}. How many fingers are still up?` : ns.length > 1 ? `Let's count with our fingers! Hold up ${ns[0]}, then ${ns.slice(1).join(' and ')} more. How many fingers now?` : `Let's count together! Point at each dot and count out loud.`, dots: dotsSVG(les.q) }; }
+  if (wrong.length > 1){ const k = pick(wrong); hp.cross.push(k); return { t: `It is not ${les.a[k]}. Try one of the others!` }; }
+  return { t: les.t ? `You can do it! ${les.t}` : 'Take your time. Read each answer and pick the one that feels right!' };
+}
+async function helpRun(kind, said){
+  const hp = ui.help, st = ui.lesson, les = st && st.cur, kid = K(); if (!hp || !les || hp.busy) return;
+  stopMic(); hp.n++; hp.busy = true; hp.ans = ''; hp.dots = kind === 'count' ? dotsSVG(les.q) : ''; hp.src = 'local'; helpRedraw();
+  const loc = helpLocal(kind, les, hp); if (loc.dots) hp.dots = loc.dots;
+  let text = '';
+  const ask = kind === 'free' ? said : ({ slow: 'Please say the question again slowly and simply.', mean: 'What does this question mean? Explain it simply.', hint: 'Give me a small hint.', count: 'Help me count it out.' })[kind];
+  if (aiOn() && kind !== 'slow'){
+    try { text = await helpAI(kid, st, les, ask, hp); if (text) hp.src = 'ai'; } catch (e) { text = ''; }
+  }
+  if (!ui.help || ui.help !== hp) return;
+  if (!text) text = kind === 'free' ? helpLocal('hint', les, hp).t : loc.t;
+  hp.busy = false; hp.ans = text; hp.log.push({ ask, text }); helpRedraw();
+  say(text, { force: true });
+}
+function helpPrompt(kid, st, les, ask, hp){
+  const r = ROBOTS[st.id], young = raFor(kid);
+  const tried = (st.picked || []).map(k => les.a[k]);
+  return `You are ${r.name}, a gentle, cheerful teacher inside a kids' learning game called Chore Buddies. A child about ${kid.age} years old${young ? ' who cannot read yet (your words will be read aloud)' : ''} needs help with this question.
+
+Lesson clue: ${les.t || '(none)'}
+Question: ${les.q}
+Choices: ${les.a.join(' | ')}
+Correct answer (do NOT say it outright): ${les.a[les.ok]}
+Answers the child already tried: ${tried.join(', ') || 'none yet'}
+Times the child has asked for help on this question: ${hp.n}
+Earlier help you gave: ${hp.log.slice(-2).map(x => x.text).join(' / ') || 'none'}
+
+The child says: "${String(ask).slice(0, 200)}"
+
+Reply with 1 to 3 very short sentences, using simple words a ${kid.age}-year-old knows. Be warm and encouraging. Help them think it through (counting on fingers, picturing things, sounding words out, a tiny example) instead of giving the answer. If they have asked 3 or more times, you may walk them almost all the way to the answer. If they say something unrelated, sad, scary or unsafe, or ask personal questions, kindly tell them to talk to a grown-up they trust, then bring them back to the question. Never ask for personal information. Plain text only: no emojis, no lists, no markdown.`;
+}
+async function helpAI(kid, st, les, ask, hp){
+  const prompt = helpPrompt(kid, st, les, ask, hp);
+  const sample = await Promise.race([aiSample(), new Promise(r => setTimeout(() => r(null), 2500))]);
+  if (sample){
+    try {
+      const { text } = await sample(prompt, { modelTier: 'quick', cache: false, onText: ({ text }) => { const p = $('#helpAnsT'); if (p) p.textContent = text; } });
+      return clean(text);
+    } catch (e) { if (e && (e.code === 'not_granted' || e.code === 'sampling_disabled')) AIH.sampleP = Promise.resolve(null); }
+  }
+  if (typeof CL !== 'undefined' && CL.client && CL.user && CL.client.functions){
+    try {
+      const { data, error } = await CL.client.functions.invoke('helper', { body: { name: ROBOTS[st.id].name, age: kid.age, young: raFor(kid), clue: les.t || '', q: les.q, choices: les.a, ok: les.ok, tried: (st.picked || []).map(k => les.a[k]), n: hp.n, ask: String(ask).slice(0, 200) } });
+      if (!error && data && data.text) return clean(data.text);
+    } catch (e) {}
+  }
+  return '';
+  function clean(t){ return String(t || '').replace(/[*_#`>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 400); }
+}
+// parent switch
+const _soundCtlAI = soundControls;
+soundControls = function(){ const on = aiOn(); return _soundCtlAI() + `<div class="card"><div class="setrow"><div><b>“I don’t get it” helper</b><small>When a question is tricky, kids can tap a button or say what they don’t understand. They get a short hint, never the answer. It uses Claude in the Claude app${typeof CL !== 'undefined' && CL.client ? ' or your cloud helper' : ''}. Otherwise it uses built-in hints.</small></div><button class="tog" data-act="aiToggle" aria-pressed="${on}" aria-label="Helper on"></button></div></div>`; };
+A.aiToggle = function(){ S.settings.aiHelp = !aiOn(); save(); render(); };
+
+// ---------- 3. REPEATING TASKS: every day, school days, weekends, or picked days ----------
+function appliesToday(t){
+  if (t.repeat === 'weekdays') return DOW >= 1 && DOW <= 5;
+  if (t.repeat === 'weekends') return DOW === 0 || DOW === 6;
+  if (t.repeat === 'weekly' || t.repeat === 'custom') return (t.days || []).includes(DOW);
+  return true;
+}
+const DAYFULL = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+function repeatNice(t){
+  if (t.repeat === 'once') return 'Just once';
+  if (t.repeat === 'daily') return 'Every day';
+  if (t.repeat === 'weekdays') return 'School days (Mon–Fri)';
+  if (t.repeat === 'weekends') return 'Weekends';
+  const d = (t.days || []).slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7));
+  if (!d.length) return 'Pick days';
+  if (d.length === 1) return 'Only on ' + DAYFULL[d[0]];
+  if (d.length === 7) return 'Every day';
+  return d.map(k => DAYN[k]).join(', ');
+}
+
+// ---------- 4. INSTALL AS AN APP (only on the family's own website) ----------
+try {
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.top === window.self && !/claude|anthropic/.test(location.hostname)) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+} catch (e) {}
 
 injectDefs();
 injectDefs2();
