@@ -631,6 +631,49 @@ input[type=time].num{width:104px}
 .evfam small{font-weight:700;color:var(--ink-3);font-size:12px}
 .hunt{cursor:pointer}
 
+/* ---------- v5: levels + wardrobe ---------- */
+.lvbar{background:#fff;border-radius:18px;padding:8px 10px;box-shadow:0 2px 0 var(--line);display:flex;flex-direction:column;gap:6px}
+.lv-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.lv-head b{font-family:var(--display);font-size:19px;color:var(--grape);flex:none}
+.lv-head span{font-weight:800;font-size:13px;color:var(--ink-2)}
+.lv-dots{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.lvd{aspect-ratio:1;border-radius:10px;background:var(--card-2);font-weight:900;font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0}
+.lvd i{font-style:normal;font-size:7px;color:#FFB800;letter-spacing:-1px;height:8px;margin-top:1px}
+.lvd.cur{background:var(--grape);color:#fff;box-shadow:0 3px 0 var(--grape-d)}
+.lvd.cur i{color:#FFE36B}
+.lvd.lock{color:var(--ink-3);opacity:.6;cursor:not-allowed}
+.lvdone{position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,37,80,.38);z-index:6;animation:fade .2s;padding:10px}
+.lvcard{background:#fff;border-radius:22px;padding:14px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 16px 30px -12px rgba(43,37,80,.5);animation:boing .5s cubic-bezier(.2,1.6,.4,1);max-width:270px}
+.lvcard small{font-weight:900;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px}
+.lvstars{display:flex;gap:4px;font-size:38px;line-height:1}
+.lvstars span{color:#DDE2EF}
+.lvstars span.on{color:#FFB800;text-shadow:0 3px 0 #E39A00;animation:starpop .45s cubic-bezier(.2,1.6,.4,1) both}
+.lvstars span:nth-child(2){animation-delay:.15s}.lvstars span:nth-child(3){animation-delay:.3s}
+@keyframes starpop{from{transform:scale(0) rotate(-40deg)}}
+.lvcard .xp{color:var(--grape);font-family:var(--display);font-size:19px}
+.lvcard p{font-weight:700;font-size:13.5px;color:var(--ink-2)}
+.lvcard .actions{width:100%}
+.memwrap{position:relative;min-height:200px}
+.lvpill{display:inline-block;vertical-align:middle;margin-left:6px;background:var(--grape);color:#fff;font-size:13px;border-radius:999px;padding:2px 9px 0;font-family:var(--display);line-height:1.3;box-shadow:0 2px 0 var(--grape-d)}
+.kidstrip .kidname small{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.xpbar{display:inline-block;width:64px;height:8px;border-radius:8px;background:#E7EAF6;overflow:hidden;flex:none}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#B49CFF,#7B5CFA);border-radius:8px}
+.floatxp{position:fixed;z-index:95;font-family:var(--display);font-weight:800;color:var(--grape);font-size:17px;animation:floatc 1.4s ease-out forwards;pointer-events:none;text-shadow:0 2px 0 #fff}
+.pill.lock{background:#EEF2FB;color:#8A85AE}
+.item.lockeditem .thumb svg{filter:saturate(.35) opacity(.6)}
+.tagx.lvgift{background:#ECE6FF;color:#5A3FD6}
+.wardrobe{display:flex;flex-direction:column;gap:10px}
+.wgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.wtile{background:var(--card-2);border-radius:16px;padding:4px 4px 7px;display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:11px;line-height:1.15;text-align:center}
+.wtile svg{width:100%;height:78px}
+.wtile[aria-pressed="true"]{background:#fff;box-shadow:0 0 0 3px var(--berry)}
+.rlv{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--ink-2)}
+.rlv b{font-family:var(--display);color:var(--sea-d);flex:none}
+.rlv .evbar{flex:1;background:var(--line);margin:0}
+.rlv .evbar i{background:var(--sea)}
+.rlv small{font-size:11.5px;color:var(--ink-3);flex:none;max-width:48%}
+.lvbig{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#fff;background:var(--grape);border-radius:50%}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -1226,16 +1269,15 @@ function charSVG(c, o = {}){
     spiky: '', curly: [[-24, -70], [24, -70], [-22, -52], [22, -52], [-14, -88], [14, -88], [0, -93]].map(([x, y]) => sph(x, y, 11, hr)).join('')
   };
   s += back[hs] || '';
+  s += backItem(c);
   if (work === 'school') s += `<rect x="-17" y="-42" width="34" height="26" rx="9" fill="#FF8A3D"/><rect x="-17" y="-42" width="34" height="26" rx="9" fill="url(#fsR)"/>`;
-  s += `<rect x="-10" y="-20" width="8.5" height="17" rx="4" fill="${pa}"/><rect x="1.5" y="-20" width="8.5" height="17" rx="4" fill="${shade(pa, -.14)}"/>`;
-  s += `<ellipse cx="-6.5" cy="-3.2" rx="7.2" ry="4.4" fill="#fff"/><ellipse cx="6.5" cy="-3.2" rx="7.2" ry="4.4" fill="#F1F4FB"/><path d="M-13.5,-1.4 h14 M0,-1.4 h13.5" stroke="#C9D3E6" stroke-width="1.6"/><ellipse cx="-8" cy="-5" rx="2.6" ry="1.2" fill="#fff" opacity=".9"/>`;
+  s += legsSVG(c);
   const armUp = !!work;
   s += `<ellipse cx="-17" cy="-29" rx="5.6" ry="10" fill="${shade(sh, -.06)}" transform="rotate(18 -17 -29)"/><circle cx="-20" cy="-20" r="4.7" fill="${sk}"/>`;
   s += armUp ? `<ellipse cx="18" cy="-36" rx="5.6" ry="10" fill="${shade(sh, -.1)}" transform="rotate(-50 18 -36)"/><circle cx="25" cy="-42" r="4.7" fill="${sk}"/>`
              : `<ellipse cx="17" cy="-29" rx="5.6" ry="10" fill="${shade(sh, -.1)}" transform="rotate(-18 17 -29)"/><circle cx="20" cy="-20" r="4.7" fill="${sk}"/>`;
   const bodyD = 'M-15,-15 C-17,-32 -12,-43 0,-43 C12,-43 17,-32 15,-15 C8,-12 -8,-12 -15,-15Z';
-  s += `<path d="${bodyD}" fill="${sh}"/><path d="${bodyD}" fill="url(#sph)"/><path d="M-6,-42 Q0,-35 6,-42" stroke="${shade(sh, -.28)}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
-  s += `<path d="${starPath(0, -26, 5, 2.2)}" fill="#fff" opacity=".9"/>`;
+  s += topSVG(c, bodyD);
   if (work === 'restaurant') s += `<path d="M-11,-36 h22 v20 q-11,4 -22,0z" fill="#fff"/><path d="M-11,-36 h22 v20 q-11,4 -22,0z" fill="url(#fsR)"/>`;
   // head
   s += `<circle cx="-25.5" cy="-60" r="5" fill="${shade(sk, -.07)}"/><circle cx="25.5" cy="-60" r="5" fill="${shade(sk, -.07)}"/>`;
@@ -1978,6 +2020,7 @@ function vFamily(){
       <div class="stats"><div class="stat"><b>${kid.coins}</b><small>Coins now</small></div><div class="stat"><b>+${earned}</b><small>Earned 7d</small></div><div class="stat"><b>−${spent}</b><small>Spent 7d</small></div></div>
       <div><div class="flabel" style="margin-bottom:6px">Coins earned each day · streak ${kid.streak} days</div><div class="week">${days.map(x => `<div class="${x.sum ? 'has' : ''} ${x.today ? 'today' : ''}"><small>${DAYN[x.d.getDay()]}</small>${x.sum || '–'}</div>`).join('')}</div></div>
       <div><div class="flabel" style="margin-bottom:6px">Learned with robots today</div>${lt.length ? `<div class="chips">${lt.map(r => `<span class="chip">${ROBOTS[r].name} · ${ROBOTS[r].topic}</span>`).join('')}</div>` : `<p class="note-s">No lessons yet today.</p>`}</div>
+      ${lvlFamLine(kid)}
       ${evFamLine(kid)}
       <div><div class="flabel">Recent activity</div><div class="hist">${h.slice(-5).reverse().map(x => `<div><span>${esc(x.label)} <span class="note-s">· ${ago(x.ts)}</span></span><span class="${x.kind === 'earn' ? 'plus' : 'minus'}">${x.kind === 'earn' ? '+' : '−'}${x.amt}</span></div>`).join('') || '<div>No activity yet</div>'}</div></div>
       <div class="actions"><button class="btn small sea" data-act="seeKid" data-v="${id}">Open ${esc(kid.name)}'s world</button><button class="btn small berry" data-act="chatWith" data-v="${id}">Message</button></div>
@@ -3920,8 +3963,518 @@ function evControls(){
 }
 A.evToggle = () => { S.settings.evOn = S.settings.evOn === false; save(); render(); };
 
+// =====================================================================
+//  LEVELS + WARDROBE — game levels that get harder, player XP, more clothes
+// =====================================================================
+
+// ---------- clothing art ----------
+function backItem(c){
+  switch (c.back){
+    case 'cape': return `<path d="M-13,-41 Q-30,-16 -25,-1 Q0,5 25,-1 Q30,-16 13,-41Z" fill="#E8414F"/><path d="M-13,-41 Q-30,-16 -25,-1 Q0,5 25,-1 Q30,-16 13,-41Z" fill="url(#fsR)"/><path d="M-20,-8 Q0,-2 20,-8" stroke="#B8283A" stroke-width="1.4" fill="none"/>`;
+    case 'wings': return `<g opacity=".9">${[[-1, 1], [1, -1]].map(([sx]) => `<ellipse cx="${sx * 25}" cy="-40" rx="13" ry="20" fill="#DDF6FF" stroke="#9FDCF5" stroke-width="1.4" transform="rotate(${sx * -28} ${sx * 25} -40)"/><ellipse cx="${sx * 21}" cy="-20" rx="8" ry="12" fill="#FCE3FF" stroke="#E3B6F5" stroke-width="1.4" transform="rotate(${sx * 30} ${sx * 21} -20)"/>`).join('')}<path class="twinkle" d="${starPath(-30, -54, 3, 1, 4)}" fill="#fff"/><path class="twinkle d2" d="${starPath(28, -26, 2.6, 1, 4)}" fill="#fff"/></g>`;
+    case 'backpack': return `<rect x="-17" y="-42" width="34" height="26" rx="9" fill="#7B5CFA"/><rect x="-17" y="-42" width="34" height="26" rx="9" fill="url(#fsR)"/>`;
+    case 'balloon': return `<path d="M-20,-20 Q-34,-50 -30,-96" stroke="#9AA3B8" stroke-width="1.2" fill="none"/><ellipse cx="-30" cy="-108" rx="13" ry="15" fill="#FF5A8C"/><ellipse cx="-30" cy="-108" rx="13" ry="15" fill="url(#sph)"/><path d="M-32,-93 l2,4 l2,-4z" fill="#FF5A8C"/>`;
+  }
+  return '';
+}
+function legsSVG(c){
+  const pa = c.pants, sk = c.skin, bot = c.top === 'dress' ? 'bare' : (c.bottom || 'pants'), shoe = c.shoes || 'sneakers', sc = c.shoeCol || '#FFFFFF';
+  let s = '';
+  if (bot === 'pants' || c.top === 'overalls') s += `<rect x="-10" y="-20" width="8.5" height="17" rx="4" fill="${pa}"/><rect x="1.5" y="-20" width="8.5" height="17" rx="4" fill="${shade(pa, -.14)}"/>`;
+  else {
+    s += `<rect x="-9.5" y="-20" width="7.5" height="17" rx="3.6" fill="${sk}"/><rect x="2" y="-20" width="7.5" height="17" rx="3.6" fill="${shade(sk, -.06)}"/>`;
+    if (bot === 'shorts') s += `<path d="M-11,-21 h22 v8 h-9.5 l-1.5,-3 l-1.5,3 h-9.5z" fill="${pa}"/><path d="M-11,-21 h22 v8 h-9.5 l-1.5,-3 l-1.5,3 h-9.5z" fill="url(#fsR)"/>`;
+    if (bot === 'skirt') s += `<path d="M-12,-21 h24 l5,11 h-34z" fill="${pa}"/>${[-8, -3, 2, 7].map(x => `<path d="M${x},-21 l${x / 4},11" stroke="${shade(pa, -.15)}" stroke-width="1.2"/>`).join('')}<path d="M-12,-21 h24 l5,11 h-34z" fill="url(#fsR)"/>`;
+  }
+  if (shoe === 'boots' || shoe === 'rainboots') s += `<rect x="-11.5" y="-13" width="11" height="12" rx="3" fill="${sc}"/><rect x="0.5" y="-13" width="11" height="12" rx="3" fill="${shade(sc, -.08)}"/><ellipse cx="-6.5" cy="-2.6" rx="7.4" ry="4" fill="${sc}"/><ellipse cx="6.5" cy="-2.6" rx="7.4" ry="4" fill="${shade(sc, -.08)}"/><path d="M-13.5,-1 h14 M0,-1 h13.5" stroke="${shade(sc, -.3)}" stroke-width="1.6"/>${shoe === 'rainboots' ? `<rect x="-11.5" y="-13" width="11" height="3" rx="1.5" fill="#fff" opacity=".7"/><rect x="0.5" y="-13" width="11" height="3" rx="1.5" fill="#fff" opacity=".7"/>` : ''}`;
+  else if (shoe === 'sandals') s += `<ellipse cx="-6.5" cy="-3" rx="6.6" ry="3.6" fill="${sk}"/><ellipse cx="6.5" cy="-3" rx="6.6" ry="3.6" fill="${shade(sk, -.06)}"/><path d="M-13,-1.2 h13 M0,-1.2 h13" stroke="${sc === '#FFFFFF' ? '#C98A55' : sc}" stroke-width="2.2"/><path d="M-10,-6 l4,3 l4,-3 M3,-6 l4,3 l4,-3" stroke="${sc === '#FFFFFF' ? '#C98A55' : sc}" stroke-width="1.8" fill="none"/>`;
+  else s += `<ellipse cx="-6.5" cy="-3.2" rx="7.2" ry="4.4" fill="${sc}"/><ellipse cx="6.5" cy="-3.2" rx="7.2" ry="4.4" fill="${shade(sc, -.05)}"/><path d="M-13.5,-1.4 h14 M0,-1.4 h13.5" stroke="${sc === '#FFFFFF' ? '#C9D3E6' : '#fff'}" stroke-width="1.6"/><ellipse cx="-8" cy="-5" rx="2.6" ry="1.2" fill="#fff" opacity=".9"/>`;
+  return s;
+}
+function topSVG(c, bodyD){
+  const sh = c.shirt, t = c.top || 'tee', dk = shade(sh, -.28), light = sh === '#FFFFFF' ? '#E3E8F7' : '#fff';
+  let s = '';
+  if (t === 'dress') s += `<path d="M-13,-22 Q-24,-8 -21,-6 Q0,-1 21,-6 Q24,-8 13,-22Z" fill="${shade(sh, .1)}"/><path d="M-13,-22 Q-24,-8 -21,-6 Q0,-1 21,-6 Q24,-8 13,-22Z" fill="url(#fsR)"/><path d="M-19,-7 Q0,-2 19,-7" stroke="${light}" stroke-width="1.6" fill="none" stroke-dasharray="3 2.4"/>`;
+  if (t === 'hoodie') s += `<ellipse cx="0" cy="-41" rx="13" ry="5" fill="${dk}"/>`;
+  s += `<path d="${bodyD}" fill="${t === 'suit' ? '#3B3A5C' : sh}"/>`;
+  if (t === 'stripes') s += `<path d="${bodyD}" fill="url(#pt-hstripes)"/>`;
+  s += `<path d="${bodyD}" fill="url(#sph)"/>`;
+  switch (t){
+    case 'tee': s += `<path d="M-6,-42 Q0,-35 6,-42" stroke="${dk}" stroke-width="2" fill="none" stroke-linecap="round"/><path d="${starPath(0, -26, 5, 2.2)}" fill="#fff" opacity=".9"/>`; break;
+    case 'stripes': s += `<path d="M-6,-42 Q0,-35 6,-42" stroke="${dk}" stroke-width="2" fill="none" stroke-linecap="round"/>`; break;
+    case 'hoodie': s += `<path d="M-7,-41 Q0,-33 7,-41" fill="${dk}"/><path d="M-3,-36 v7 M3,-36 v7" stroke="${light}" stroke-width="1.3" stroke-linecap="round"/><path d="M-9,-24 h18 l-2,7 h-14z" fill="${dk}" opacity=".55"/>`; break;
+    case 'dress': s += `<path d="M-6,-42 Q0,-36 6,-42" stroke="${light}" stroke-width="2" fill="none"/><path d="M-6,-21 l6,3 l6,-3 l-2,5 l-4,-2 l-4,2z" fill="#FF5A8C"/>`; break;
+    case 'overalls': s += `<path d="M-6,-42 Q0,-36 6,-42" stroke="${dk}" stroke-width="2" fill="none"/><rect x="-9" y="-31" width="18" height="16" rx="3" fill="${c.pants}"/><path d="M-9,-31 l-4,-10 M9,-31 l4,-10" stroke="${c.pants}" stroke-width="3.4" stroke-linecap="round"/><circle cx="-6" cy="-28" r="1.6" fill="#FFD84A"/><circle cx="6" cy="-28" r="1.6" fill="#FFD84A"/><rect x="-4" y="-25" width="8" height="5" rx="1.5" fill="${shade(c.pants, -.15)}"/>`; break;
+    case 'jersey': s += `<path d="M-7,-43 l7,8 l7,-8" stroke="${light}" stroke-width="2.4" fill="none"/><text x="0" y="-19" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="13" fill="${light}">7</text><path d="M-15,-30 h4 M11,-30 h4" stroke="${light}" stroke-width="2"/>`; break;
+    case 'sweater': s += `<path d="M-6,-42 Q0,-36 6,-42" stroke="${dk}" stroke-width="3" fill="none"/><path d="M0,-20 C-8,-25 -7,-32 -3,-32 C-1,-32 0,-30 0,-29 C0,-30 1,-32 3,-32 C7,-32 8,-25 0,-20Z" fill="#FF5A8C"/><path d="M-14,-17 Q0,-12 14,-17" stroke="${dk}" stroke-width="3" fill="none" stroke-dasharray="2 1.5"/>`; break;
+    case 'raincoat': s += `<path d="M-7,-43 l7,6 l7,-6" fill="${dk}"/><path d="M0,-37 v22" stroke="${dk}" stroke-width="1.4"/>${[-31, -24, -17].map(y => `<circle cx="2.6" cy="${y}" r="1.6" fill="#fff"/>`).join('')}`; break;
+    case 'suit': s += `<path d="M-5,-42 L0,-26 L5,-42z" fill="#fff"/><path d="M-4,-40 l4,3 l4,-3 l-1,4 l-3,-1.4 l-3,1.4z" fill="#E8414F"/><circle cx="0" cy="-22" r="1.3" fill="#fff"/><circle cx="0" cy="-17" r="1.3" fill="#fff"/>`; break;
+  }
+  return s;
+}
+// new hats & accessories (join the existing accessory system)
+Object.assign(EVACC, {
+  catears: () => `<path d="M-27,-68 A27,30 0 0 1 27,-68" stroke="#2B2550" stroke-width="3" fill="none"/><path d="M-23,-82 l-5,-20 l16,10z M23,-82 l5,-20 l-16,10z" fill="#2B2550"/><path d="M-21,-86 l-2.6,-10 l8,5z M21,-86 l2.6,-10 l-8,5z" fill="#FF8FB8"/>`,
+  bucket: () => `<path d="M-32,-74 q32,9 64,0 l-9,-7 h-46z" fill="#F3D38A"/><path d="M-22,-81 C-22,-103 22,-103 22,-81z" fill="#FFE59E"/><path d="M-22,-81 C-22,-103 22,-103 22,-81z" fill="url(#sph)"/>${rr(-22, -86, 44, 5, 2, '#34B2F0')}<path d="M-14,-96 q14,-4 28,0" stroke="#E3C26E" stroke-width="1.4" fill="none" stroke-dasharray="2 2"/>`,
+  heartglasses: () => `${[-9.5, 9.5].map(x => `<path d="M${x},-50 C${x - 11},-56 ${x - 9},-66 ${x - 4},-66 C${x - 2},-66 ${x},-64 ${x},-62 C${x},-64 ${x + 2},-66 ${x + 4},-66 C${x + 9},-66 ${x + 11},-56 ${x},-50Z" fill="#FF8FB8" fill-opacity=".45" stroke="#FF3D7F" stroke-width="2.2"/>`).join('')}<path d="M-2,-60 q2,-2 4,0" stroke="#FF3D7F" stroke-width="2" fill="none"/>`,
+  tiara: () => `<path d="M-18,-86 Q0,-92 18,-86 L14,-96 L8,-90 L0,-102 L-8,-90 L-14,-96Z" fill="#E6ECF7" stroke="#B9C2D6" stroke-width="1.2" stroke-linejoin="round"/><circle cx="0" cy="-94" r="3" fill="#FF8FB8"/><circle cx="-10" cy="-90" r="1.8" fill="#8FD0FF"/><circle cx="10" cy="-90" r="1.8" fill="#8FD0FF"/><path class="twinkle" d="${starPath(16, -100, 3.4, 1.2, 4)}" fill="#fff"/>`,
+  pirate: () => `<path d="M-36,-80 Q-18,-112 0,-100 Q18,-112 36,-80 Q0,-70 -36,-80Z" fill="#2B2550"/><path d="M-36,-80 Q0,-70 36,-80" stroke="#FFD84A" stroke-width="2.4" fill="none"/><circle cx="0" cy="-90" r="5" fill="#fff"/><circle cx="-1.8" cy="-91" r="1.1" fill="#2B2550"/><circle cx="1.8" cy="-91" r="1.1" fill="#2B2550"/><path d="M-5,-84 l10,4 M5,-84 l-10,4" stroke="#fff" stroke-width="1.6"/>`,
+  helmet: () => `<circle cx="0" cy="-63" r="34" fill="#BFE8FF" fill-opacity=".28" stroke="#fff" stroke-width="3"/><path d="M-20,-84 q10,-10 24,-8" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".8"/>${rr(-24, -34, 48, 9, 4, '#E6ECF7')}<circle cx="-14" cy="-29.5" r="2" fill="#FF5A6E"/><circle cx="14" cy="-29.5" r="2" fill="#3EC46B"/>`,
+  flowercrown: () => `${[-24, -15, -5, 5, 15, 24].map((x, k) => { const y = -78 - Math.cos(x / 26) * 10; return `<g transform="translate(${x},${f1(y)})">${[0, 1, 2, 3, 4].map(q => `<circle cx="${f1(Math.cos(q * 1.2566) * 3.4)}" cy="${f1(Math.sin(q * 1.2566) * 3.4)}" r="2.8" fill="${['#FF8FB8', '#FFE36B', '#C9B6FF', '#fff'][k % 4]}"/>`).join('')}<circle r="2" fill="#FFC63A"/></g>`; }).join('')}<path d="M-28,-74 q28,-20 56,0" stroke="#4CBF58" stroke-width="2" fill="none"/>`
+});
+
+// ---------- clothing catalogue ----------
+const CLOTHES = [
+  ['top', 'tee', 'Comfy Tee', 0, 1], ['top', 'stripes', 'Stripy Shirt', null, 2], ['top', 'hoodie', 'Cozy Hoodie', 40, 2], ['top', 'dress', 'Twirly Dress', 50, 2], ['top', 'overalls', 'Overalls', 45, 3],
+  ['top', 'jersey', 'Team Jersey', 55, 4], ['top', 'sweater', 'Heart Sweater', 60, 5], ['top', 'raincoat', 'Rain Coat', 65, 6], ['top', 'suit', 'Fancy Suit', 90, 8],
+  ['bottom', 'pants', 'Pants', 0, 1], ['bottom', 'shorts', 'Shorts', 20, 1], ['bottom', 'skirt', 'Pleated Skirt', 30, 2],
+  ['shoes', 'sneakers', 'Sneakers', 0, 1], ['shoes', 'sandals', 'Sandals', null, 5], ['shoes', 'boots', 'Cool Boots', 40, 4], ['shoes', 'rainboots', 'Rain Boots', null, 8],
+  ['back', 'backpack', 'Backpack', 30, 2], ['back', 'balloon', 'Balloon', null, 3], ['back', 'cape', 'Hero Cape', null, 12], ['back', 'wings', 'Fairy Wings', null, 10]
+].map(([slot, v, name, price, lvl]) => ({ id: 'cl-' + slot + '-' + v, cat: 'Outfits', kind: 'cloth', slot, v: slot + ':' + v, name, price: price || 0, lvl, gift: price === null, free: price === 0 }));
+const NEWACC = [['catears', 'Kitty Ears', null, 4], ['bucket', 'Bucket Hat', null, 6], ['flowercrown', 'Flower Crown', 30, 2], ['heartglasses', 'Heart Glasses', 35, 3], ['tiara', 'Sparkle Tiara', 60, 5], ['pirate', 'Pirate Hat', 55, 6], ['helmet', 'Space Helmet', 110, 9]]
+  .map(([v, name, price, lvl]) => ({ id: 'o-' + v, cat: 'Outfits', kind: 'outfit', slot: 'acc', v, name, price: price || 0, lvl, gift: price === null }));
+[...CLOTHES.filter(c => !c.free), ...NEWACC].forEach(it => { CATALOG.push(it); CAT[it.id] = it; });
+CATALOG.forEach(it => { if (it.kind === 'outfit' && !it.slot) it.slot = 'acc'; });
+if (CAT['o-crown']) CAT['o-crown'].lvl = 7; if (CAT['o-headphones']) CAT['o-headphones'].lvl = 3; if (CAT['o-glasses']) CAT['o-glasses'].lvl = 2;
+const ACCN = { none: 'Nothing', cap: 'Sunny Cap', bow: 'Big Bow', glasses: 'Smart Glasses', flower: 'Hair Flower', headphones: 'DJ Headphones', crown: 'Royal Crown', beanie: 'Cozy Beanie' };
+NEWACC.forEach(a => ACCN[a.v] = a.name); Object.values(EVENTS).forEach(E => E.rw.filter(r => r[1] === 'acc').forEach(r => ACCN[r[2]] = r[3]));
+const itemName = id => { if (id.startsWith('acc:')) return ACCN[id.slice(4)] || id.slice(4); const c = CLOTHES.find(x => x.v === id); return c ? c.name : id; };
+const SHOECOLS = ['#FFFFFF', '#FF5A8C', '#34B2F0', '#3EC46B', '#FFC63A', '#2B2550', '#8A5634', '#FFD84A'];
+const PANTSCOLS = ['#4F6BD8', '#3D3352', '#2E6FD8', '#5A4BB8', '#FF8FB8', '#3EC46B', '#C98A55', '#E8414F'];
+function ensureCloset(kid){ if (!kid.closet) kid.closet = ['top:tee', 'bottom:pants', 'shoes:sneakers', 'back:none']; return kid.closet; }
+function wearCfg(c, id){ const [slot, v] = id.split(':'); const o = { ...c }; if (slot === 'acc') o.acc = v; if (slot === 'top') o.top = v; if (slot === 'bottom') o.bottom = v; if (slot === 'shoes'){ o.shoes = v; if (v === 'rainboots' && (!c.shoeCol || c.shoeCol === '#FFFFFF')) o.shoeCol = '#FFD84A'; } if (slot === 'back') o.back = v; return o; }
+const clothBox = (kid, id) => `<svg viewBox="-46 -122 92 128" aria-hidden="true">${charSVG(wearCfg(kid.char, id), { mood: 'cheer' })}</svg>`;
+
+// ---------- player level ----------
+const LV_TITLES = ['Little Helper', 'Busy Bee', 'Chore Champ', 'Star Builder', 'Super Helper', 'World Hero', 'Town Legend', 'Chore Royalty'];
+const LV_GIFTS = { 2: ['top:stripes'], 3: ['back:balloon'], 4: ['acc:catears'], 5: ['shoes:sandals'], 6: ['acc:bucket'], 8: ['shoes:rainboots'], 10: ['back:wings'], 12: ['back:cape'] };
+function lvlInfo(xp){ let L = 1, need = 100, acc = 0; while (xp >= acc + need && L < 60){ acc += need; L++; need = 100 + (L - 1) * 50; } return { L, into: xp - acc, need, title: LV_TITLES[Math.min(LV_TITLES.length - 1, Math.floor((L - 1) / 2))] }; }
+const pLevel = kid => lvlInfo(kid.xp || 0).L;
+function giveItem(kid, id){ if (id.startsWith('acc:')){ const v = id.slice(4); if (!kid.outfits.includes(v)) kid.outfits.push(v); } else { ensureCloset(kid); if (!kid.closet.includes(id)) kid.closet.push(id); } }
+function floatXP(n){ const t = document.querySelector('.lvpill') || document.querySelector('#room .wallet'); if (!t) return; const r = t.getBoundingClientRect(); const el = document.createElement('div'); el.className = 'floatxp'; el.textContent = `+${n} XP`; el.style.left = r.left + 'px'; el.style.top = (r.bottom + 2) + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 1400); }
+function addXP(kid, n){
+  if (!kid || !n) return;
+  const b = pLevel(kid); kid.xp = (kid.xp || 0) + n; const a = lvlInfo(kid.xp); save();
+  const me = isKid() && K() === kid;
+  if (me){ floatXP(n); decorateStrip(); }
+  if (a.L > b){
+    const gifts = []; for (let L = b + 1; L <= a.L; L++) (LV_GIFTS[L] || []).forEach(id => { giveItem(kid, id); gifts.push(itemName(id)); });
+    const item = { amount: 0, title: `Level ${a.L}!`, label: `You're a ${a.title}!`, sub: gifts.length ? `Level gift: ${gifts.join(', ')}. Wear it in Buddies!` : 'New clothes unlocked in the Market!' };
+    save();
+    if (me) setTimeout(() => celebrate(item), 500); else S.cele[kid.id].push(item);
+  }
+}
+function decorateStrip(){
+  if (!S || !isKid()) return; const kid = K(); if (!kid) return; const I = lvlInfo(kid.xp || 0);
+  const h = document.querySelector('.kidstrip .kidname h1'); if (h && !h.querySelector('.lvpill')) h.insertAdjacentHTML('beforeend', `<span class="lvpill">Lv ${I.L}</span>`); else if (h) h.querySelector('.lvpill').textContent = 'Lv ' + I.L;
+  const sm = document.querySelector('.kidstrip .kidname small'); if (sm) sm.innerHTML = `${I.title} <span class="xpbar" title="${I.into} of ${I.need} XP"><i style="width:${(I.into / I.need * 100).toFixed(0)}%"></i></span>`;
+}
+const _renderBase = render;
+render = function(){ _renderBase(); decorateStrip(); };
+function lvlFamLine(kid){ const I = lvlInfo(kid.xp || 0); return `<div class="evfam"><span class="lvbig">${I.L}</span><div><b>Level ${I.L} · ${I.title}</b><small>${I.into} / ${I.need} XP to level ${I.L + 1} · ${Object.values(kid.glv || {}).reduce((a, g) => a + Object.values(g.stars).reduce((x, y) => x + y, 0), 0)} game stars</small></div></div>`; }
+
+// XP from everything kids do
+const _approveXP = A.approve; A.approve = function(el, e){ const t = S.tasks.find(x => x.id === el.dataset.id), kid = t && kidOf(t.kid); _approveXP(el, e); if (kid) addXP(kid, 25); };
+const _huntXP = huntCollect; huntCollect = function(h){ const ev = activeEvent(), kid = K(), b = ev ? (evState(kid, ev).found[dayKey()] || []).length : 0; _huntXP(h); if (ev && (evState(kid, ev).found[dayKey()] || []).length > b) addXP(kid, 5); };
+const _claimXP = A.evClaim; A.evClaim = function(el, e){ const ev = activeEvent(), kid = K(), st = evState(kid, ev), i = +el.dataset.i, was = st.claimed[i]; _claimXP(el, e); if (!was && st.claimed[i]) addXP(kid, 10); };
+
+// ---------- game levels ----------
+const MAXL = 10;
+const GAMES = {
+  cook: { name: 'Pizza Party', cfg: n => ({ goal: 2 + Math.ceil(n / 2), tops: Math.min(4, 1 + Math.floor(n / 3)), time: n >= 3 ? Math.max(9, 25 - n * 1.6) : 0 }), goal: c => `Serve ${c.goal} perfect pizzas${c.time ? ` · ${Math.round(c.time)}s each` : ''}` },
+  mem: { name: 'Memory Match', cfg: n => ({ pairs: Math.min(10, 3 + n), moves: n >= 3 ? (3 + n) * 2 + 6 - Math.floor(n / 2) : 0 }), goal: c => `Find ${c.pairs} pairs${c.moves ? ` in ${c.moves} moves` : ''}` },
+  stack: { name: 'Scoop Stack', cfg: n => ({ goal: 3 + n * 2, speed: 1.1 + n * .17, tol: Math.max(15, 34 - n * 1.8), amp: Math.min(112, 64 + n * 5) }), goal: c => `Stack ${c.goal} scoops` },
+  duck: { name: 'Duck Dash', cfg: n => ({ goal: 6 + n * 3, dur: Math.max(2.2, 5.4 - n * .3), spawn: Math.max(380, 700 - n * 28), gold: Math.max(.05, .14 - n * .008) }), goal: c => `Score ${c.goal} points in 30 seconds` },
+  swing: { name: 'Swing High', cfg: n => ({ target: Math.min(70, 46 + n * 2.4), decay: .005 + n * .0024, win: Math.max(-.93, -.83 - n * .01) }), goal: c => `Swing up to the star line (${Math.round(c.target / 72 * 100)}%)` },
+  fish: { name: 'Fishing', cfg: n => ({ goal: 1 + Math.ceil(n / 2), window: Math.max(420, 1150 - n * 70) }), goal: c => `Catch ${c.goal} fish · reel within ${(c.window / 1000).toFixed(1)}s` },
+  catch: { name: 'Catch game', cfg: n => ({ goal: 8 + n * 3, speed: n * .28, bad: .1 + n * .016 }), goal: c => `Catch ${c.goal} in 30 seconds` }
+};
+function glv(game){ const kid = K(); kid.glv = kid.glv || {}; return kid.glv[game] || (kid.glv[game] = { at: 1, cur: 1, stars: {} }); }
+const gcfg = game => GAMES[game].cfg(glv(game).cur);
+function levelBar(game){
+  const g = glv(game), c = gcfg(game);
+  return `<div class="lvbar"><div class="lv-head"><b>Level ${g.cur}</b><span>${GAMES[game].goal(c)}</span></div><div class="lv-dots">${[...Array(MAXL)].map((_, k) => { const n = k + 1, st = g.stars[n] || 0, open = n <= g.at; return `<button class="lvd ${n === g.cur ? 'cur' : ''} ${open ? '' : 'lock'}" data-act="lvPick" data-g="${game}" data-v="${n}" ${open ? '' : 'disabled'} aria-label="Level ${n}${open ? '' : ' locked'}">${open ? n : '<svg viewBox="0 0 12 12" width="10"><rect x="2" y="5" width="8" height="6" rx="1.5" fill="currentColor"/><path d="M4,5 v-1.6 a2,2 0 0 1 4,0 v1.6" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>'}<i>${'★'.repeat(st)}</i></button>`; }).join('')}</div></div>`;
+}
+function levelEnd(game, win, stars, host, loseMsg){
+  const g = glv(game), n = g.cur; let xp = 0;
+  if (win){ const prev = g.stars[n] || 0; if (!prev) xp += 15; if (stars > prev){ xp += (stars - prev) * 10; g.stars[n] = stars; } if (n === g.at && n < MAXL) g.at = n + 1; save(); playReward(stars >= 3 ? 2 : 1, `${GAMES[game].name} level ${n}`); if (xp) addXP(K(), xp); }
+  const el = document.createElement('div'); el.className = 'lvdone';
+  el.innerHTML = win ? `<div class="lvcard"><small>Level ${n} complete!</small><div class="lvstars">${[1, 2, 3].map(k => `<span class="${k <= stars ? 'on' : ''}">★</span>`).join('')}</div>${xp ? `<b class="xp">+${xp} XP</b>` : ''}<p>${n < MAXL ? `Level ${n + 1} is unlocked. It's a little harder!` : 'You beat every level. Superstar!'}</p><div class="actions"><button class="btn ghost small" data-act="lvReplay" data-g="${game}">Replay</button>${n < MAXL ? `<button class="btn sun small" data-act="lvNext" data-g="${game}">Level ${n + 1} →</button>` : ''}</div></div>`
+    : `<div class="lvcard"><small>Level ${n}</small><b class="xp">So close!</b><p>${esc(loseMsg || 'Give it another try!')}</p><button class="btn sun" data-act="lvReplay" data-g="${game}">Try again</button></div>`;
+  const h = host || document.querySelector('#rmBody .rm-scene'); if (h) h.appendChild(el);
+}
+const GRESTART = {
+  cook: () => { G.cook = null; reBody(cookHTML()); cookInit(); },
+  mem: () => { memNew(); reBody(memHTML()); },
+  stack: () => { G.stk = null; reBody(stackHTML()); },
+  duck: () => { reBody(poolHTML()); },
+  swing: () => { reBody(playgroundHTML()); playgroundInit(); },
+  fish: () => { G.fish = null; reBody(pondHTML()); },
+  catch: () => { reBody(evCatchHTML()); evCatchInit(); }
+};
+Object.assign(A, {
+  lvPick(el){ const g = glv(el.dataset.g), v = +el.dataset.v; if (v > g.at) return; g.cur = v; save(); G.stop(); GRESTART[el.dataset.g](); },
+  lvNext(el){ const g = glv(el.dataset.g); g.cur = Math.min(g.at, g.cur + 1); save(); G.stop(); GRESTART[el.dataset.g](); },
+  lvReplay(el){ G.stop(); GRESTART[el.dataset.g](); }
+});
+
+// ---- Pizza Party with levels ----
+function cookNew(keep){
+  const cf = gcfg('cook'), prev = G.cook || {};
+  G.cook = { lv: glv('cook').cur, order: shuffle(Object.keys(TOPS)).slice(0, cf.tops), pizza: [], cust: pick(Object.keys(BUDDIES)), mood: 'wait', served: keep ? prev.served || 0 : 0, good: keep ? prev.good || 0 : 0, miss: keep ? prev.miss || 0 : 0, baking: false, t0: Date.now(), limit: cf.time * 1000, over: false };
+}
+function cookScene(){
+  const c = G.cook, kid = K();
+  let s = roomShell({ wall: '#FFE9D6', wp: 'tiles', floor: '#E9C9A6', fp: 'check' });
+  s += IP.bunting(40, 320, 6);
+  s += IP.chalk(120, 18, 120, 48, [{ t: 'Pizza Party!', s: 17 }, { t: 'make it just right ★', s: 11, c: '#FFE36B' }]);
+  s += IP.shelf(42, 64, 70, `${rr(48, 46, 14, 18, 3, '#FFB3C7')}${rr(66, 42, 14, 22, 3, '#FFE68A')}${rr(84, 48, 14, 16, 3, '#9BE6C2')}${rr(46, 42, 18, 5, 2, '#fff')}${rr(64, 38, 18, 5, 2, '#fff')}${rr(82, 44, 18, 5, 2, '#fff')}`);
+  s += `<path d="M236,170 v-62 a42,42 0 0 1 84,0 v62z" fill="#C9654B"/><path d="M236,170 v-62 a42,42 0 0 1 84,0 v62z" fill="url(#brick)"/><path d="M236,170 v-62 a42,42 0 0 1 84,0 v62z" fill="url(#fsR)"/>`;
+  s += `<path d="M254,170 v-30 a24,24 0 0 1 48,0 v30z" fill="#3B2B40"/><ellipse cx="278" cy="158" rx="20" ry="14" fill="url(#fireG)" class="glowb"/><path d="M266,170 q-2,-16 8,-22 q-2,10 6,10 q4,-6 2,-14 q10,12 4,26z" fill="#FFB13D"/>${rr(268, 54, 20, 18, 3, '#9A4E3A')}`;
+  if (c.baking) s += `<ellipse cx="278" cy="162" rx="18" ry="5" fill="#F3C27A" stroke="#D9A04A"/>`;
+  s += IP.pendant(96, 22, '#FF5A8C');
+  const happy = c.mood === 'yay', sad = c.mood === 'hmm';
+  s += grp(76, 214, 1.15, buddySVG(c.cust, { cheer: happy }), happy ? 'class="jump"' : '');
+  const bw = 22 + c.order.length * 26;
+  s += `<g transform="translate(${f1(76 - bw / 2 + 30)},86)">${rr(0, -30, bw, 36, 14, '#fff', 'stroke="#E2E8F7"')}<path d="M14,6 l-6,10 l14,-10z" fill="#fff"/>${sad ? TX(bw / 2, -6, c.slow ? 'Too slow!' : 'Hmm… not quite!', 11, '#B42B2B') : happy ? TX(bw / 2, -6, 'Yummy! Thank you!', 11, '#1D7A3E') : c.order.map((k, i) => grp(20 + i * 26, -12, 1.1, TOPS[k].d(0, 0))).join('')}</g>`;
+  if (c.limit && c.mood === 'wait'){ const fr = clamp(1 - (Date.now() - c.t0) / c.limit, 0, 1); s += rr(30, 40, 92, 9, 4.5, '#fff', 'stroke="#E2E8F7"') + rr(32, 42, 88 * fr, 5, 2.5, fr > .4 ? '#3EC46B' : fr > .2 ? '#FFC63A' : '#FF5A6E'); }
+  s += grp(316, 214, .95, charSVG(kid.char, { work: 'restaurant', mood: happy ? 'cheer' : 'happy' }));
+  s += `<polygon points="0,190 360,190 360,252 0,252" fill="#F7EFE6"/><polygon points="0,190 360,190 360,252 0,252" fill="url(#fl-tile)" opacity=".6"/><rect y="188" width="360" height="5" fill="#fff"/><rect y="252" width="360" height="18" fill="#E8414F"/><rect y="252" width="360" height="4" fill="#fff" opacity=".7"/>`;
+  s += `<ellipse cx="190" cy="230" rx="74" ry="22" fill="#C98A55"/><rect x="250" y="226" width="40" height="8" rx="4" fill="#C98A55"/>`;
+  s += `<g class="${c.baking ? 'bakeaway' : ''}"><ellipse cx="190" cy="226" rx="64" ry="19" fill="#F3C27A"/><ellipse cx="190" cy="225" rx="56" ry="15.5" fill="#E8574A"/>${c.pizza.map(p => grp(190 + p.x, 225 + p.y, .9, TOPS[p.k].d(0, 0))).join('')}</g>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function cookHTML(){
+  if (!G.cook || G.cook.lv !== glv('cook').cur) cookNew();
+  const c = G.cook, cf = gcfg('cook');
+  return `${levelBar('cook')}<div class="rm-scene" id="cookScene">${cookScene()}</div>
+  ${sayBox(`A customer wants: <b>${c.order.map(k => TOPS[k].name).join(', ')}</b>.${cf.time ? ' Be quick!' : ''}`)}
+  <div class="topgrid">${Object.entries(TOPS).map(([k, t]) => `<button class="topbtn" data-act="cookAdd" data-v="${k}"><svg viewBox="-12 -10 24 20" width="34" height="28">${t.d(0, 0)}</svg>${t.name}</button>`).join('')}</div>
+  <div class="actions"><button class="btn ghost" data-act="cookClear">Start over</button><button class="btn sun big" style="flex:2" data-act="cookServe">Bake &amp; serve!</button></div>
+  <p class="note-s center">Perfect pizzas <b>${c.good}</b> / ${cf.goal} · Oops <b>${c.miss}</b> / 3</p>`;
+}
+function cookAfter(){
+  const c = G.cook, cf = gcfg('cook');
+  if (c.miss >= 3){ c.over = true; levelEnd('cook', false, 0, $('#cookScene'), 'Three oops! Read the order bubble carefully and try again.'); return; }
+  if (c.good >= cf.goal){ c.over = true; levelEnd('cook', true, c.miss === 0 ? 3 : c.miss === 1 ? 2 : 1, $('#cookScene')); return; }
+  G.after(() => { cookNew(true); reBody(cookHTML()); }, 1700);
+}
+function cookInit(){ G.every(() => { const c = G.cook; if (!c || c.over || !c.limit || c.mood !== 'wait' || c.baking) return; if (Date.now() - c.t0 > c.limit){ c.mood = 'hmm'; c.slow = true; c.miss++; cookRedraw(); rmSay('Too slow! The customer got hungry and left.'); cookAfter(); } else cookRedraw(); }, 400); }
+ROOMS.restaurant.tabs[0][3] = cookInit;
+A.cookServe = function(){
+  const c = G.cook; if (c.baking || c.mood !== 'wait' || c.over) return;
+  if (!c.pizza.length) return rmSay('Add some toppings first!');
+  c.baking = true; cookRedraw(); rmSay('Into the oven… it smells amazing!');
+  G.after(() => {
+    const have = [...new Set(c.pizza.map(p => p.k))].sort().join(), want = c.order.slice().sort().join();
+    c.baking = false; c.served++; c.pizza = [];
+    if (have === want){ c.good++; c.mood = 'yay'; rmSay(pick(['Perfect pizza! The customer is so happy!', 'Just right! You are a pizza star!', 'Delicious! Five stars for the chef!'])); }
+    else { c.miss++; c.mood = 'hmm'; rmSay(`Oops! They wanted ${c.order.map(k => TOPS[k].name.toLowerCase()).join(' and ')}.`); }
+    cookRedraw(); cookAfter();
+  }, 1100);
+};
+A.cookAdd = function(el){ const c = G.cook; if (c.baking || c.mood !== 'wait' || c.over) return; if (c.pizza.length > 26) return rmSay('That pizza is super full!'); for (let n = 0; n < 3; n++){ const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * .82; c.pizza.push({ k: el.dataset.v, x: Math.cos(a) * 48 * r, y: Math.sin(a) * 12 * r }); } cookRedraw(); };
+
+// ---- Memory Match with levels ----
+MEMI.rocket = `<path d="M0,-17 C8,-10 8,4 5,10 H-5 C-8,4 -8,-10 0,-17Z" fill="#fff" stroke="#9AA3B8" stroke-width="1.4"/><circle cx="0" cy="-4" r="3.4" fill="#34B2F0"/><path d="M-5,4 l-6,8 l6,-2z M5,4 l6,8 l-6,-2z" fill="#E8414F"/><path d="M-3,10 q3,10 6,0" fill="#FFB13D"/>`;
+MEMI.music = `<path d="M-6,10 V-12 L12,-16 V6" stroke="#7B5CFA" stroke-width="3" fill="none"/><ellipse cx="-10" cy="10" rx="5.4" ry="4.2" fill="#7B5CFA"/><ellipse cx="8" cy="6" rx="5.4" ry="4.2" fill="#7B5CFA"/>`;
+function memNew(){ const cf = gcfg('mem'), keys = shuffle(Object.keys(MEMI)).slice(0, cf.pairs); G.mem = { lv: glv('mem').cur, cards: shuffle([...keys, ...keys]).map(k => ({ k, up: false, done: false })), first: null, lock: false, moves: 0, pairs: cf.pairs, limit: cf.moves, won: false, over: false }; }
+function memHTML(){
+  if (!G.mem || G.mem.lv !== glv('mem').cur) memNew();
+  const m = G.mem, cols = m.cards.length > 16 ? 5 : 4;
+  return `${levelBar('mem')}<div class="rm-scene">${schoolBanner()}</div>${sayBox(`Flip two cards to find a match. ${m.pairs} pairs to find!${m.limit ? ` You have ${m.limit} moves.` : ''}`, robotBox('lexi', { happy: 1 }))}
+  <div class="memwrap" id="memWrap"><div class="memgrid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">${m.cards.map((c, i) => `<button class="mcard ${c.up || c.done ? 'up' : ''} ${c.done ? 'done' : ''}" data-act="memFlip" data-i="${i}" aria-label="Card ${i + 1}"><span class="mc-in"><span class="mc-back"><svg viewBox="-20 -20 40 40"><path d="${starPath(0, 0, 11, 5)}" fill="#fff" opacity=".85"/></svg></span><span class="mc-front"><svg viewBox="-20 -20 40 40">${MEMI[c.k]}</svg></span></span></button>`).join('')}</div></div>
+  <div class="actions"><span class="note-s" style="align-self:center">Moves: <b id="memMoves">${m.moves}</b>${m.limit ? ' / ' + m.limit : ''}</span><button class="btn ghost" data-act="memRestart">Restart</button></div>`;
+}
+A.memFlip = function(el){
+  const m = G.mem, i = +el.dataset.i, c = m.cards[i]; if (m.lock || c.up || c.done || m.won || m.over) return;
+  c.up = true;
+  if (m.first == null){ m.first = i; memSync(); return; }
+  m.moves++; const f = m.cards[m.first];
+  if (f.k === c.k){ f.done = c.done = true; f.up = c.up = false; m.first = null; memSync(); rmSay(pick(['A match! 🎉', 'You found it!', 'Great memory!']));
+    if (m.cards.every(x => x.done)){ m.won = true; const best = m.pairs + 2, stars = m.moves <= best ? 3 : m.moves <= Math.round(m.pairs * 1.7) ? 2 : 1; G.after(() => levelEnd('mem', true, stars, $('#memWrap')), 500); return; } }
+  else { m.lock = true; memSync(); G.after(() => { f.up = c.up = false; m.first = null; m.lock = false; memSync(); }, 850); }
+  if (m.limit && m.moves >= m.limit && !m.cards.every(x => x.done)){ m.over = true; G.after(() => levelEnd('mem', false, 0, $('#memWrap'), `Out of moves! You had ${m.limit}. Try to remember where each picture was.`), 900); }
+};
+A.memRestart = function(){ G.stop(); memNew(); reBody(memHTML()); };
+
+// ---- Scoop Stack with levels ----
+function stackScene(){
+  const st = G.stk, cf = gcfg('stack');
+  let s = `<rect width="300" height="360" fill="#FFF0F6"/>`;
+  for (let k = 0; k < 18; k++) s += `<rect x="${f1(rnd(k) * 290)}" y="${f1(rnd(k + 5) * 350)}" width="6" height="2" rx="1" fill="${['#FF8FB8', '#9BE6C2', '#FFE36B', '#A9B8FF'][k % 4]}" transform="rotate(${k * 40} ${f1(rnd(k) * 290)} ${f1(rnd(k + 5) * 350)})"/>`;
+  const gy = 280 - (cf.goal - 1) * 34 - 26;
+  s += `<g transform="translate(0,${f1(st.cam)})"><path d="M14,${gy} H286" stroke="#FF5A8C" stroke-width="2.4" stroke-dasharray="7 5"/>${rr(232, gy - 19, 54, 17, 8.5, '#FF5A8C')}${TX(259, gy - 6.5, 'GOAL', 10.5, '#fff')}`;
+  s += `<path d="M126,300 L150,358 L174,300z" fill="#E8B06A"/><path d="M132,312 l26,26 M140,302 l24,24 M168,312 l-26,26 M160,302 l-24,24" stroke="#C98A45" stroke-width="1.6"/><ellipse cx="150" cy="300" rx="26" ry="5" fill="#D99A50"/>`;
+  st.stack.forEach((sc, k) => s += scoopSVG(sc.x, 280 - k * 34, sc.c));
+  if (st.fall) s += scoopSVG(st.fall.x, st.fall.y, st.fall.c);
+  s += `</g>`;
+  if (st.state === 'play' && !st.fall) s += scoopSVG(st.x, 46, st.next) + `<path d="M${f1(st.x)},76 v14" stroke="#FF8FB8" stroke-width="2" stroke-dasharray="3 3"/>`;
+  s += `<text x="16" y="30" font-family="Baloo 2,sans-serif" font-weight="800" font-size="22" fill="#FF5A8C">${st.stack.length} / ${cf.goal}</text>`;
+  return `<svg viewBox="0 0 300 360" class="stack-svg" data-down="stackDrop">${s}</svg>`;
+}
+function stackHTML(){
+  if (!G.stk || G.stk.lv !== glv('stack').cur) G.stk = { lv: glv('stack').cur, state: 'ready', stack: [], offs: [], x: 150, next: pick(FLAV), cam: 0 };
+  const st = G.stk;
+  return `${levelBar('stack')}<div class="rm-scene">${scoopBanner()}</div>${sayBox('Tap when the scoop is right above the cone. Reach the GOAL line!')}
+  <div class="stack-wrap" id="stackWrap">${stackScene()}${st.state === 'ready' ? `<div class="pool-start"><button class="btn sun big" data-act="stackGo">Start level ${glv('stack').cur}!</button></div>` : ''}</div>
+  <button class="btn berry big" data-act="stackDrop">Drop!</button>`;
+}
+function stackLoop(){
+  const st = G.stk, cf = gcfg('stack'), t0 = performance.now();
+  const step = ts => {
+    if (!$('#stackWrap') || st.state !== 'play') return;
+    if (!st.fall){ st.x = 150 + Math.sin((ts - t0) / 1000 * cf.speed * (1 + st.stack.length * .03)) * cf.amp; }
+    else {
+      st.fall.vy += .9; st.fall.y += st.fall.vy;
+      const targetY = 280 - st.stack.length * 34;
+      if (!st.fall.miss && st.fall.y >= targetY){
+        const topX = st.stack.length ? st.stack[st.stack.length - 1].x : 150, off = Math.abs(st.fall.x - topX);
+        if (off <= (st.stack.length ? cf.tol : cf.tol + 8)){
+          st.stack.push({ x: st.fall.x, c: st.fall.c }); st.offs.push(off); st.fall = null; st.next = pick(FLAV);
+          if (st.stack.length >= cf.goal){ st.state = 'won'; const avg = st.offs.reduce((a, b) => a + b, 0) / st.offs.length, stars = avg < cf.tol * .35 ? 3 : avg < cf.tol * .6 ? 2 : 1; const w = $('#stackWrap svg'); if (w) w.outerHTML = stackScene(); levelEnd('stack', true, stars, $('#stackWrap')); return; }
+        } else { st.fall.miss = true; st.fall.vx = st.fall.x < topX ? -3 : 3; }
+      }
+      if (st.fall && st.fall.miss){ st.fall.x += st.fall.vx; if (st.fall.y > 460){ st.fall = null; st.state = 'over'; const w = $('#stackWrap svg'); if (w) w.outerHTML = stackScene(); levelEnd('stack', false, 0, $('#stackWrap'), `Your tower was ${st.stack.length} scoops. You need ${cf.goal}!`); return; } }
+    }
+    const top = 280 - st.stack.length * 34; st.cam += (Math.max(0, 170 - top) - st.cam) * .1;
+    const w = $('#stackWrap svg'); if (w) w.outerHTML = stackScene();
+    G.raf = requestAnimationFrame(step);
+  };
+  G.raf = requestAnimationFrame(step);
+}
+A.stackGo = function(){ G.stop(); G.stk = { lv: glv('stack').cur, state: 'play', stack: [], offs: [], x: 150, next: pick(FLAV), cam: 0 }; reBody(stackHTML()); stackLoop(); };
+A.stackDrop = function(){ const st = G.stk; if (!st || st.state !== 'play' || st.fall) return; st.fall = { x: st.x, y: 46 - st.cam, vy: 2, c: st.next }; };
+
+// ---- Duck Dash with levels ----
+function poolHTML(){ const cf = gcfg('duck'); return `${levelBar('duck')}<div class="rm-scene pool" id="poolArea">${poolScene()}<div class="pool-hud"><span>⏱ <b id="duckT">30</b></span><span>🦆 <b id="duckN">0</b> / ${cf.goal}</span></div><div class="pool-start" id="poolStart"><button class="btn sun big" data-act="duckGo">Start level ${glv('duck').cur}!</button></div></div>${sayBox('Tap the rubber ducks before they swim away. Golden ducks are worth 3!')}`; }
+A.duckGo = function(){
+  const area = $('#poolArea'); if (!area) return; $('#poolStart').hidden = true; const cf = gcfg('duck');
+  let n = 0, t = 30;
+  G.every(() => { t--; const el = $('#duckT'); if (el) el.textContent = t; if (t <= 0){ G.stop(); area.querySelectorAll('.duck').forEach(d => d.remove()); const win = n >= cf.goal; levelEnd('duck', win, n >= cf.goal * 1.5 ? 3 : n >= cf.goal * 1.2 ? 2 : 1, area, `You scored ${n}. You need ${cf.goal}!`); } }, 1000);
+  G.every(() => {
+    const d = document.createElement('button'), gold = Math.random() < cf.gold, right = Math.random() < .5;
+    d.className = 'duck' + (gold ? ' gold' : ''); d.setAttribute('aria-label', gold ? 'Golden duck' : 'Duck');
+    d.style.top = (58 + Math.random() * 24) + '%'; d.style.animation = `${right ? 'swimL' : 'swimR'} ${(cf.dur + Math.random() * 1.4).toFixed(1)}s linear forwards`;
+    if (right) d.style.transform = 'scaleX(-1)';
+    d.innerHTML = duckSVG(gold);
+    d.addEventListener('pointerdown', e => { e.stopPropagation(); if (d.classList.contains('got')) return; d.classList.add('got'); d.style.animation = 'duckgot .3s forwards'; n += gold ? 3 : 1; const el = $('#duckN'); if (el) el.textContent = n; setTimeout(() => d.remove(), 300); });
+    d.addEventListener('animationend', ev => { if (ev.animationName.startsWith('swim')) d.remove(); });
+    area.appendChild(d);
+  }, cf.spawn);
+};
+
+// ---- Swing High with levels ----
+function playgroundScene(){
+  const kid = K(), sw = G.swing || { th: 0, A: 10 }, cf = gcfg('swing');
+  let s = outdoorShell({ hz: 130 }) + R.tree(30, 160) + R.tree(336, 166);
+  s += `<ellipse cx="80" cy="238" rx="56" ry="16" fill="#F4E1B2"/><ellipse cx="80" cy="236" rx="48" ry="12" fill="#F8E9C4"/>${sph(60, 230, 6, '#FF5A8C')}<path d="M92,236 l-6,-14 h16z" fill="#34B2F0"/>`;
+  s += `<g transform="translate(300,232)"><path d="M-30,0 L10,-70 h20 L-10,0z" fill="#FF8A3D"/><path d="M-26,0 L12,-66" stroke="#FFC07A" stroke-width="4"/>${rr(10, -76, 30, 8, 3, '#34B2F0')}${[0, 1, 2, 3].map(k => rr(30, -64 + k * 16, 14, 3, 1.5, '#3E7BE0')).join('')}<path d="M40,-70 v70 M46,-70 v70" stroke="#3E7BE0" stroke-width="3"/>${grp(-14, -10, .45, buddySVG(G.slide ? kid.buddy : 'pip', { cheer: 1 }), G.slide ? 'class="slidedown"' : '')}</g>`;
+  s += `<path d="M110,250 L140,60 M150,250 L140,60 M250,250 L220,60 M210,250 L220,60" stroke="#7B5CFA" stroke-width="6" stroke-linecap="round"/>${rr(134, 54, 92, 10, 5, '#9C7BFF')}`;
+  s += `<g transform="rotate(${f1(sw.th)} 180 62)"><path d="M168,62 v120 M192,62 v120" stroke="#9AA3B8" stroke-width="2"/>${rr(162, 180, 36, 7, 3, '#FFC63A')}${grp(180, 196, .62, charSVG(kid.char, { mood: Math.abs(sw.th) > 40 ? 'cheer' : 'happy' }))}</g>`;
+  const meter = clamp(sw.A / 72, 0, 1), ty = 42 + 116 * (1 - cf.target / 72);
+  s += rr(14, 40, 14, 120, 7, '#fff', 'opacity=".88"') + rr(16, 42 + 116 * (1 - meter), 10, 116 * meter, 5, sw.A >= cf.target ? '#FF5A8C' : '#3EC46B') + `<path d="M10,${f1(ty)} h22" stroke="#FF5A8C" stroke-width="2.4"/><path d="${starPath(38, ty, 7, 3)}" fill="#FFC63A"/>`;
+  if (sw.done) s += [...Array(6)].map((_, k) => `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(120 + k * 24, 30 + (k % 2) * 16, 7, 2.6, 4)}" fill="#FFE36B"/>`).join('');
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function playgroundHTML(){ return `${levelBar('swing')}<div class="rm-scene" id="swingScene">${playgroundScene()}<div class="pushhint" id="pushHint">Push now!</div></div>${sayBox('Tap Push when the swing is way back. Fill the meter up to the star!')}<div class="actions"><button class="btn ghost" data-act="slideGo">Slide!</button><button class="btn sun big" style="flex:2" data-act="swingPush">Push!</button></div>`; }
+function playgroundInit(){
+  const cf = gcfg('swing');
+  G.swing = { A: 12, th: 0, t0: performance.now(), start: performance.now(), done: false, cf };
+  const step = ts => {
+    const sw = G.swing; if (!$('#swingScene')) return;
+    const ph = (ts - sw.t0) / 1000 * (2 * Math.PI / 2.2); sw.s = Math.sin(ph); sw.th = sw.A * sw.s; if (!sw.done) sw.A = Math.max(8, sw.A - cf.decay);
+    const sc = $('#swingScene svg'); if (sc) sc.outerHTML = playgroundScene();
+    const h = $('#pushHint'); if (h) h.classList.toggle('on', !sw.done && sw.s < cf.win);
+    G.raf = requestAnimationFrame(step);
+  };
+  G.raf = requestAnimationFrame(step);
+}
+A.swingPush = function(){
+  const sw = G.swing; if (!sw || sw.done) return; const cf = sw.cf;
+  if (sw.s < cf.win){ sw.A = Math.min(72, sw.A + 8); rmSay(pick(['Wheee!', 'Higher!', 'Great push!']));
+    if (sw.A >= cf.target){ sw.done = true; const secs = (performance.now() - sw.start) / 1000; rmSay('You touched the star! ☁️'); levelEnd('swing', true, secs < 9 ? 3 : secs < 16 ? 2 : 1, $('#swingScene')); } }
+  else { sw.A = Math.max(8, sw.A - 4); rmSay('Wait until the swing is all the way back!'); }
+};
+
+// ---- Fishing with levels ----
+function pondHTML(){
+  if (!G.fish || G.fish.lv !== glv('fish').cur) G.fish = { lv: glv('fish').cur, st: 'idle', caught: 0, miss: 0, over: false };
+  const kid = K(), book = kid.fishbook || {}, cf = gcfg('fish'), f = G.fish;
+  return `${levelBar('fish')}<div class="rm-scene" id="pondScene">${pondScene()}</div>${sayBox('Cast your line and wait. When you see <b>!</b>, tap Reel in quick!')}
+  <p class="note-s center">Caught <b>${f.caught}</b> / ${cf.goal} · Missed <b>${f.miss}</b> / 3</p>
+  <button class="btn sea big" id="fishBtn" data-act="fishBtn">${['wait', 'bite'].includes(f.st) ? 'Reel in!' : 'Cast the line'}</button>
+  <div class="field"><span class="flabel">Fish book · ${Object.keys(book).length} of ${FISH.length}</span><div class="plushrow">${FISH.map(x => `<span class="plush ${book[x.id] ? '' : 'locked'}"><svg viewBox="-30 -24 60 48">${fishSVG(x)}</svg><b>${book[x.id] ? '×' + book[x.id] : '?'}</b></span>`).join('')}</div></div>`;
+}
+function fishMiss(msg){ const f = G.fish; f.miss++; f.st = 'miss'; reBody(pondHTML()); rmSay(msg); if (f.miss >= 3){ f.over = true; levelEnd('fish', false, 0, $('#pondScene'), 'Three fish got away! Wait for the ! and then tap fast.'); } }
+A.fishBtn = function(){
+  const f = G.fish, cf = gcfg('fish'); if (f.over) return;
+  if (f.st === 'idle' || f.st === 'caught' || f.st === 'miss'){
+    f.st = 'wait'; f.got = null; pondRedraw(); rmSay('Shhh… waiting for a nibble…');
+    G.after(() => { if (f.st !== 'wait') return; f.st = 'bite'; pondRedraw(); rmSay('<b>Something is biting!</b>'); G.after(() => { if (f.st === 'bite') fishMiss('Aww, it got away. Be quicker!'); }, cf.window); }, 1500 + Math.random() * 3000);
+  } else if (f.st === 'wait') fishMiss('Too early! The fish swam off. Wait for the <b>!</b>');
+  else if (f.st === 'bite'){
+    const tot = FISH.reduce((a, x) => a + x.w, 0); let r = Math.random() * tot; const got = FISH.find(x => (r -= x.w) < 0) || FISH[0];
+    f.st = 'caught'; f.got = got; f.caught++; const kid = K(); kid.fishbook = kid.fishbook || {}; const isNew = !kid.fishbook[got.id]; kid.fishbook[got.id] = (kid.fishbook[got.id] || 0) + 1; save();
+    evTrack(kid, 'fish'); reBody(pondHTML()); rmSay(`You caught a <b>${got.name}</b>!${isNew ? ' New in your fish book! 📖' : ''}`);
+    if (f.caught >= cf.goal){ f.over = true; G.after(() => levelEnd('fish', true, f.miss === 0 ? 3 : f.miss === 1 ? 2 : 1, $('#pondScene')), 900); }
+  }
+};
+
+// ---- Event catch game with levels ----
+function evCatchHTML(){
+  const ev = activeEvent(); if (!ev) return '';
+  const E = EVENTS[ev.id], st = evState(K(), ev), cf = gcfg('catch');
+  return `${levelBar('catch')}<div class="rm-scene evcatch sky-${E.sky}" id="ecArea"><div class="ec-ground"></div><div class="pool-hud"><span>⏱ <b id="ecT">30</b></span><span>${tokBox(E.tok, 16)} <b id="ecN">0</b> / ${cf.goal}</span></div><div class="ec-basket" id="ecBasket"><svg viewBox="-44 -40 88 60">${grp(0, -10, .62, buddySVG(K().buddy, { cheer: 1 }))}<path d="M-34,-8 h68 l-8,24 h-52z" fill="#D9A06E"/><path d="M-32,0 h64 M-30,8 h60" stroke="#B67542" stroke-width="2"/><path d="M-34,-8 h68" stroke="#B67542" stroke-width="4" stroke-linecap="round"/></svg></div><div class="pool-start" id="ecStart"><button class="btn sun big" data-act="ecGo">Start level ${glv('catch').cur}!</button></div></div>
+  ${sayBox(`Catch the ${E.catchN} in the basket! Gold ones are worth 3. Dodge the grumpy clouds. Best: <b>${st.m.catch || 0}</b>`)}
+  <div class="clawpad"><button class="padbtn" data-hold="-1" aria-label="Move left">◀</button><span class="note-s" style="flex:1;text-align:center">Drag the basket or hold the arrows</span><button class="padbtn" data-hold="1" aria-label="Move right">▶</button></div>`;
+}
+A.ecGo = function(){
+  const area = $('#ecArea'), ev = activeEvent(); if (!area || !ev) return;
+  const E = EVENTS[ev.id], ec = G.ec, cf = gcfg('catch'); $('#ecStart').hidden = true;
+  ec.on = true; ec.items = []; let n = 0, t = 30, last = performance.now(), spawnAt = 0;
+  G.every(() => { t--; const el = $('#ecT'); if (el) el.textContent = t; if (t <= 0) end(); }, 1000);
+  const end = () => {
+    ec.on = false; G.stop(); ec.items.forEach(it => it.el.remove()); ec.items = [];
+    evTrack(K(), 'catch', n, 'max');
+    levelEnd('catch', n >= cf.goal, n >= cf.goal * 1.5 ? 3 : n >= cf.goal * 1.2 ? 2 : 1, area, `You caught ${n}. You need ${cf.goal}!`);
+  };
+  const step = ts => {
+    if (!ec.on || !area.isConnected) return;
+    const dt = Math.min(40, ts - last) / 16.7; last = ts;
+    if (ec.dir()){ ec.bx = clamp(ec.bx + ec.dir() * .022 * dt, .08, .92); const b = $('#ecBasket'); if (b) b.style.left = (ec.bx * 100) + '%'; }
+    if (ts > spawnAt){ spawnAt = ts + 480 + Math.random() * 300; const r = Math.random(), kind = r < cf.bad ? 'bad' : r < cf.bad + .1 ? 'gold' : 'tok';
+      const el = document.createElement('div'); el.className = 'ec-it ' + kind; el.innerHTML = kind === 'bad' ? CLOUDBAD : tokBox(E.tok); area.appendChild(el);
+      ec.items.push({ el, x: .06 + Math.random() * .88, y: -30, vy: 2 + cf.speed + Math.random() * 1.6 + (30 - t) * .05, kind }); }
+    const bw = area.clientWidth, bh = area.clientHeight;
+    ec.items = ec.items.filter(it => {
+      it.y += it.vy * dt; it.el.style.transform = `translate(${it.x * bw - 18}px,${it.y}px)`;
+      if (it.y > bh - 74 && it.y < bh - 30 && Math.abs(it.x - ec.bx) * bw < 46){
+        if (it.kind === 'bad'){ n = Math.max(0, n - 2); rmSay('Oof, a grumpy cloud! −2'); area.classList.remove('shake'); void area.offsetWidth; area.classList.add('shake'); }
+        else n += it.kind === 'gold' ? 3 : 1;
+        const c = $('#ecN'); if (c) c.textContent = n; it.el.remove(); return false; }
+      if (it.y > bh){ it.el.remove(); return false; }
+      return true;
+    });
+    G.raf = requestAnimationFrame(step);
+  };
+  G.raf = requestAnimationFrame(step);
+};
+
+// ---- Robot teachers level up into harder questions ----
+const BAND_ORDER = ['little', 'middle', 'big'];
+function robotLv(kid, id){ kid.rlv = kid.rlv || {}; const n = kid.rlv[id] || 0; return { lvl: 1 + Math.floor(n / 4), into: n % 4 }; }
+function robotBand(kid, id){ return BAND_ORDER[Math.min(2, BAND_ORDER.indexOf(bandOf(kid.age)) + robotLv(kid, id).lvl - 1)]; }
+function robotSheet(id){
+  const kid = K(), r = ROBOTS[id];
+  const st = ui.lesson && ui.lesson.id === id ? ui.lesson : (ui.lesson = { id, n: 0, picked: [], right: false, band: robotBand(kid, id) });
+  const list = LESSONS[id][st.band], les = list[(doy() + st.n) % list.length], done = learnedToday(kid)[id], rl = robotLv(kid, id), top = st.band === 'big' && robotBand(kid, id) === 'big';
+  return `<div class="grab"></div>
+  <div class="robohead"><div class="rbig">${robotBox(id, { wave: !st.right, happy: st.right })}</div><div><h3>Hi, I'm ${r.name}!</h3><p class="sub">${r.topic} · ${BANDS[st.band]} questions</p></div></div>
+  <div class="rlv"><b>Level ${rl.lvl}</b><span class="evbar"><i style="width:${rl.into / 4 * 100}%"></i></span><small>${top ? 'Top level questions!' : `${4 - rl.into} more right answer${4 - rl.into > 1 ? 's' : ''} → harder questions`}</small></div>
+  <div class="lesson"><p>${esc(les.t)}</p><button class="btn small ghost" data-act="speak" data-v="${esc(les.t + ' ' + les.q)}">🔊 Read it to me</button></div>
+  <h3 style="font-size:19px">${esc(les.q)}</h3>
+  <div class="answers">${les.a.map((a, k) => `<button data-act="answer" data-k="${k}" ${st.right ? 'disabled' : ''} class="${st.right && k === les.ok ? 'right' : st.picked.includes(k) ? 'wrong' : ''}">${esc(a)}</button>`).join('')}</div>
+  ${st.right ? `<p class="feedback ok">Yes! ${esc(les.why)}${st.lvup ? ` <b>Level up! ${r.name} has harder questions for you now.</b>` : ''}</p>` : st.picked.length ? `<p class="feedback">Not quite. Try another one!</p>` : ''}
+  <p class="note-s">${done ? `You already earned ${r.name}'s coins today. Keep playing to level up!` : 'Get it right for +3 coins (+1 if it takes a few tries).'}</p>
+  <div class="actions">${st.right ? `<button class="btn ghost" data-act="robotNext" data-v="${id}">Another one</button>` : ''}<button class="btn sea" data-act="closeSheet">Bye, ${r.name}!</button></div>`;
+}
+A.answer = function(el){
+  const kid = K(), st = ui.lesson, id = st.id, list = LESSONS[id][st.band], les = list[(doy() + st.n) % list.length], k = +el.dataset.k;
+  if (st.right) return;
+  if (k === les.ok){
+    st.right = true; kid.rlv = kid.rlv || {}; const before = robotLv(kid, id).lvl; kid.rlv[id] = (kid.rlv[id] || 0) + 1; st.lvup = robotLv(kid, id).lvl > before && BAND_ORDER.indexOf(robotBand(kid, id)) > BAND_ORDER.indexOf(st.band);
+    addXP(kid, st.picked.length ? 5 : 10);
+    const lt = (kid.learned[dayKey()] = kid.learned[dayKey()] || {});
+    if (!lt[id]){ const amt = st.picked.length ? 1 : 3; lt[id] = 1; kid.coins += amt; addHist(kid.id, 'earn', amt, `Learned ${ROBOTS[id].topic.toLowerCase()} with ${ROBOTS[id].name}`); evTrack(kid, 'robots'); save(); openSheet(robotSheet(id)); render(); celebrate({ amount: amt, label: `${ROBOTS[id].name} says: great thinking!`, sub: ROBOTS[id].topic + ' lesson', robot: id }); return; }
+    save();
+  } else if (!st.picked.includes(k)) st.picked.push(k);
+  openSheet(robotSheet(id));
+};
+A.robotNext = function(el){ const st = ui.lesson; st.n++; st.right = false; st.picked = []; st.lvup = false; st.band = robotBand(K(), el.dataset.v); openSheet(robotSheet(el.dataset.v)); };
+
+// ---------- market + wardrobe ----------
+function grant(kid, it){
+  kid.coins -= it.price; kid.spent[dayKey()] = (kid.spent[dayKey()] || 0) + it.price;
+  addHist(kid.id, 'spend', it.price, 'Bought ' + it.name);
+  if (it.kind === 'place') kid.inv.push({ id: uid(), t: it.t });
+  if (it.kind === 'outfit'){ if (!kid.outfits.includes(it.v)) kid.outfits.push(it.v); kid.char.acc = it.v; }
+  if (it.kind === 'buddy') kid.buddies.push(it.v);
+  if (it.kind === 'cloth'){ ensureCloset(kid); if (!kid.closet.includes(it.v)) kid.closet.push(it.v); kid.char = wearCfg(kid.char, it.v); }
+}
+const _buyLv = A.buy;
+A.buy = function(el, e){ const it = CAT[el.dataset.id], kid = K(); if (it && it.lvl && pLevel(kid) < it.lvl) return toast(`Reach level ${it.lvl} to unlock the ${esc(it.name)}. Do chores and play games to level up!`); if (it && it.gift) return; _buyLv(el, e); };
+const SLOTS = [['acc', 'Hats & more'], ['top', 'Tops'], ['bottom', 'Bottoms'], ['shoes', 'Shoes'], ['back', 'Extras']];
+function vMarket(){
+  const kid = K(), L = pLevel(kid); ensureCloset(kid);
+  const cats = ['Buildings', 'Decor', 'Outfits', 'Buddies', 'Holiday'];
+  let items = CATALOG.filter(c => c.cat === ui.cat), sub = '';
+  if (ui.cat === 'Outfits'){ ui.slot = ui.slot || 'top'; sub = `<div class="chips">${SLOTS.map(([k, l]) => `<button class="chip" data-act="slot" data-v="${k}" aria-pressed="${ui.slot === k}">${l}</button>`).join('')}</div>`; items = items.filter(it => (it.slot || 'acc') === ui.slot).sort((a, b) => (a.lvl || 1) - (b.lvl || 1)); }
+  const reqIds = S.requests.filter(r => r.kid === kid.id).map(r => r.item);
+  return `<div class="sec-h"><h2>Market</h2><small>You have ${kid.coins} coins · Level ${L}</small></div>
+  <div class="chips" role="group" aria-label="Market sections">${cats.map(c => `<button class="chip" data-act="cat" data-v="${c}" aria-pressed="${ui.cat === c}">${c}${c === 'Holiday' ? ' ❄' : ''}</button>`).join('')}</div>${sub}
+  <div class="grid">${items.map(it => {
+    const own = it.kind === 'place' ? (!it.multi && owns(kid, it.t)) : it.kind === 'outfit' ? kid.outfits.includes(it.v) : it.kind === 'buddy' ? kid.buddies.includes(it.v) : it.kind === 'cloth' ? kid.closet.includes(it.v) : false;
+    const locked = it.lvl && L < it.lvl, asked = reqIds.includes(it.id);
+    const thumb = it.kind === 'place' ? thumbBox(it.t) : it.kind === 'outfit' ? clothBox(kid, 'acc:' + it.v) : it.kind === 'cloth' ? clothBox(kid, it.v) : budBox(it.v);
+    const short = it.price - kid.coins;
+    const btn = own ? `<span class="pill ok">Owned</span>` : it.gift ? `<span class="pill req">Free at Lv ${it.lvl}</span>` : locked ? `<span class="pill lock">🔒 Lv ${it.lvl}</span>` : asked ? `<span class="pill req">Asked ${esc(pname())}</span>` : short > 0 ? `<span class="note-s">Need ${short} more</span>` : `<button class="btn small berry" data-act="buy" data-id="${it.id}">Buy</button>`;
+    const tag = it.holiday ? '<span class="tagx hol">Holiday</span>' : it.gift ? '<span class="tagx lvgift">Level gift</span>' : it.note ? `<span class="tagx">${esc(it.note)}</span>` : '';
+    return `<div class="item ${locked && !own ? 'lockeditem' : ''}">${tag}<div class="thumb">${thumb}</div><h4>${esc(it.name)}</h4><div class="row">${it.gift ? '<span></span>' : `<span class="coinchip">${COIN()}${it.price}</span>`}${btn}</div></div>`;
+  }).join('')}</div>
+  ${ui.cat === 'Outfits' ? `<p class="note-s">Level up by doing chores, playing games and learning with robots. Higher levels unlock more clothes, and some are free level gifts.</p>` : ''}
+  ${S.settings.bigOn ? `<p class="note-s">Things that cost ${S.settings.bigAt} coins or more need a quick OK from ${esc(pname())}.</p>` : ''}`;
+}
+A.slot = el => { ui.slot = el.dataset.v; render(); };
+function vBuddies(){
+  const kid = K(), c = kid.char, I = lvlInfo(kid.xp || 0); ensureCloset(kid);
+  const sw = (arr, field) => `<div class="swatches">${arr.map(col => `<button class="sw" style="background:${col}" data-act="look" data-f="${field}" data-v="${col}" aria-pressed="${(c[field] || (field === 'shoeCol' ? '#FFFFFF' : '')) === col}" aria-label="${field} color"></button>`).join('')}</div>`;
+  const ws = ui.wslot || 'top';
+  const owned = ws === 'acc' ? kid.outfits.map(v => 'acc:' + v) : kid.closet.filter(id => id.startsWith(ws + ':'));
+  const cur = ws === 'acc' ? 'acc:' + (c.acc || 'none') : ws + ':' + (c[ws] || ({ top: 'tee', bottom: 'pants', shoes: 'sneakers', back: 'none' })[ws]);
+  const lvl = Math.min(10, 1 + Math.floor(kid.streak / 3));
+  return `<div class="sec-h"><h2>Me</h2><small>Level ${I.L} · ${I.title}</small></div>
+  <div class="card me"><div class="stage"><svg viewBox="-48 -124 96 130">${charSVG(c, { mood: 'cheer' })}</svg></div>
+    <div class="opts">
+      <label>Hair</label><div class="chips">${STYLES.map(st => `<button class="chip" data-act="look" data-f="hairStyle" data-v="${st}" aria-pressed="${c.hairStyle === st}">${st}</button>`).join('')}</div>
+      ${sw(HAIRS, 'hair')}
+      <label>Skin</label>${sw(SKINS, 'skin')}
+    </div></div>
+  <div class="card wardrobe"><div class="sec-h" style="margin:0"><h2 style="font-size:20px">My closet</h2><button class="btn small berry" data-act="toMarketSlot" data-v="${ws}">Get more</button></div>
+    <div class="chips">${SLOTS.map(([k, l]) => `<button class="chip" data-act="wslot" data-v="${k}" aria-pressed="${ws === k}">${l}</button>`).join('')}</div>
+    <div class="wgrid">${owned.map(id => `<button class="wtile" data-act="wear" data-v="${id}" aria-pressed="${id === cur}">${clothBox(kid, id)}${esc(id.endsWith(':none') ? 'Nothing' : itemName(id))}</button>`).join('')}</div>
+    ${ws === 'top' ? `<label class="flabel">Top color</label>${sw(SHIRTS, 'shirt')}` : ws === 'bottom' ? `<label class="flabel">Bottom color</label>${sw(PANTSCOLS, 'pants')}` : ws === 'shoes' ? `<label class="flabel">Shoe color</label>${sw(SHOECOLS, 'shoeCol')}` : ''}
+  </div>
+  <div class="sec-h"><h2>Buddies</h2><small>Level up with streaks</small></div>
+  <div class="grid">${Object.entries(BUDDIES).map(([k, b]) => {
+    const has = kid.buddies.includes(k);
+    return `<div class="item buddycard ${kid.buddy === k ? 'active' : ''} ${has ? '' : 'locked'}"><div class="thumb">${budBox(k, { cheer: kid.buddy === k })}</div><h4>${b.name}</h4>${has ? `<span class="lvl">Level ${lvl} · ${b.kind}</span><p>${esc(b.about)}</p><div class="row">${kid.buddy === k ? '<span class="pill ok">With you</span>' : `<button class="btn small sea" data-act="setBuddy" data-v="${k}">Walk with me</button>`}</div>`
+      : `<span class="lvl" style="color:var(--ink-3)">${b.kind}</span><div class="row"><span class="coinchip">${COIN()}${b.price}</span><button class="btn small ghost" data-act="toMarket" data-v="${b.holiday ? 'Holiday' : 'Buddies'}">See</button></div>`}</div>`;
+  }).join('')}</div>`;
+}
+Object.assign(A, {
+  wslot(el){ ui.wslot = el.dataset.v; render(); },
+  wear(el){ const kid = K(); kid.char = wearCfg(kid.char, el.dataset.v); save(); render(); },
+  toMarketSlot(el){ ui.cat = 'Outfits'; ui.slot = el.dataset.v; S.tab = 'market'; render(); $('#view').scrollTop = 0; }
+});
+
+function injectDefs3(){ $('#defs defs').insertAdjacentHTML('beforeend', `<pattern id="pt-hstripes" width="10" height="8" patternUnits="userSpaceOnUse"><rect width="10" height="4" fill="#fff" opacity=".55"/></pattern>`); }
+function migrateV5(){
+  Object.values(DB.accounts).forEach(acc => { const F = acc.fam; if (!F || !F.kids) return; Object.values(F.kids).forEach(k => {
+    if (k.v5) return; k.v5 = true; ensureCloset(k);
+    if (k.xp == null) k.xp = k.id === 'ava' ? 1180 : k.id === 'leo' ? 160 : 40;
+    for (let L = 2; L <= lvlInfo(k.xp).L; L++) (LV_GIFTS[L] || []).forEach(id => giveItem(k, id));
+  }); });
+  save();
+}
+
+function migKid(k){ if (k.v5) return; k.v5 = true; ensureCloset(k); if (k.xp == null) k.xp = k.id === 'ava' ? 1180 : k.id === 'leo' ? 160 : 40; for (let L = 2; L <= lvlInfo(k.xp).L; L++) (LV_GIFTS[L] || []).forEach(id => giveItem(k, id)); }
+const _seedLv = seedDemo; seedDemo = function(){ const F = _seedLv(); Object.values(F.kids).forEach(migKid); return F; };
+
 injectDefs();
 injectDefs2();
+injectDefs3();
 migrateV3();
+migrateV5();
 render();
 </script>
