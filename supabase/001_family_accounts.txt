@@ -1,0 +1,115 @@
+-- Chore Buddies · migration 001 · family accounts, kids, tasks, chat, wallet
+-- Paste into Supabase > SQL Editor and run once.
+-- Parents sign in with Supabase Auth (email + password). Kids never get an auth user:
+-- they are rows owned by the parent, opened on the parent's device with an optional PIN.
+
+create extension if not exists pgcrypto;
+
+create table public.families (
+  id uuid primary key default gen_random_uuid(),
+  owner uuid not null references auth.users(id) on delete cascade,
+  parent_name text not null,
+  settings jsonb not null default '{}'::jsonb,
+  consent_at timestamptz not null default now(),          -- parent/guardian consent (COPPA)
+  created_at timestamptz not null default now()
+);
+
+create table public.kids (
+  id uuid primary key default gen_random_uuid(),
+  family_id uuid not null references public.families(id) on delete cascade,
+  name text not null check (char_length(name) between 1 and 14),
+  age smallint not null check (age between 4 and 12),
+  pin_hash text,                                           -- crypt(pin, gen_salt('bf')), null = no PIN
+  coins integer not null default 20 check (coins >= 0),   -- coins never go below zero
+  strength smallint not null default 80 check (strength between 0 and 100),
+  streak integer not null default 0,
+  look jsonb not null default '{}'::jsonb,                 -- character: skin, hair, outfit
+  buddy text not null default 'mochi',
+  world jsonb not null default '[]'::jsonb,                -- placed buildings [{t,i,j}]
+  inventory jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table public.tasks (
+  id uuid primary key default gen_random_uuid(),
+  kid_id uuid not null references public.kids(id) on delete cascade,
+  title text not null,
+  icon text not null default 'dish',
+  coins smallint not null default 5,
+  penalty smallint not null default 0,
+  due time not null default '18:00',
+  repeat text not null default 'daily' check (repeat in ('once','daily','weekdays','weekly','custom')),
+  days smallint[] not null default '{}',
+  activity text not null default 'home',
+  example_photo text,
+  created_at timestamptz not null default now()
+);
+
+create table public.task_runs (                            -- one row per task per day
+  id uuid primary key default gen_random_uuid(),
+  task_id uuid not null references public.tasks(id) on delete cascade,
+  day date not null default current_date,
+  status text not null default 'todo' check (status in ('todo','waiting','approved','missed')),
+  note text, photo text, done_at timestamptz, reminded_at timestamptz,
+  stars smallint check (stars between 1 and 5), paid integer,
+  unique (task_id, day)
+);
+
+create table public.wallet_tx (
+  id bigserial primary key,
+  kid_id uuid not null references public.kids(id) on delete cascade,
+  kind text not null check (kind in ('earn','spend','loss')),
+  amount integer not null check (amount >= 0),
+  label text not null,
+  created_at timestamptz not null default now()
+);
+
+create table public.messages (                             -- family-only chat, no kid-to-kid
+  id uuid primary key default gen_random_uuid(),
+  kid_id uuid not null references public.kids(id) on delete cascade,
+  sender text not null check (sender in ('parent','kid')),
+  body text check (char_length(body) <= 200),
+  sticker text,
+  gift smallint check (gift between 0 and 50),
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table public.lessons_done (
+  kid_id uuid not null references public.kids(id) on delete cascade,
+  robot text not null,
+  day date not null default current_date,
+  coins smallint not null,
+  primary key (kid_id, robot, day)
+);
+
+-- Row level security: a parent only ever sees their own family.
+alter table public.families enable row level security;
+alter table public.kids enable row level security;
+alter table public.tasks enable row level security;
+alter table public.task_runs enable row level security;
+alter table public.wallet_tx enable row level security;
+alter table public.messages enable row level security;
+alter table public.lessons_done enable row level security;
+
+create policy "own family" on public.families for all using (owner = auth.uid()) with check (owner = auth.uid());
+
+create or replace function public.owns_kid(k uuid) returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from kids join families f on f.id = kids.family_id where kids.id = k and f.owner = auth.uid());
+$$;
+
+create policy "own kids" on public.kids for all
+  using (exists (select 1 from families f where f.id = family_id and f.owner = auth.uid()))
+  with check (exists (select 1 from families f where f.id = family_id and f.owner = auth.uid()));
+create policy "own tasks" on public.tasks for all using (owns_kid(kid_id)) with check (owns_kid(kid_id));
+create policy "own runs" on public.task_runs for all
+  using (exists (select 1 from tasks t where t.id = task_id and owns_kid(t.kid_id)))
+  with check (exists (select 1 from tasks t where t.id = task_id and owns_kid(t.kid_id)));
+create policy "own wallet" on public.wallet_tx for all using (owns_kid(kid_id)) with check (owns_kid(kid_id));
+create policy "own messages" on public.messages for all using (owns_kid(kid_id)) with check (owns_kid(kid_id));
+create policy "own lessons" on public.lessons_done for all using (owns_kid(kid_id)) with check (owns_kid(kid_id));
+
+-- Kid PIN check without ever sending the hash to the browser.
+create or replace function public.check_kid_pin(k uuid, pin text) returns boolean language sql stable security definer set search_path = public, extensions as $$
+  select owns_kid(k) and (select pin_hash is null or pin_hash = crypt(pin, pin_hash) from kids where id = k);
+$$;

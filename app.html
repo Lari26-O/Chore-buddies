@@ -21,6 +21,7 @@
   color-scheme: light;
 }
 html,body{height:100%}
+[hidden]{display:none!important}
 body{background:var(--page) radial-gradient(circle at 12% 18%,#fff 0 2px,transparent 3px) 0 0/46px 46px;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.4;-webkit-tap-highlight-color:transparent;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible,input:focus-visible,select:focus-visible,label:focus-within{outline:3px solid var(--grape);outline-offset:2px}
@@ -82,7 +83,7 @@ nav#tabs button[aria-current="page"] .ti{background:var(--tc,#FFE38A);transform:
 /* ---------- world ---------- */
 .world-wrap{position:relative;width:100%;aspect-ratio:476/452;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,#6FC4FF 0%,#A9DDFF 45%,#DDF3FF 80%,#F3FBFF 100%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6),0 14px 30px -14px rgba(30,80,140,.45);flex:none;max-width:100%}
 .world-wrap > svg.world{position:absolute;inset:0;width:100%;height:100%;z-index:2}
-.sun{position:absolute;top:5%;right:7%;width:15%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 38%,#FFFBE0,#FFE36B 55%,#FFC93A);box-shadow:0 0 0 10px rgba(255,236,140,.35),0 0 60px 20px rgba(255,230,120,.55);z-index:0}
+.skysun{position:absolute;top:5%;right:7%;width:15%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 38%,#FFFBE0,#FFE36B 55%,#FFC93A);box-shadow:0 0 0 10px rgba(255,236,140,.35),0 0 60px 20px rgba(255,230,120,.55);z-index:0}
 .rainbow{position:absolute;left:-10%;top:20%;width:70%;z-index:0;opacity:.55}
 .cloud{position:absolute;z-index:1;animation:drift linear infinite;filter:drop-shadow(0 6px 6px rgba(80,140,200,.18))}
 .cloud.front{z-index:3;opacity:.92}
@@ -325,16 +326,106 @@ input[type=time].num{width:104px}
 .empty svg{width:110px;height:110px}
 .empty h3{font-size:20px;color:var(--ink)}
 .note-s{font-size:12.5px;color:var(--ink-3);font-weight:700}
+/* ---------- v2: accounts, big world, robots, chat ---------- */
+.world-wrap > svg.world{touch-action:pan-y;cursor:grab}
+.world-wrap.tall{aspect-ratio:auto;height:max(380px,calc(100dvh - 330px))}
+.world-wrap.tall > svg.world{touch-action:none}
+.wctl{position:absolute;z-index:5;right:10px;top:50px;display:flex;flex-direction:column;gap:6px}
+.wctl button{width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.94);font-family:var(--display);font-weight:800;font-size:22px;line-height:1;display:grid;place-items:center;box-shadow:0 3px 0 #C9D6EE,0 6px 12px -6px rgba(43,37,80,.4)}
+.hud.bl{left:10px;bottom:10px;top:auto}
+.hover{animation:hov 2.4s ease-in-out infinite}
+@keyframes hov{50%{transform:translateY(-4px)}}
+.glowb{animation:glowb 1.4s ease-in-out infinite}
+@keyframes glowb{50%{opacity:.35}}
+.wave{animation:wavey 3s ease-in-out infinite}
+@keyframes wavey{0%,100%{opacity:.15}50%{opacity:.85}}
+.bobw{animation:bobw 2.6s ease-in-out infinite}
+@keyframes bobw{50%{transform:translateY(-3px) rotate(1.5deg)}}
+.tapring{animation:tapring .6s ease-out forwards;transform-box:fill-box;transform-origin:center}
+@keyframes tapring{from{transform:scale(.3);opacity:1}to{transform:scale(1.6);opacity:0}}
+.waveArm{animation:waveArm .9s ease-in-out infinite;transform-box:fill-box;transform-origin:0% 100%}
+@keyframes waveArm{50%{transform:rotate(-22deg)}}
+.profile{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:3px 12px 3px 3px;font-weight:800;font-size:13px;color:var(--ink-2);box-shadow:inset 0 0 0 1.5px var(--line)}
+.avatar.mini{width:30px;height:30px;box-shadow:none;display:inline-block}
+.pav{display:inline-grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#7B5CFA,#B08CFF);color:#fff;font-family:var(--display);font-weight:800;flex:none;box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.mailbtn{position:relative;width:46px;height:46px;border-radius:16px;background:#fff;display:grid;place-items:center;box-shadow:0 3px 0 #F3C3D3,inset 0 0 0 2px #FFE0EA;flex:none}
+.mailbtn .badge{top:-5px;right:-5px}
+.auth{display:flex;flex-direction:column;gap:12px}
+.auth.card{padding:18px}
+.auth h2{font-size:26px}
+.auth .sub{color:var(--ink-2);font-weight:700}
+.welcome{text-align:center;padding-block:6px 10px}
+.welcome h1{font-size:34px;color:var(--ink)}
+.welcome > p{font-weight:700;color:var(--ink-2);font-size:15.5px;max-width:38ch;margin:0 auto}
+.hero-art{border-radius:30px;background:linear-gradient(180deg,#7FCBFF,#CDEBFF 70%,#EAF7FF);box-shadow:inset 0 0 0 3px rgba(255,255,255,.6)}
+.hero-art svg{display:block;width:100%;height:auto}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:13.5px;color:var(--ink-2)}
+.check input{width:22px;height:22px;flex:none;accent-color:var(--grape);margin-top:1px}
+.err{color:var(--danger-d);font-weight:800;font-size:14px}
+.who{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding-top:20px}
+.who h1{font-size:34px}
+.who .sub{color:var(--ink-2);font-weight:700;margin-top:-8px}
+.who-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:100%}
+.who-t{background:#fff;border-radius:26px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 4px 0 var(--line),0 12px 24px -16px rgba(43,37,80,.4);transition:transform .1s}
+.who-t:active{transform:scale(.97)}
+.who-t b{font-family:var(--display);font-size:20px}
+.who-t small{font-weight:800;color:var(--ink-3);font-size:12px}
+.who-av{width:84px;height:84px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 40% 30%,#fff,#CFEAFF);display:grid;place-items:center}
+.who-av svg{width:100%;height:100%}
+.who-av.sm{width:56px;height:56px;flex:none}
+.pinhead{display:flex;align-items:center;gap:12px}
+.pindots{display:flex;justify-content:center;gap:14px;padding:6px 0}
+.pindots i{width:18px;height:18px;border-radius:50%;background:#DDE3F2}
+.pindots i.on{background:var(--grape)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pinpad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pinpad button{height:62px;border-radius:20px;background:#fff;font-family:var(--display);font-weight:800;font-size:26px;box-shadow:0 4px 0 var(--line)}
+.pinpad button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.looks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.looks.bud{grid-template-columns:repeat(3,minmax(0,1fr))}
+.looks button{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff,#DDEFFF);overflow:hidden;box-shadow:inset 0 0 0 2px #fff}
+.looks.bud button{border-radius:20px;aspect-ratio:auto;padding:4px 4px 6px;display:flex;flex-direction:column;align-items:center;font-weight:800;font-size:12.5px}
+.looks.bud button svg{width:70%}
+.looks button svg{width:100%;height:100%}
+.looks button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--grape)}
+.robo-strip{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory}
+.robo{flex:none;width:118px;background:#fff;border-radius:22px;padding:8px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 3px 0 var(--line),0 10px 20px -16px rgba(43,37,80,.35);scroll-snap-align:start;text-align:center}
+.robo .rb{width:76px;height:96px;display:block}
+.robo .rb svg{width:100%;height:100%}
+.robo b{font-family:var(--display);font-size:16px}
+.robo small{font-size:11.5px;font-weight:700;color:var(--ink-3);line-height:1.15;min-height:2.3em}
+.robohead{display:flex;align-items:center;gap:12px}
+.rbig{width:96px;height:124px;flex:none;border-radius:22px;background:radial-gradient(circle at 50% 70%,#E6F7FF,#fff 70%)}
+.rbig svg{width:100%;height:100%}
+.lesson{background:#fff;border-radius:20px;padding:12px 14px;font-weight:700;font-size:16px;line-height:1.45;display:flex;flex-direction:column;gap:8px;align-items:flex-start;box-shadow:0 2px 0 var(--line)}
+.feedback{font-weight:800;color:var(--ink-2)}
+.feedback.ok{color:var(--leaf-d)}
+.chat{display:flex;flex-direction:column;gap:10px;padding:12px}
+.thread{display:flex;flex-direction:column;gap:8px;max-height:46vh;min-height:140px;overflow-y:auto;padding:4px 2px}
+.sheet .thread{max-height:38vh;background:#fff;border-radius:20px;padding:10px}
+.thread .msg{display:flex;align-items:flex-end;gap:7px;max-width:86%}
+.thread .msg.me{align-self:flex-end;flex-direction:row-reverse}
+.thread .mb{display:flex;flex-direction:column;gap:3px;align-items:flex-start;min-width:0}
+.thread .msg.me .mb{align-items:flex-end}
+.thread .bt{background:var(--card-2);border-radius:18px 18px 18px 6px;padding:8px 12px;font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.thread .msg.me .bt{background:var(--grape);color:#fff;border-radius:18px 18px 6px 18px}
+.thread small{font-size:11px;font-weight:700;color:var(--ink-3)}
+.giftchip{display:inline-flex;align-items:center;gap:4px;font-weight:900;font-size:12.5px;background:#FFF2C4;color:#8A5A00;border-radius:999px;padding:2px 9px 2px 3px}
+.stkrow{display:flex;gap:6px;overflow-x:auto;padding:2px}
+.stkrow button{flex:none;width:52px;height:52px;border-radius:15px;background:var(--card-2);display:grid;place-items:center}
+.giftrow{align-items:center}
+.composer{display:flex;gap:8px}
+.composer .text{flex:1;min-width:0}
+.dotn{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--berry);color:#fff;font-size:11px}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
 <div id="app">
   <header class="topbar">
     <div class="brand"><svg viewBox="-20 -20 40 40" aria-hidden="true"><use href="#coin" x="-20" y="-20" width="40" height="40"/></svg><span>Chore <b>Buddies</b></span></div>
-    <div class="seg" role="group" aria-label="Who is using the app">
-      <button id="mKid" data-act="mode" data-v="kid">Kid</button>
-      <button id="mParent" class="parent" data-act="mode" data-v="parent">Parent</button>
-    </div>
+    <div id="who"></div>
   </header>
   <div id="strip"></div>
   <main id="view"></main>
@@ -373,7 +464,7 @@ function rnd(seed){ let x = Math.sin(seed * 9301 + 49297) * 233280; return x - M
 // =====================================================================
 //  ART ENGINE — soft "vinyl toy" isometric world drawn in SVG
 // =====================================================================
-const TW = 76, TH = 38, N = 6, OX = 228, OY = 132;
+const TW = 76, TH = 38, OX = 14 * 76 / 2, OY = 150;
 const P = (i, j) => [OX + (i - j) * TW / 2, OY + (i + j) * TH / 2];
 const f1 = v => (+v).toFixed(1);
 const pts = a => a.map(p => f1(p[0]) + ',' + f1(p[1])).join(' ');
@@ -703,77 +794,209 @@ R.pond = (x, y) => {
   return g;
 };
 
-// ---------- the floating island ----------
-const isPath = (i, j) => j === 2 || i === 3;
-function islandBase(){
-  const Wc = [0, OY + 5 * TH / 2], Sc = [OX, OY + 10 * TH / 2 + TH / 2], Ec = [2 * OX, OY + 5 * TH / 2], Nc = [OX, OY - TH / 2];
-  Wc[1] = OY + 5 * TH / 2; // corner y equals centre row of edge tiles
-  let g = `<ellipse cx="${OX}" cy="${Sc[1] + 120}" rx="140" ry="16" fill="#5C9BD1" opacity=".18" filter="url(#blur6)"/>`;
-  const L = 12;
-  const tip = [OX + 6, Sc[1] + 118];
-  g += `<path d="M${f1(Wc[0])},${f1(Wc[1] + L)} L${f1(Sc[0])},${f1(Sc[1] + L)} L${f1(Ec[0])},${f1(Ec[1] + L)} C${Ec[0] - 10},${Ec[1] + 70} ${OX + 110},${Sc[1] + 60} ${tip[0] + 18},${tip[1] - 10} Q${tip[0]},${tip[1] + 8} ${tip[0] - 18},${tip[1] - 14} C${OX - 110},${Sc[1] + 60} ${Wc[0] + 10},${Wc[1] + 70} ${f1(Wc[0])},${f1(Wc[1] + L)}Z" fill="url(#dirt)"/>`;
-  g += `<path d="M${f1(Wc[0])},${f1(Wc[1] + L)} L${f1(Sc[0])},${f1(Sc[1] + L)} L${tip[0] - 6},${tip[1] - 6} C${OX - 110},${Sc[1] + 60} ${Wc[0] + 10},${Wc[1] + 70} ${f1(Wc[0])},${f1(Wc[1] + L)}Z" fill="#3A2210" opacity=".22"/>`;
-  // strata
-  g += `<path d="M30,${Wc[1] + 44} Q${OX - 60},${Sc[1] + 20} ${OX},${Sc[1] + 36} Q${OX + 70},${Sc[1] + 22} ${2 * OX - 34},${Ec[1] + 44}" stroke="#C48A5A" stroke-width="3" fill="none" opacity=".55"/>`;
-  g += `<path d="M90,${Wc[1] + 86} Q${OX - 40},${Sc[1] + 58} ${OX + 4},${Sc[1] + 70} Q${OX + 60},${Sc[1] + 60} ${2 * OX - 96},${Ec[1] + 88}" stroke="#C48A5A" stroke-width="2.4" fill="none" opacity=".45"/>`;
-  [[70, 60, 7], [150, 100, 9], [320, 92, 8], [392, 58, 6], [250, 120, 6], [200, 66, 5]].forEach(([rx, ry, r]) => g += `<ellipse cx="${rx}" cy="${Wc[1] + ry}" rx="${r * 1.4}" ry="${r}" fill="#8F5E3A"/><ellipse cx="${rx - 2}" cy="${Wc[1] + ry - 2}" rx="${r * .8}" ry="${r * .45}" fill="#B98055"/>`);
-  // grass lip
-  g += poly([Wc, Sc, dn(Sc, L), dn(Wc, L)], '#4FA544') + poly([Sc, Ec, dn(Ec, L), dn(Sc, L)], '#5DB650');
-  for (let k = 0; k < 12; k++){ const t = (k + .5) / 12; const p = mix(Wc, Sc, t), q = mix(Sc, Ec, t);
-    g += `<ellipse cx="${f1(p[0])}" cy="${f1(p[1] + L)}" rx="10" ry="4" fill="#4FA544"/><ellipse cx="${f1(q[0])}" cy="${f1(q[1] + L)}" rx="10" ry="4" fill="#5DB650"/>`; }
-  // vines
-  [[.15, 26], [.42, 18], [.7, 30]].forEach(([t, l]) => { const p = mix(Wc, Sc, t); g += `<path d="M${f1(p[0])},${f1(p[1] + L)} q4,${l / 2} -2,${l}" stroke="#3E9B3A" stroke-width="2" fill="none"/><circle cx="${f1(p[0] - 2)}" cy="${f1(p[1] + L + l)}" r="2.6" fill="#FF8FB8"/>`; });
-  // waterfall
-  const wf = mix(Sc, Ec, .66);
-  g += `<path d="M${f1(wf[0] - 9)},${f1(wf[1] - 2)} h18 l2,${L + 76} h-22z" fill="url(#fallG)"/>`;
-  g += `<path class="fall" d="M${f1(wf[0] - 4)},${f1(wf[1])} v${L + 74}" stroke="#fff" stroke-width="2" opacity=".8"/><path class="fall" style="animation-delay:-.3s" d="M${f1(wf[0] + 4)},${f1(wf[1])} v${L + 74}" stroke="#fff" stroke-width="1.6" opacity=".7"/>`;
-  g += `<ellipse cx="${f1(wf[0])}" cy="${f1(wf[1] + L + 76)}" rx="16" ry="5" fill="#fff" opacity=".6" filter="url(#blur2)"/>`;
-  // tiny floating rocks
-  g += `<g opacity=".95"><path d="M20,${Sc[1] + 40} q12,-6 24,0 q-4,14 -12,16 q-8,-2 -12,-16z" fill="#9A6A44"/><ellipse cx="32" cy="${Sc[1] + 39}" rx="12" ry="4" fill="#5DB650"/></g>`;
-  g += `<g><path d="M410,${Sc[1] + 66} q9,-5 18,0 q-3,10 -9,12 q-6,-2 -9,-12z" fill="#9A6A44"/><ellipse cx="419" cy="${Sc[1] + 65}" rx="9" ry="3" fill="#5DB650"/></g>`;
-  return g;
+// ---------- the big floating island ----------
+// Legend: . grass  * flower meadow  f forest  = path  : sand  ~ water  b bridge
+const MAP = [
+  "fffff.......:~~~~.",
+  "ffffff...=..:~~~~:",
+  "fffff....=..::~~~:",
+  "fff=======...:~~::",
+  "ff.......=....~...",
+  "f........=....~...",
+  ".=============b==.",
+  "*........=....~...",
+  "**.......=....~.**",
+  "***......=....~.**",
+  "**.......=....~...",
+  "*....:::.=::..~...",
+  "...::::::=::::~:..",
+  "..::::::::::::~:::"
+];
+const W = 18, H = 14;
+const TER = (i, j) => (i < 0 || j < 0 || i >= W || j >= H) ? null : MAP[j][i];
+const MAPW = (W + H) * TW / 2, MAPH = OY + (W + H) * TH / 2 + 250;
+const buildable = t => t === '.' || t === '*';
+const cam = { cx: 0, cy: 0, w: 600, follow: true };
+const ROBOTS = {
+  bolt:   { name: 'Bolt',   topic: 'Math',               color: '#FFC63A', tile: [7, 8],  emblem: 'bolt' },
+  lexi:   { name: 'Lexi',   topic: 'Words & reading',    color: '#B58CFF', tile: [5, 7],  emblem: 'book' },
+  kindy:  { name: 'Kindy',  topic: 'Feelings & kindness', color: '#FF7FA8', tile: [7, 4], emblem: 'heart' },
+  penny:  { name: 'Penny',  topic: 'Money smarts',       color: '#FF9F3D', tile: [12, 5], emblem: 'coin' },
+  sprout: { name: 'Sprout', topic: 'Nature',             color: '#5CCB6E', tile: [2, 2],  emblem: 'leaf' },
+  cosmo:  { name: 'Cosmo',  topic: 'Space',              color: '#5A6FD8', tile: [11, 1], emblem: 'star' },
+  wave:   { name: 'Wave',   topic: 'Ocean & water',      color: '#3EC7E8', tile: [7, 12], emblem: 'drop' }
+};
+const PLACES = [['Town', [9, 6]], ['Whisper Woods', [3, 3]], ['Lake Twinkle', [12, 1]], ['Sunny Beach', [9, 12]], ['Flower Fields', [1, 9]], ['River Bridge', [15, 6]]];
+const SCEN = (() => {
+  const out = [], res = new Set();
+  Object.values(ROBOTS).forEach(r => { const [i, j] = r.tile; [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => res.add((i + a) + ',' + (j + b))); });
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++){
+    if (TER(i, j) === 'f' && !res.has(i + ',' + j) && rnd(i * 31 + j * 17) > .28) out.push({ t: rnd(i * 7 + j * 3) > .45 ? 'pine' : 'tree', i, j });
+  }
+  [['sign', 3, 4, 'Whisper Woods'], ['sign', 12, 2, 'Lake Twinkle'], ['sign', 10, 11, 'Sunny Beach'], ['sign', 2, 8, 'Flower Fields'], ['sign', 13, 7, 'Town'],
+   ['palm', 4, 12], ['palm', 12, 12], ['palm', 15, 12], ['palm', 3, 13], ['umbrella', 6, 13], ['umbrella', 11, 13], ['castle', 9, 13],
+   ['boat', 15, 1], ['rock', 16, 8], ['rock', 17, 4], ['telescope', 10, 0], ['rock', 1, 11]].forEach(([t, i, j, text]) => out.push({ t, i, j, text }));
+  return out;
+})();
+function blockedSet(kid){
+  const b = new Set();
+  kid.world.forEach(o => b.add(o.i + ',' + o.j));
+  SCEN.forEach(o => b.add(o.i + ',' + o.j));
+  Object.values(ROBOTS).forEach(r => b.add(r.tile.join(',')));
+  return b;
 }
+
+const TPAL = {
+  '.': ['#8DDA6F', '#84D267', '#79C65E', '#4FA544'], '*': ['#93DD76', '#8AD86D', '#7DCB63', '#4FA544'],
+  'f': ['#6DC45B', '#66BC55', '#59AE4A', '#3F8F37'], '=': ['#F2DFB8', '#EFDAB0', '#E3CC9C', '#C9A56E'],
+  ':': ['#F8E4B0', '#F4DDA4', '#E8CF8E', '#D4B06A'], '~': ['#5CC4F2', '#58BFEE', '#7FD3F7', '#3A9CCB'], 'b': ['#5CC4F2', '#58BFEE', '#7FD3F7', '#3A9CCB']
+};
 function tileSVG(i, j){
-  const [x, y] = P(i, j);
-  const path = isPath(i, j);
-  let g = poly(diamond(x, y), path ? '#F2DFB8' : ((i + j) % 2 ? '#8DDA6F' : '#84D267'), `stroke="${path ? '#E3CC9C' : '#79C65E'}" stroke-width=".8"`);
-  const s = i * 7 + j * 13;
-  if (path){
-    for (let k = 0; k < 4; k++){ const px = x + (rnd(s + k) - .5) * 40, py = y + (rnd(s + k + 9) - .5) * 16; g += `<ellipse cx="${f1(px)}" cy="${f1(py)}" rx="${f1(2 + rnd(s + k * 3) * 3)}" ry="${f1(1.2 + rnd(s + k) * 1.4)}" fill="#E0C796"/>`; }
+  const t = TER(i, j), [x, y] = P(i, j), c = TPAL[t], s = i * 7 + j * 13, L = 14;
+  let g = '';
+  if (j === H - 1){ const Wp = [x - TW / 2, y], Sp = [x, y + TH / 2]; g += poly([Wp, Sp, dn(Sp, L), dn(Wp, L)], t === '~' ? '#8FDCFF' : c[3]); }
+  if (i === W - 1){ const Sp = [x, y + TH / 2], Ep = [x + TW / 2, y]; g += poly([Sp, Ep, dn(Ep, L), dn(Sp, L)], t === '~' ? '#A6E3FB' : shade(c[3], .14)); }
+  g += poly(diamond(x, y), c[(i + j) % 2], `stroke="${c[2]}" stroke-width=".8"`);
+  const R2 = k => rnd(s + k);
+  if (t === '~' || t === 'b'){
+    g += `<path class="wave" style="animation-delay:-${(R2(1) * 3).toFixed(1)}s" d="M${f1(x - 14 + R2(2) * 8)},${f1(y + R2(3) * 6 - 3)} q4,-3 8,0 t8,0" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
+    if (R2(4) > .6) g += `<path class="twinkle" d="${starPath(x + 10, y - 4, 3, 1, 4)}" fill="#fff"/>`;
+  }
+  if (t === 'b'){
+    const [Nn, E, S, Wd] = diamond(x, y, .9);
+    g += poly([Nn, E, S, Wd], '#C98A55') + poly([Nn, E, S, Wd], 'url(#fsR)');
+    for (let k = 1; k < 6; k++){ const u = k / 6; g += line(mix(Nn, E, u), mix(Wd, S, u), '#9A6340', 1); }
+    g += line(up(Wd, 7), up(S, 7), '#8A5634', 2.2) + line(up(Nn, 7), up(E, 7), '#8A5634', 2.2);
+    [Wd, S, Nn, E].forEach(p => g += line(p, up(p, 8), '#8A5634', 2));
+  } else if (t === '=') {
+    for (let k = 0; k < 4; k++) g += `<ellipse cx="${f1(x + (R2(k) - .5) * 40)}" cy="${f1(y + (R2(k + 9) - .5) * 16)}" rx="${f1(2 + R2(k * 3) * 3)}" ry="${f1(1.2 + R2(k) * 1.4)}" fill="#E0C796"/>`;
+  } else if (t === ':') {
+    for (let k = 0; k < 5; k++) g += `<circle cx="${f1(x + (R2(k) - .5) * 44)}" cy="${f1(y + (R2(k + 5) - .5) * 16)}" r=".9" fill="#D9BC7C"/>`;
+    if (R2(7) > .7) g += `<path d="M${f1(x + 6)},${f1(y + 3)} a3.4,3.4 0 0 1 6.8,0 z" fill="#FFB8C8"/>`;
   } else {
-    for (let k = 0; k < 3; k++){ const px = x + (rnd(s + k) - .5) * 44, py = y + (rnd(s + k + 5) - .5) * 18; g += `<path d="M${f1(px - 2.5)},${f1(py)} l1.2,-4 l1.3,4 l1.2,-4 l1.3,4" stroke="#5DB650" stroke-width="1.2" fill="none" stroke-linejoin="round"/>`; }
-    if (rnd(s + 2) > .55){ const px = x + (rnd(s + 4) - .5) * 40, py = y + (rnd(s + 8) - .5) * 14; g += `<circle cx="${f1(px)}" cy="${f1(py)}" r="1.8" fill="${rnd(s) > .5 ? '#fff' : '#FFB8D0'}"/><circle cx="${f1(px)}" cy="${f1(py)}" r=".7" fill="#FFD84A"/>`; }
+    const dk = t === 'f' ? '#4E9F43' : '#5DB650';
+    for (let k = 0; k < 3; k++){ const px = x + (R2(k) - .5) * 44, py = y + (R2(k + 5) - .5) * 18; g += `<path d="M${f1(px - 2.5)},${f1(py)} l1.2,-4 l1.3,4 l1.2,-4 l1.3,4" stroke="${dk}" stroke-width="1.2" fill="none" stroke-linejoin="round"/>`; }
+    const fl = t === '*' ? 6 : R2(2) > .55 ? 1 : 0, cols = ['#fff', '#FFB8D0', '#FFE36B', '#C9B6FF', '#FF8A8A'];
+    for (let k = 0; k < fl; k++){ const px = x + (R2(k + 20) - .5) * 44, py = y + (R2(k + 30) - .5) * 16; g += `<circle cx="${f1(px)}" cy="${f1(py - 1)}" r="2.1" fill="${cols[Math.floor(R2(k + 40) * 5)]}"/><circle cx="${f1(px)}" cy="${f1(py - 1)}" r=".8" fill="#FFD84A"/>`; }
+    if (t === 'f' && R2(9) > .7) g += `<g transform="translate(${f1(x - 10)},${f1(y + 2)})"><rect x="-1.4" y="-4" width="2.8" height="5" rx="1" fill="#FFF4E0"/><path d="M-5,-3 a5,4 0 0 1 10,0z" fill="#E8414F"/><circle cx="-2" cy="-5" r=".9" fill="#fff"/><circle cx="2" cy="-4.5" r=".7" fill="#fff"/></g>`;
   }
   return g;
 }
+function islandBase(){
+  const Wc = [0, P(0, H - 1)[1]], Sc = [P(W - 1, H - 1)[0], P(W - 1, H - 1)[1] + TH / 2], Ec = [MAPW, P(W - 1, 0)[1]];
+  const L = 14, tip = [Sc[0] + 10, Sc[1] + 230];
+  let g = `<ellipse cx="${tip[0]}" cy="${tip[1] + 30}" rx="260" ry="22" fill="#5C9BD1" opacity=".16" filter="url(#blur6)"/>`;
+  const under = `M${f1(Wc[0])},${f1(Wc[1] + L)} L${f1(Sc[0])},${f1(Sc[1] + L)} L${f1(Ec[0])},${f1(Ec[1] + L)} C${Ec[0] - 30},${Ec[1] + 130} ${Sc[0] + 280},${Sc[1] + 120} ${tip[0] + 34},${tip[1] - 16} Q${tip[0]},${tip[1] + 12} ${tip[0] - 34},${tip[1] - 20} C${Sc[0] - 280},${Sc[1] + 110} ${Wc[0] + 30},${Wc[1] + 130} ${f1(Wc[0])},${f1(Wc[1] + L)}Z`;
+  g += `<path d="${under}" fill="url(#dirt)"/>`;
+  g += `<path d="M${f1(Wc[0])},${f1(Wc[1] + L)} L${f1(Sc[0])},${f1(Sc[1] + L)} L${tip[0] - 8},${tip[1] - 10} C${Sc[0] - 280},${Sc[1] + 110} ${Wc[0] + 30},${Wc[1] + 130} ${f1(Wc[0])},${f1(Wc[1] + L)}Z" fill="#3A2210" opacity=".2"/>`;
+  [[50, 40], [110, 90], [170, 140]].forEach(([d, w], k) => g += `<path d="M${Wc[0] + w},${Wc[1] + d + 20} Q${Sc[0] - 200},${Sc[1] + d - 30} ${Sc[0]},${Sc[1] + d - 10} Q${Sc[0] + 220},${Sc[1] + d - 40} ${Ec[0] - w},${Ec[1] + d + 20}" stroke="#C48A5A" stroke-width="${3 - k * .6}" fill="none" opacity=".5"/>`);
+  for (let k = 0; k < 16; k++){ const t = (k + .5) / 16, side = k % 2 ? mix(Wc, Sc, t) : mix(Sc, Ec, t), r = 5 + rnd(k) * 6, dy = 30 + rnd(k + 3) * 70 * (1 - Math.abs(t - .5));
+    g += `<ellipse cx="${f1(side[0])}" cy="${f1(side[1] + dy)}" rx="${f1(r * 1.4)}" ry="${f1(r)}" fill="#8F5E3A"/><ellipse cx="${f1(side[0] - 2)}" cy="${f1(side[1] + dy - 2)}" rx="${f1(r * .8)}" ry="${f1(r * .45)}" fill="#B98055"/>`; }
+  [[.1, 26], [.3, 18], [.5, 32], [.72, 22]].forEach(([t, l]) => { const p = mix(Wc, Sc, t); g += `<path d="M${f1(p[0])},${f1(p[1] + L)} q4,${l / 2} -2,${l}" stroke="#3E9B3A" stroke-width="2" fill="none"/><circle cx="${f1(p[0] - 2)}" cy="${f1(p[1] + L + l)}" r="2.6" fill="#FF8FB8"/>`; });
+  const [rx, ry] = P(14, H - 1), wf = [rx - TW / 4, ry + TH / 4];
+  g += `<path d="M${f1(wf[0] - 11)},${f1(wf[1] - 4)} h22 l3,${L + 150} h-28z" fill="url(#fallG)"/>`;
+  g += `<path class="fall" d="M${f1(wf[0] - 5)},${f1(wf[1])} v${L + 148}" stroke="#fff" stroke-width="2.2" opacity=".85"/><path class="fall" style="animation-delay:-.3s" d="M${f1(wf[0] + 5)},${f1(wf[1])} v${L + 148}" stroke="#fff" stroke-width="1.6" opacity=".7"/>`;
+  g += `<ellipse cx="${f1(wf[0])}" cy="${f1(wf[1] + L + 150)}" rx="22" ry="7" fill="#fff" opacity=".6" filter="url(#blur3)"/>`;
+  [[60, Sc[1] + 60, 1], [MAPW - 70, Sc[1] + 90, .8], [Sc[0] - 330, Sc[1] + 170, .7]].forEach(([x, y, s]) => g += `<g transform="translate(${f1(x)},${f1(y)}) scale(${s})"><path d="M-12,0 q12,-6 24,0 q-4,14 -12,16 q-8,-2 -12,-16z" fill="#9A6A44"/><ellipse cx="0" cy="-1" rx="12" ry="4" fill="#5DB650"/></g>`);
+  return g;
+}
+// scenery pieces
+R.sign = (x, y, text = '') => {
+  const w = Math.max(40, text.length * 5.6 + 14);
+  return `<ellipse cx="${x + 3}" cy="${y + 2}" rx="10" ry="4" fill="#1F4D18" opacity=".22" filter="url(#blur2)"/>${line([x, y + 1], [x, y - 22], '#8A5634', 3)}<rect x="${f1(x - w / 2)}" y="${y - 36}" width="${f1(w)}" height="16" rx="5" fill="#8A5634"/><rect x="${f1(x - w / 2 + 1.5)}" y="${y - 34.5}" width="${f1(w - 3)}" height="13" rx="4" fill="#C98A55"/><text x="${x}" y="${y - 24.6}" text-anchor="middle" font-family="Baloo 2,Trebuchet MS,sans-serif" font-weight="800" font-size="9.5" fill="#fff">${esc(text)}</text>`;
+};
+R.palm = (x, y) => {
+  let g = `<ellipse cx="${x + 10}" cy="${y + 3}" rx="20" ry="7" fill="#7a5a20" opacity=".18" filter="url(#blur3)"/>`;
+  g += `<path d="M${x - 3},${y + 2} q-4,-24 7,-48 l5,1.4 q-9,24 -6,46.6z" fill="#B98055"/>`;
+  for (let k = 1; k < 6; k++) g += `<path d="M${f1(x - 3 + k * 1.8)},${f1(y + 2 - k * 9.4)} l5,1.2" stroke="#946240" stroke-width="1.2"/>`;
+  const tx = x + 7, ty = y - 46;
+  [-160, -120, -60, -20, 20, 200].forEach((a, k) => g += `<path d="M${tx},${ty} q14,-12 30,-2 q-16,-3 -30,2z" fill="${k % 2 ? '#3FAF4F' : '#4CBF58'}" transform="rotate(${a} ${tx} ${ty})"/>`);
+  g += `<circle cx="${tx - 3}" cy="${ty + 3}" r="3.2" fill="#8A5634"/><circle cx="${tx + 3}" cy="${ty + 4}" r="3.2" fill="#9A6340"/>`;
+  return g;
+};
+R.umbrella = (x, y) => {
+  let g = poly(diamond(x + 4, y + 2, .5), '#FF8FB8') + poly(diamond(x + 4, y + 2, .3), '#fff');
+  g += line([x, y], [x, y - 32], '#fff', 2.2);
+  const cols = ['#FF5A8C', '#fff', '#FF5A8C', '#fff', '#FF5A8C', '#fff'];
+  for (let k = 0; k < 6; k++){ const a0 = Math.PI + k * Math.PI / 6, a1 = a0 + Math.PI / 6; g += `<path d="M${x},${y - 40} L${f1(x + Math.cos(a0) * 24)},${f1(y - 34 + Math.sin(a0 + Math.PI) * -4)} L${f1(x + Math.cos(a1) * 24)},${f1(y - 34 + Math.sin(a1 + Math.PI) * -4)}Z" fill="${cols[k]}"/>`; }
+  g += `<path d="M${x - 24},${y - 34} Q${x},${y - 30} ${x + 24},${y - 34}" stroke="#E8416F" stroke-width="1.2" fill="none"/>`;
+  return g;
+};
+R.castle = (x, y) => {
+  const b = box(x, y, .42, 12, '#EFCF8A');
+  let g = shadowD(x, y, .4) + b.g;
+  [b.Wt, b.Et, b.Nt].forEach(p => { const t = box(p[0], p[1] + 3, .12, 10, '#F3D896'); g += t.g + `<path d="M${p[0]},${p[1] - 10} v-8 l6,2.5 -6,2.5" fill="#FF5A8C" stroke="#9A6340" stroke-width=".8"/>`; });
+  return g;
+};
+R.boat = (x, y) => `<g class="bobw"><path d="M${x - 20},${y - 4} h40 l-7,10 h-26z" fill="#fff"/><path d="M${x - 20},${y - 4} h40 l-2,3 h-36z" fill="#E8414F"/>${line([x, y - 4], [x, y - 40], '#8A5634', 2)}<path d="M${x + 1},${y - 38} L${x + 1},${y - 8} L${x + 20},${y - 8}Z" fill="#FFE36B"/><path d="M${x - 1},${y - 34} L${x - 1},${y - 8} L${x - 16},${y - 8}Z" fill="#fff"/></g>`;
+R.rock = (x, y) => `<ellipse cx="${x + 5}" cy="${y + 3}" rx="18" ry="6" fill="#1F4D18" opacity=".2" filter="url(#blur2)"/>${sph(x - 6, y - 5, 9, '#A9B3C9')}${sph(x + 7, y - 3, 7, '#BAC3D6')}${sph(x + 1, y - 12, 6, '#C9D1E2')}`;
+R.telescope = (x, y) => `${line([x, y - 18], [x - 8, y + 2], '#5B5470', 2)}${line([x, y - 18], [x + 8, y + 2], '#5B5470', 2)}${line([x, y - 18], [x, y + 3], '#5B5470', 2)}<g transform="rotate(-35 ${x} ${y - 20})"><rect x="${x - 16}" y="${y - 25}" width="32" height="10" rx="4" fill="#5A6FD8"/><rect x="${x + 12}" y="${y - 26}" width="7" height="12" rx="2" fill="#3E4FB0"/><rect x="${x - 16}" y="${y - 25}" width="32" height="10" rx="4" fill="url(#fsR)"/></g>`;
+
+// ---------- robots ----------
+const EMB = {
+  bolt: `<path d="M1,-5 L-3.5,1 h3 l-1,4.5 L3.6,-1 h-3z" fill="#FFB800"/>`,
+  book: `<path d="M-5,-3 q2.5,-1.3 5,0 q2.5,-1.3 5,0 v6 q-2.5,-1.3 -5,0 q-2.5,-1.3 -5,0z" fill="#9C6CF0"/>`,
+  heart: `<path d="M0,4 C-6,0 -5,-4.5 -2.4,-4.5 C-1,-4.5 0,-3 0,-2.4 C0,-3 1,-4.5 2.4,-4.5 C5,-4.5 6,0 0,4Z" fill="#FF4F8B"/>`,
+  coin: `<circle r="4.6" fill="#FFC63A" stroke="#E39A00"/><path d="${starPath(0, 0, 2.6, 1.1)}" fill="#fff"/>`,
+  leaf: `<path d="M-4,3 Q-4,-4 4,-4 Q4,3 -4,3Z" fill="#3EC46B"/><path d="M-4,3 L2,-2" stroke="#fff" stroke-width=".8"/>`,
+  star: `<path d="${starPath(0, 0, 5, 2.2)}" fill="#FFD84A"/>`,
+  drop: `<path d="M0,-5 Q4,0 4,2 a4,4 0 0 1 -8,0 Q-4,0 0,-5Z" fill="#34B2F0"/>`
+};
+function robotSVG(id, o = {}){
+  const r = ROBOTS[id], c = r.color;
+  let s = `<ellipse cx="0" cy="0" rx="17" ry="5" fill="#1d3b12" opacity=".22" filter="url(#blur2)"/><g class="hover">`;
+  s += `<ellipse cx="0" cy="-5" rx="9" ry="3.4" fill="#9FF3FF" opacity=".85" filter="url(#blur2)"/>`;
+  s += `<path d="M-11,-11 h22 l-4,6 h-14z" fill="${shade(c, -.3)}"/>`;
+  s += `<rect x="-24" y="-31" width="7" height="15" rx="3.5" fill="${shade(c, -.12)}" transform="rotate(18 -20 -31)"/><circle cx="-24" cy="-17" r="4" fill="#DDE3EF"/>`;
+  s += o.wave ? `<g class="waveArm"><rect x="17" y="-46" width="7" height="15" rx="3.5" fill="${shade(c, -.12)}" transform="rotate(-30 20 -31)"/><circle cx="26" cy="-46" r="4" fill="#DDE3EF"/></g>`
+              : `<rect x="17" y="-31" width="7" height="15" rx="3.5" fill="${shade(c, -.12)}" transform="rotate(-18 20 -31)"/><circle cx="24" cy="-17" r="4" fill="#DDE3EF"/>`;
+  s += `<rect x="-15.5" y="-36" width="31" height="26" rx="11" fill="${c}"/><rect x="-15.5" y="-36" width="31" height="26" rx="11" fill="url(#sph)"/>`;
+  s += `<rect x="-8" y="-30" width="16" height="13" rx="4.5" fill="#fff" opacity=".9"/><g transform="translate(0,-23.5)">${EMB[r.emblem]}</g>`;
+  s += `<rect x="-4" y="-40" width="8" height="5" rx="2" fill="#B9C2D6"/>`;
+  s += `<rect x="-24" y="-58" width="7" height="13" rx="3.5" fill="${c}"/><rect x="17" y="-58" width="7" height="13" rx="3.5" fill="${c}"/>`;
+  s += `<rect x="-19.5" y="-67" width="39" height="29" rx="13" fill="#F3F6FC"/><rect x="-19.5" y="-67" width="39" height="29" rx="13" fill="url(#sph)"/>`;
+  s += `<rect x="-15" y="-63" width="30" height="21" rx="9" fill="#202552"/><path d="M-12,-60 q6,-2 12,0 l-1,3 q-5,-2 -10,0z" fill="#fff" opacity=".22"/>`;
+  s += o.happy ? `<path d="M-10,-52 q3,-5 6,0 M4,-52 q3,-5 6,0" stroke="#7CF7FF" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+               : `<g class="blink"><ellipse cx="-6.5" cy="-53" rx="2.8" ry="3.6" fill="#7CF7FF"/><ellipse cx="6.5" cy="-53" rx="2.8" ry="3.6" fill="#7CF7FF"/></g>`;
+  s += `<path d="M-3.5,-47.5 q3.5,3 7,0" stroke="#7CF7FF" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="-11" cy="-47" r="2" fill="#FF7E9A" opacity=".7"/><circle cx="11" cy="-47" r="2" fill="#FF7E9A" opacity=".7"/>`;
+  if (r.emblem === 'leaf') s += `<path d="M0,-67 v-6" stroke="#3C8A3F" stroke-width="2"/><path d="M0,-72 q-9,-2 -10,-9 q9,0 10,9z M0,-72 q8,-1 9,-8 q-8,0 -9,8z" fill="#4CBF58"/>`;
+  else s += `<path d="M0,-67 v-7" stroke="#9AA3B8" stroke-width="2"/><circle class="glowb" cx="0" cy="-76" r="3.6" fill="${c}" stroke="#fff" stroke-width="1"/>`;
+  if (r.emblem === 'star') s += `<ellipse cx="0" cy="-52" rx="27" ry="6" fill="none" stroke="#FFD84A" stroke-width="2.2" opacity=".9" transform="rotate(-12 0 -52)"/>`;
+  return s + '</g>';
+}
+const robotBox = (id, o = {}) => `<svg viewBox="-34 -86 68 92" aria-hidden="true">${robotSVG(id, o)}</svg>`;
+
 function worldSVG(kid, o = {}){
   let tiles = '';
-  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) tiles += tileSVG(i, j);
-  // plaza highlight
-  const pc = P(3, 2);
-  tiles += `<ellipse cx="${pc[0]}" cy="${pc[1]}" rx="22" ry="10" fill="#EAD2A2"/><ellipse cx="${pc[0]}" cy="${pc[1]}" rx="14" ry="6" fill="#F7E8C8"/>`;
-  const objs = kid.world.map(ob => ({ d: ob.i + ob.j, s: `<g class="obj" data-d="${ob.i + ob.j}" data-id="${ob.id}">${(R[ob.t] || R.tree)(...P(ob.i, ob.j))}</g>` })).sort((a, b) => a.d - b.d);
-  let hit = '';
-  if (o.build){
-    const used = new Set(kid.world.map(ob => ob.i + ',' + ob.j));
-    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++){
-      const k = i + ',' + j, cls = isPath(i, j) ? 'path' : used.has(k) ? 'used' : 'free';
-      hit += poly(diamond(...P(i, j), .94), 'transparent', `class="hit ${cls}" data-act="tile" data-i="${i}" data-j="${j}"`);
-    }
-  }
-  return `<svg class="world${o.build ? ' building' : ''}${o.armed ? ' armed' : ''}" id="${o.id || 'worldMain'}" viewBox="-10 0 476 452" role="img" aria-label="${esc(kid.name)}'s little world">
-    ${islandBase()}<g>${tiles}</g><g id="objLayer">${objs.map(x => x.s).join('')}</g><g id="fxLayer"></g>${hit}</svg>`;
+  for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) tiles += tileSVG(i, j);
+  const pc = P(9, 6);
+  tiles += `<ellipse cx="${pc[0]}" cy="${pc[1]}" rx="24" ry="11" fill="#EAD2A2"/><ellipse cx="${pc[0]}" cy="${pc[1]}" rx="15" ry="6.5" fill="#F7E8C8"/>`;
+  const today = (kid.learned || {})[dayKey()] || {};
+  const objs = [
+    ...kid.world.map(ob => ({ d: ob.i + ob.j, s: `<g class="obj" data-d="${ob.i + ob.j}" data-id="${ob.id}">${(R[ob.t] || R.tree)(...P(ob.i, ob.j))}</g>` })),
+    ...SCEN.map(ob => ({ d: ob.i + ob.j, s: `<g class="obj" data-d="${ob.i + ob.j}">${R[ob.t](...P(ob.i, ob.j), ob.text)}</g>` })),
+    ...Object.entries(ROBOTS).map(([id, r]) => { const [x, y] = P(...r.tile), done = today[id];
+      return { d: r.tile[0] + r.tile[1], s: `<g class="obj robot" data-d="${r.tile[0] + r.tile[1]}" transform="translate(${x},${y + 2}) scale(.6)">${robotSVG(id)}<g transform="translate(0,-96)" class="${done ? '' : 'hover'}"><circle r="10" fill="${done ? '#3EC46B' : '#FFC63A'}" stroke="#fff" stroke-width="2.4"/>${done ? '<path d="M-4.5,0 l3,3 l6,-6" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : '<text y="5" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="15" fill="#fff">!</text>'}</g></g>` }; })
+  ].sort((a, b) => a.d - b.d);
+  let hl = '';
+  if (o.armed){ const bl = blockedSet(kid); for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) if (buildable(TER(i, j)) && !bl.has(i + ',' + j)) hl += poly(diamond(...P(i, j), .9), 'rgba(255,230,120,.4)', 'class="freeT" stroke="#FFC63A" stroke-width="1.6" stroke-dasharray="5 4"'); }
+  const ar = o.tall ? 1.25 : .9, w = cam.w, h = w * ar;
+  return `<svg class="world${o.build ? ' building' : ''}" id="worldMain" viewBox="${f1(cam.cx - w / 2)} ${f1(cam.cy - h / 2)} ${w} ${f1(h)}" role="img" aria-label="${esc(kid.name)}'s world. Drag to look around, tap to walk.">
+    ${islandBase()}<g>${tiles}</g><g id="hlLayer" style="pointer-events:none">${hl}</g><g id="objLayer">${objs.map(x => x.s).join('')}</g><g id="fxLayer"></g></svg>`;
 }
 function worldBlock(kid, o = {}){
   const cloud = (t, l, w, d, cls = '') => `<div class="cloud ${cls}" style="top:${t}%;left:${l}%;width:${w}px;animation-duration:${d}s;animation-delay:-${(d * l / 100).toFixed(1)}s">${CLOUD}</div>`;
-  return `<div class="world-wrap">
-    <div class="sun"></div>
+  return `<div class="world-wrap${o.tall ? ' tall' : ''}">
+    <div class="skysun"></div>
     <svg class="rainbow" viewBox="0 0 200 100" aria-hidden="true">${['#FF8A8A', '#FFC07A', '#FFE680', '#A6E88C', '#8FD0FF', '#B9A2FF'].map((c, k) => `<path d="M${10 + k * 6},100 a${90 - k * 6},${90 - k * 6} 0 0 1 ${180 - k * 12},0" stroke="${c}" stroke-width="6" fill="none"/>`).join('')}</svg>
-    ${cloud(8, 10, 92, 70)}${cloud(30, 60, 70, 90)}${cloud(62, 30, 110, 80, 'front')}
+    ${cloud(8, 10, 92, 70)}${cloud(30, 60, 70, 90)}${cloud(70, 30, 110, 80, 'front')}
     ${worldSVG(kid, o)}
+    <div class="wctl"><button data-act="zoom" data-v="in" aria-label="Zoom in">+</button><button data-act="zoom" data-v="out" aria-label="Zoom out">−</button><button data-act="zoom" data-v="me" aria-label="Find me">${PIN_ICON}</button></div>
     ${o.hud || ''}
   </div>`;
 }
+const PIN_ICON = `<svg viewBox="0 0 20 20" width="18" height="18"><path d="M10,18 C5,12 4,9.5 4,7.5 a6,6 0 0 1 12,0 c0,2 -1,4.5 -6,10.5z" fill="#FF5A8C"/><circle cx="10" cy="7.5" r="2.4" fill="#fff"/></svg>`;
+
 const CLOUD = `<svg viewBox="0 0 120 60"><g fill="#fff"><circle cx="35" cy="36" r="20"/><circle cx="60" cy="26" r="24"/><circle cx="86" cy="36" r="18"/><rect x="18" y="34" width="86" height="22" rx="11"/></g><g fill="url(#sphCloud)"><circle cx="60" cy="26" r="24"/></g><rect x="18" y="44" width="86" height="12" rx="6" fill="#D9ECFA" opacity=".7"/></svg>`;
 
 // ---------- characters ----------
@@ -1024,111 +1247,286 @@ const CATALOG = [
   { id: 'bd-snowpuff', cat: 'Holiday', kind: 'buddy', v: 'snowpuff', name: 'Snowpuff', price: 120, holiday: 1, note: 'Snow seal' }
 ];
 const CAT = Object.fromEntries(CATALOG.map(c => [c.id, c]));
-const NAMES = { home: 'Cozy Cottage', restaurant: 'Pasta Palace', school: 'Bright School', boutique: 'Star Boutique', greenhouse: 'Greenhouse', hotel: 'Sparkle Hotel', bakery: 'Sugar Bakery', icecream: 'Scoop Shop', library: 'Story Library', toyshop: 'Toy Shop', gingerbread: 'Gingerbread House', tree: 'Apple Tree', pine: 'Pine Tree', snowpine: 'Snowy Pine', flowers: 'Flower Bed', fountain: 'Fountain', bench: 'Park Bench', lamp: 'Street Lamp', pond: 'Duck Pond' };
-const QUIZ = [
-  { q: 'Dishes pay 10 coins. You do them 3 days in a row. How many coins?', a: ['13', '30', '20'], ok: 1 },
-  { q: 'A tree costs 12 coins and you have 30. How many are left after you buy it?', a: ['18', '22', '42'], ok: 0 },
-  { q: 'Which way saves the most water when washing dishes?', a: ['Leave the tap running', 'Fill the sink, then turn the tap off', 'Use a new plate every time'], ok: 1 },
-  { q: 'You save 5 coins a day. How many days until you have 25?', a: ['4 days', '5 days', '20 days'], ok: 1 },
-  { q: 'Where do clean socks go?', a: ['Under the bed', 'In the drawer, matched in pairs', 'In the toy box'], ok: 1 },
-  { q: 'The Scoop Shop costs 85. You have 60. How many more coins do you need?', a: ['15', '25', '35'], ok: 1 }
-];
+const NAMES = { home: 'Cozy Cottage', restaurant: 'Pasta Palace', school: 'Bright School', boutique: 'Star Boutique', greenhouse: 'Greenhouse', hotel: 'Sparkle Hotel', bakery: 'Sugar Bakery', icecream: 'Scoop Shop', library: 'Story Library', toyshop: 'Toy Shop', gingerbread: 'Gingerbread House', tree: 'Apple Tree', pine: 'Pine Tree', snowpine: 'Snowy Pine', flowers: 'Flower Bed', fountain: 'Fountain', bench: 'Park Bench', lamp: 'Street Lamp', pond: 'Duck Pond', palm: 'Palm Tree', umbrella: 'Beach Umbrella', castle: 'Sand Castle', boat: 'Sailboat', rock: 'Rocks', telescope: 'Telescope', sign: 'Sign' };
 const SKINS = ['#FBDCC4', '#F6C9A8', '#E3A77F', '#C68458', '#9A5E3A', '#6E4127'];
 const HAIRS = ['#2B1B14', '#5B3A29', '#9A5B2E', '#E3B55A', '#E8604C', '#7B5CFA', '#FF8FB8'];
 const SHIRTS = ['#FF6F9F', '#34B2F0', '#3EC46B', '#FFC63A', '#7B5CFA', '#FF8A3D', '#FFFFFF'];
 const STYLES = ['bob', 'puffs', 'spiky', 'curly', 'long'];
+const LOOKS = [
+  { skin: '#F6C9A8', hair: '#5B3A29', hairStyle: 'puffs', shirt: '#FF6F9F', pants: '#4F6BD8', acc: 'bow' },
+  { skin: '#C68458', hair: '#2B1B14', hairStyle: 'curly', shirt: '#3EC46B', pants: '#3D3352', acc: 'cap' },
+  { skin: '#FBDCC4', hair: '#E3B55A', hairStyle: 'long', shirt: '#34B2F0', pants: '#5A4BB8', acc: 'none' },
+  { skin: '#9A5E3A', hair: '#2B1B14', hairStyle: 'spiky', shirt: '#FFC63A', pants: '#2E6FD8', acc: 'none' },
+  { skin: '#E3A77F', hair: '#E8604C', hairStyle: 'bob', shirt: '#7B5CFA', pants: '#3D3352', acc: 'glasses' },
+  { skin: '#6E4127', hair: '#2B1B14', hairStyle: 'puffs', shirt: '#FF8A3D', pants: '#4F6BD8', acc: 'flower' }
+];
+const STARTERS = ['mochi', 'pip', 'bao'];
+const bandOf = age => age <= 6 ? 'little' : age <= 9 ? 'middle' : 'big';
+const BANDS = { little: 'ages 4–6', middle: 'ages 7–9', big: 'ages 10–12' };
 
-function seed(){
+// Lessons: every robot teaches something different at each age band.
+const L = (t, q, a, ok, why) => ({ t, q, a, ok, why });
+const LESSONS = {
+  bolt: {
+    little: [L('Counting on is easy! Start at the big number and count up. 3 apples and 1 more: 3… 4!', 'You have 2 stars and find 2 more. How many stars now?', ['3', '4', '5'], 1, '2… 3, 4. Four stars!'),
+             L('Shapes are everywhere. A triangle has 3 sides. A square has 4 sides, all the same length.', 'How many sides does a square have?', ['3', '4', '5'], 1, 'A square has 4 equal sides.')],
+    middle: [L('Multiplying is fast adding. 3 × 4 means 3 groups of 4: 4 + 4 + 4 = 12.', 'What is 5 × 3?', ['8', '15', '53'], 1, '3 + 3 + 3 + 3 + 3 = 15.'),
+             L('To add 29 + 6, make a ten first: 29 + 1 = 30, then add the 5 that are left: 35.', 'What is 48 + 7?', ['55', '54', '57'], 0, '48 + 2 = 50, then 5 more is 55.')],
+    big: [L('A fraction is part of a whole. 3/4 of a pizza means 3 of 4 equal slices.', 'What is 1/2 of 18?', ['6', '9', '12'], 1, 'Split 18 into 2 equal parts: 9 each.'),
+          L('Percent means "out of 100". 25% is 25 out of 100, which is one quarter.', 'What is 10% of 50?', ['5', '10', '15'], 0, '10% is one tenth. 50 ÷ 10 = 5.')]
+  },
+  lexi: {
+    little: [L('Words that rhyme end with the same sound: cat, hat, bat.', 'Which word rhymes with "dog"?', ['log', 'cup', 'sun'], 0, 'Dog and log both end in "og".'),
+             L('A sentence starts with a capital letter and ends with a period.', 'Which one is a sentence?', ['the cat', 'The cat naps.', 'cat naps'], 1, 'It has a capital letter and a period.')],
+    middle: [L('A noun is a person, place or thing. A verb is an action word, like run or sing.', 'Which word is a verb?', ['jump', 'table', 'blue'], 0, 'You can jump. That makes it an action.'),
+             L('Synonyms are words that mean almost the same thing. Big and huge are synonyms.', 'Which is a synonym for "happy"?', ['sad', 'glad', 'tired'], 1, 'Glad means happy.')],
+    big: [L('A metaphor says one thing IS another to paint a picture: "The classroom was a zoo." A simile uses "like" or "as".', 'Which one is a metaphor?', ['Her smile was sunshine.', 'She smiled a lot.', 'She smiled like the sun.'], 0, 'It says her smile WAS sunshine. No "like" or "as".'),
+          L('Prefixes change what a word means. "Un-" means not, so unhappy means not happy. "Re-" means again.', 'What does "rewrite" mean?', ['Write badly', 'Write again', 'Not write'], 1, 'Re- means again.')]
+  },
+  kindy: {
+    little: [L('When you feel angry, try 3 big balloon breaths. Breathe in slowly, then let it out like a balloon.', 'What can help when you feel angry?', ['Big slow breaths', 'Yelling', 'Throwing toys'], 0, 'Slow breaths help your body calm down.'),
+             L('Sharing makes friends feel happy and cared for.', 'Your friend has no crayons. What can you do?', ['Share yours', 'Hide yours', 'Laugh'], 0, 'Sharing is kind!')],
+    middle: [L('Empathy means imagining how someone else feels, then acting kindly.', 'A classmate drops their lunch. What shows empathy?', ['Help pick it up', 'Walk away', 'Laugh'], 0, 'Helping shows you care how they feel.'),
+             L('A good sorry says what you did and how you will fix it.', 'Which is the best sorry?', ['Sorry, I guess.', 'Sorry I broke your tower. Can I help rebuild it?', 'Whatever.'], 1, 'It names what happened and offers to fix it.')],
+    big: [L('A growth mindset means mistakes help your brain grow. Hard things get easier with practice.', 'You got a hard problem wrong. A growth mindset says…', ["I'm just bad at this.", 'I can learn from this and try again.', "I'll quit."], 1, 'Mistakes are how we learn.'),
+          L('Online, be kind and keep private things private, like your address or school.', 'Someone online asks where you live. What do you do?', ['Tell them', "Don't share it and tell a parent", 'Send a photo of your house'], 1, 'Never share private info. Tell a grown-up.')]
+  },
+  penny: {
+    little: [L('Saving means keeping some coins for later, so you can get something bigger.', 'A toy costs 5 coins. You have 3. What can you do?', ['Save more coins', 'Cry', 'Take it'], 0, 'Save 2 more and it is yours!'),
+             L('A need is something you must have, like food or water. A want is nice to have, like a toy.', 'Which one is a need?', ['A water bottle', 'A sticker', 'A balloon'], 0, 'We all need water.')],
+    middle: [L('A budget is a plan for your coins: some to spend and some to save.', 'You earn 20 coins and save half. How many do you save?', ['5', '10', '15'], 1, 'Half of 20 is 10.'),
+             L('On sale means a lower price. A 12-coin treat that is 3 off costs 9.', 'A 15-coin hat is 5 off. What does it cost?', ['10', '20', '5'], 0, '15 − 5 = 10 coins.')],
+    big: [L('Interest is extra money a bank adds when you save.', 'You save 100 and earn 10% interest. How much after a year?', ['101', '110', '200'], 1, '10% of 100 is 10, so 110.'),
+          L('Compare unit prices to find the better deal: divide the price by how many you get.', 'Which is the better deal?', ['3 apples for 6 coins', '5 apples for 8 coins', 'They are the same'], 1, '6 ÷ 3 = 2 each. 8 ÷ 5 = 1.6 each.')]
+  },
+  sprout: {
+    little: [L('Plants need sun, water and air to grow, just like you need food!', 'What do plants need to grow?', ['Candy', 'Sun and water', 'Toys'], 1, 'Sun and water help plants grow.'),
+             L('A caterpillar wraps up in a chrysalis and comes out as a butterfly.', 'What does a caterpillar become?', ['A bird', 'A butterfly', 'A frog'], 1, 'Butterfly! It is called metamorphosis.')],
+    middle: [L('Leaves make food from sunlight. That is called photosynthesis.', 'What do leaves use to make food?', ['Sunlight', 'Moonlight', 'Rocks'], 0, 'Leaves catch sunlight to make food.'),
+             L('Bees carry pollen from flower to flower. That helps fruit and seeds grow.', 'How do bees help plants?', ['They eat leaves', 'They carry pollen', 'They dig holes'], 1, 'Pollen moves from flower to flower.')],
+    big: [L('In a food chain, energy moves from plants to plant-eaters to meat-eaters.', 'In grass → rabbit → fox, what is the rabbit?', ['A producer', 'A herbivore', 'A decomposer'], 1, 'Rabbits eat plants, so they are herbivores.'),
+          L('Trees take in carbon dioxide and give out oxygen that we breathe.', 'Which gas do trees give out?', ['Oxygen', 'Carbon dioxide', 'Helium'], 0, 'Trees make the oxygen we breathe.')]
+  },
+  cosmo: {
+    little: [L('The Sun is a star! It is so close that it gives us light and warmth.', 'What is the Sun?', ['A planet', 'A star', 'A moon'], 1, 'The Sun is our closest star.'),
+             L('We live on planet Earth. It is covered in land and lots of water.', 'Which planet do we live on?', ['Mars', 'Earth', 'Jupiter'], 1, 'Earth is home!')],
+    middle: [L('Earth spins around once every day. When your side faces the Sun, it is day.', 'What makes day and night?', ['Earth spinning', 'Clouds', 'The Moon turning off'], 0, 'Earth spins, so the Sun seems to rise and set.'),
+             L('There are 8 planets in our solar system. Jupiter is the biggest one.', 'Which planet is the biggest?', ['Earth', 'Jupiter', 'Mars'], 1, 'Jupiter could fit over 1,000 Earths!')],
+    big: [L('Earth takes about 365 days to travel all the way around the Sun.', 'How long does Earth take to go around the Sun?', ['1 day', '1 month', '1 year'], 2, 'One trip around the Sun is one year.'),
+          L('Light is super fast, but the Sun is far away. Sunlight takes about 8 minutes to reach us.', 'How long does sunlight take to reach Earth?', ['8 seconds', '8 minutes', '8 days'], 1, 'About 8 minutes.')]
+  },
+  wave: {
+    little: [L('Fish breathe underwater with special parts called gills.', 'What do fish use to breathe?', ['Gills', 'Noses', 'Wings'], 0, 'Gills take air out of the water.'),
+             L('Most of our planet is covered by the ocean!', 'What covers most of Earth?', ['Sand', 'Water', 'Ice cream'], 1, 'Water covers most of Earth.')],
+    middle: [L('Water can be a solid (ice), a liquid (water) or a gas (steam).', 'What is ice?', ['Water as a solid', 'Water as a gas', 'Not water'], 0, 'Ice is frozen, solid water.'),
+             L('Whales live in the sea but they are mammals. They breathe air through a blowhole.', 'How do whales breathe?', ['With gills', 'Air through a blowhole', "They don't"], 1, 'They swim up to breathe air.')],
+    big: [L('The water cycle: water evaporates into vapor, forms clouds (condensation), then falls as rain (precipitation).', 'What is it called when water turns into vapor?', ['Precipitation', 'Evaporation', 'Erosion'], 1, 'Evaporation turns liquid into vapor.'),
+          L('Ocean tides rise and fall mostly because of the Moon’s gravity pulling on the water.', 'What mainly causes tides?', ['Wind', 'The Moon', 'Fish'], 1, 'The Moon’s pull makes the tides.')]
+  }
+};
+const STICKERS = {
+  heart: `<path d="M32,56 C10,40 4,28 10,18 C16,8 28,10 32,20 C36,10 48,8 54,18 C60,28 54,40 32,56Z" fill="#FF5A8C"/><path d="M32,56 C10,40 4,28 10,18 C16,8 28,10 32,20 C36,10 48,8 54,18 C60,28 54,40 32,56Z" fill="url(#sph)"/>`,
+  star: `<path d="${starPath(32, 34, 27, 12)}" fill="#FFC63A" stroke="#E39A00" stroke-width="2" stroke-linejoin="round"/><path d="${starPath(32, 34, 27, 12)}" fill="url(#sph)"/><circle cx="25" cy="34" r="2.6" fill="#2B2550"/><circle cx="39" cy="34" r="2.6" fill="#2B2550"/><path d="M27,40 q5,4 10,0" stroke="#2B2550" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+  trophy: `<path d="M18,10 h28 v12 a14,14 0 0 1 -28,0z" fill="#FFC63A"/><path d="M18,14 h-7 a7,8 0 0 0 9,10 M46,14 h7 a7,8 0 0 1 -9,10" stroke="#E39A00" stroke-width="3.4" fill="none"/><rect x="28" y="34" width="8" height="10" fill="#E39A00"/><rect x="20" y="44" width="24" height="9" rx="3" fill="#7B5CFA"/><path d="M18,10 h28 v12 a14,14 0 0 1 -28,0z" fill="url(#sph)"/>`,
+  rainbow: `${['#FF8A8A', '#FFC07A', '#FFE680', '#A6E88C', '#8FD0FF', '#B9A2FF'].map((c, k) => `<path d="M${6 + k * 4},48 a${26 - k * 4},${26 - k * 4} 0 0 1 ${52 - k * 8},0" stroke="${c}" stroke-width="4.4" fill="none"/>`).join('')}<circle cx="10" cy="48" r="7" fill="#fff"/><circle cx="17" cy="50" r="6" fill="#fff"/><circle cx="54" cy="48" r="7" fill="#fff"/><circle cx="47" cy="50" r="6" fill="#fff"/>`,
+  sun: `${[...Array(10)].map((_, k) => `<path d="M32,32 L${f1(32 + Math.cos(k * .628) * 29)},${f1(32 + Math.sin(k * .628) * 29)}" stroke="#FFC63A" stroke-width="5" stroke-linecap="round"/>`).join('')}<circle cx="32" cy="32" r="17" fill="#FFD84A"/><circle cx="32" cy="32" r="17" fill="url(#sph)"/><circle cx="26" cy="30" r="2.4" fill="#2B2550"/><circle cx="38" cy="30" r="2.4" fill="#2B2550"/><path d="M25,37 q7,6 14,0" stroke="#2B2550" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="22" cy="36" r="2.6" fill="#FF8FA3" opacity=".7"/><circle cx="42" cy="36" r="2.6" fill="#FF8FA3" opacity=".7"/>`,
+  party: `<path d="M10,56 L22,18 L48,44Z" fill="#7B5CFA"/><path d="M14,44 L40,36 M17,34 L30,30" stroke="#FFC63A" stroke-width="3"/><circle cx="44" cy="14" r="3.4" fill="#FF5A8C"/><circle cx="54" cy="26" r="3" fill="#3EC46B"/><circle cx="36" cy="8" r="2.4" fill="#34B2F0"/><path d="M48,8 l4,-4 M56,16 l5,-2 M52,36 l6,1" stroke="#FFC63A" stroke-width="3" stroke-linecap="round"/>`
+};
+const stickerBox = (k, w = 64) => `<svg viewBox="0 0 64 64" width="${w}" height="${w}" aria-label="${k} sticker">${STICKERS[k] || ''}</svg>`;
+const KID_SAYS = ['On it!', 'All done!', 'Love you!', 'Can I have more time?', 'Thank you!', 'Come see my world!'];
+
+function makeKid({ name, age, look = 0, buddy = 'mochi', pin = '', char }){
+  const id = 'k' + uid();
+  const ch = char ? { ...char } : { ...LOOKS[look] };
+  return { id, name, age, pin, coins: 20, strength: 80, streak: 0, streakDay: '', buddy, buddies: [buddy], char: ch,
+    outfits: [...new Set(['none', ch.acc])], learned: {},
+    world: [{ t: 'home', i: 8, j: 5 }, { t: 'restaurant', i: 10, j: 5 }, { t: 'school', i: 8, j: 7 }, { t: 'tree', i: 6, j: 5 }, { t: 'flowers', i: 7, j: 5 }].map(o => ({ id: uid(), ...o })),
+    inv: [{ id: uid(), t: 'tree' }], spent: {}, lost: {} };
+}
+function starterTasks(kidId){
+  return [['Make your bed', 'bed', 5, 1, '08:00', 'home'], ['Brush teeth', 'tooth', 3, 1, '20:00', 'home'], ['Put toys away', 'toy', 6, 2, '18:00', 'home'], ['Help with the dishes', 'dish', 8, 2, '19:00', 'restaurant']]
+    .map(([title, icon, coins, penalty, due, act]) => ({ id: uid(), kid: kidId, title, icon, coins, penalty, due, repeat: 'daily', days: [], act, status: 'todo' }));
+}
+const SETTINGS = () => ({ spendOn: true, spendLimit: 150, bigOn: true, bigAt: 100, lossCap: 10, grace: 15, screenOn: false, from: '07:00', to: '20:30', friends: false, publicWorld: false });
+function newFamily(parentName, email){
+  return { v: 2, demo: false, parentName, email, day: dayKey(), tab: 'home', ptab: 'family', kids: {}, order: [], tasks: [], hist: [], requests: [], cele: {}, nudges: {}, msgs: [], settings: SETTINGS() };
+}
+function addKidTo(F, kid){ F.kids[kid.id] = kid; F.order.push(kid.id); F.cele[kid.id] = []; F.nudges[kid.id] = []; }
+function seedDemo(){
   const now = Date.now(), D = 864e5;
-  const w = arr => arr.map(o => ({ id: uid(), ...o }));
-  const ava = { id: 'ava', name: 'Ava', age: 8, coins: 132, strength: 82, streak: 6, streakDay: '', buddy: 'mochi', buddies: ['mochi'],
-    char: { skin: '#F6C9A8', hair: '#5B3A29', hairStyle: 'puffs', shirt: '#FF6F9F', pants: '#4F6BD8', acc: 'bow' }, outfits: ['none', 'bow', 'cap'],
-    world: w([{ t: 'home', i: 2, j: 1 }, { t: 'restaurant', i: 4, j: 1 }, { t: 'school', i: 2, j: 3 }, { t: 'boutique', i: 4, j: 3 }, { t: 'tree', i: 0, j: 0 }, { t: 'tree', i: 5, j: 1 }, { t: 'pine', i: 0, j: 5 }, { t: 'flowers', i: 1, j: 1 }, { t: 'fountain', i: 5, j: 4 }, { t: 'lamp', i: 1, j: 3 }, { t: 'pond', i: 0, j: 3 }, { t: 'pine', i: 5, j: 0 }]),
-    inv: w([{ t: 'bench' }, { t: 'flowers' }]), spent: {}, lost: {}, quiz: {} };
-  const leo = { id: 'leo', name: 'Leo', age: 6, coins: 34, strength: 46, streak: 2, streakDay: '', buddy: 'pip', buddies: ['pip'],
-    char: { skin: '#C68458', hair: '#2B1B14', hairStyle: 'curly', shirt: '#3EC46B', pants: '#3D3352', acc: 'cap' }, outfits: ['none', 'cap'],
-    world: w([{ t: 'home', i: 2, j: 1 }, { t: 'restaurant', i: 4, j: 1 }, { t: 'school', i: 2, j: 3 }, { t: 'tree', i: 0, j: 0 }, { t: 'tree', i: 5, j: 5 }, { t: 'flowers', i: 4, j: 3 }, { t: 'tree', i: 1, j: 4 }]),
-    inv: [], spent: {}, lost: {}, quiz: {} };
-  const tasks = [
+  const F = newFamily('Parent', 'demo@chorebuddies.app'); F.demo = true; F.ptab = 'inbox';
+  const ava = makeKid({ name: 'Ava', age: 8, look: 0, buddy: 'mochi' }); ava.id = 'ava';
+  Object.assign(ava, { coins: 132, strength: 82, streak: 6, outfits: ['none', 'bow', 'cap'],
+    world: [{ t: 'home', i: 8, j: 5 }, { t: 'restaurant', i: 10, j: 5 }, { t: 'school', i: 8, j: 7 }, { t: 'boutique', i: 10, j: 7 }, { t: 'tree', i: 6, j: 5 }, { t: 'tree', i: 12, j: 8 }, { t: 'pine', i: 13, j: 4 }, { t: 'flowers', i: 7, j: 5 }, { t: 'fountain', i: 10, j: 9 }, { t: 'lamp', i: 11, j: 7 }, { t: 'pond', i: 6, j: 10 }, { t: 'pine', i: 12, j: 10 }, { t: 'flowers', i: 6, j: 7 }].map(o => ({ id: uid(), ...o })),
+    inv: [{ id: uid(), t: 'bench' }, { id: uid(), t: 'flowers' }] });
+  const leo = makeKid({ name: 'Leo', age: 6, look: 1, buddy: 'pip' }); leo.id = 'leo';
+  Object.assign(leo, { coins: 34, strength: 46, streak: 2,
+    world: [{ t: 'home', i: 8, j: 5 }, { t: 'restaurant', i: 10, j: 5 }, { t: 'school', i: 8, j: 7 }, { t: 'tree', i: 6, j: 5 }, { t: 'tree', i: 12, j: 8 }, { t: 'flowers', i: 10, j: 7 }, { t: 'tree', i: 6, j: 9 }].map(o => ({ id: uid(), ...o })), inv: [] });
+  addKidTo(F, ava); addKidTo(F, leo);
+  F.tasks = [
     { id: uid(), kid: 'ava', title: 'Wash the dishes', icon: 'dish', coins: 10, penalty: 3, due: '18:30', repeat: 'daily', days: [], act: 'restaurant', status: 'todo' },
     { id: uid(), kid: 'ava', title: 'Finish homework', icon: 'book', coins: 15, penalty: 5, due: '16:30', repeat: 'weekdays', days: [], act: 'school', status: 'waiting', note: 'I did all 10 math problems!', doneAt: now - 18 * 6e4 },
     { id: uid(), kid: 'ava', title: 'Tidy your closet', icon: 'hanger', coins: 12, penalty: 3, due: '19:30', repeat: 'custom', days: [DOW, (DOW + 3) % 7], act: 'boutique', status: 'todo' },
-    { id: uid(), kid: 'ava', title: 'Make your bed', icon: 'bed', coins: 5, penalty: 2, due: '08:00', repeat: 'daily', days: [], act: 'home', status: 'approved', stars: 4 },
+    { id: uid(), kid: 'ava', title: 'Make your bed', icon: 'bed', coins: 5, penalty: 2, due: '08:00', repeat: 'daily', days: [], act: 'home', status: 'approved', stars: 4, paid: 5 },
     { id: uid(), kid: 'leo', title: 'Put toys away', icon: 'toy', coins: 8, penalty: 2, due: '07:30', repeat: 'daily', days: [], act: 'home', status: 'todo' },
     { id: uid(), kid: 'leo', title: 'Water the plants', icon: 'plant', coins: 6, penalty: 2, due: '17:00', repeat: 'daily', days: [], act: 'home', status: 'todo' },
     { id: uid(), kid: 'leo', title: 'Brush teeth', icon: 'tooth', coins: 3, penalty: 1, due: '20:00', repeat: 'daily', days: [], act: 'home', status: 'todo' }
   ];
-  const hist = [];
-  [[22, 0], [18, 12], [27, 0], [15, 20], [25, 0], [20, 8]].forEach(([e, s], k) => {
-    const ts = now - (6 - k) * D;
-    hist.push({ kid: 'ava', kind: 'earn', amt: e, label: 'Quests approved', ts });
-    if (s) hist.push({ kid: 'ava', kind: 'spend', amt: s, label: s === 12 ? 'Bought Apple Tree' : s === 20 ? 'Bought Big Bow' : 'Bought Flower Bed', ts: ts + 3600e3 });
-  });
-  [[9, 0], [0, 0], [14, 0], [6, 12], [11, 0], [8, 0]].forEach(([e, s], k) => {
-    const ts = now - (6 - k) * D;
-    if (e) hist.push({ kid: 'leo', kind: 'earn', amt: e, label: 'Quests approved', ts });
-    if (s) hist.push({ kid: 'leo', kind: 'spend', amt: s, label: 'Bought Apple Tree', ts: ts + 3600e3 });
-  });
-  hist.push({ kid: 'ava', kind: 'earn', amt: 5, label: 'Make your bed ★★★★', ts: now - 9 * 3600e3 });
-  return { v: 1, day: dayKey(), mode: 'kid', tab: 'home', ptab: 'inbox', active: 'ava', parentName: 'Parent', kids: { ava, leo }, order: ['ava', 'leo'], tasks, hist, requests: [], cele: { ava: [], leo: [] }, nudges: { ava: [], leo: [] },
-    settings: { spendOn: true, spendLimit: 150, bigOn: true, bigAt: 100, lossCap: 10, grace: 15, screenOn: false, from: '07:00', to: '20:30', friends: false, publicWorld: false } };
+  [[22, 0], [18, 12], [27, 0], [15, 20], [25, 0], [20, 8]].forEach(([e, s], k) => { const ts = now - (6 - k) * D; F.hist.push({ kid: 'ava', kind: 'earn', amt: e, label: 'Quests approved', ts }); if (s) F.hist.push({ kid: 'ava', kind: 'spend', amt: s, label: s === 12 ? 'Bought Apple Tree' : s === 20 ? 'Bought Big Bow' : 'Bought Flower Bed', ts: ts + 3600e3 }); });
+  [[9, 0], [0, 0], [14, 0], [6, 12], [11, 0], [8, 0]].forEach(([e, s], k) => { const ts = now - (6 - k) * D; if (e) F.hist.push({ kid: 'leo', kind: 'earn', amt: e, label: 'Quests approved', ts }); if (s) F.hist.push({ kid: 'leo', kind: 'spend', amt: s, label: 'Bought Apple Tree', ts: ts + 3600e3 }); });
+  F.hist.push({ kid: 'ava', kind: 'earn', amt: 5, label: 'Make your bed ★★★★', ts: now - 9 * 3600e3 });
+  F.msgs = [
+    { id: uid(), kid: 'ava', from: 'parent', text: 'Great job finishing homework early yesterday!', ts: now - 26 * 3600e3, read: true },
+    { id: uid(), kid: 'ava', from: 'kid', sticker: 'heart', ts: now - 25.9 * 3600e3, read: true },
+    { id: uid(), kid: 'ava', from: 'kid', text: 'Can I have more time?', ts: now - 25.8 * 3600e3, read: true },
+    { id: uid(), kid: 'ava', from: 'parent', text: 'Here is a little gift for helping with groceries. Dinner is at 6:30!', gift: 5, ts: now - 12 * 6e4, read: false },
+    { id: uid(), kid: 'leo', from: 'parent', sticker: 'star', ts: now - 3 * 3600e3, read: true },
+    { id: uid(), kid: 'leo', from: 'kid', text: 'Come see my world!', ts: now - 40 * 6e4, read: false }
+  ];
+  return F;
 }
-const KEY = 'chorebuddies.v1';
-let S;
-try { S = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { S = null; }
-if (!S || S.v !== 1) S = seed();
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage full or blocked: prototype keeps running in memory */ } }
-// a new day: repeating quests reset
-if (S.day !== dayKey()){
-  S.tasks.forEach(t => { if (t.status === 'approved' || t.status === 'missed') { if (t.repeat === 'once') t.gone = true; else { t.status = 'todo'; delete t.stars; delete t.reminded; delete t.note; delete t.photo; } } });
+
+// ---------- storage: accounts on this device ----------
+const DBKEY = 'chorebuddies.v2';
+let DB;
+try { DB = JSON.parse(localStorage.getItem(DBKEY) || 'null'); } catch (e) { DB = null; }
+if (!DB || !DB.accounts) DB = { accounts: {}, current: null, session: null };
+let S = DB.current && DB.accounts[DB.current] ? DB.accounts[DB.current].fam : null;
+function save(){ if (S && DB.current && DB.accounts[DB.current]) DB.accounts[DB.current].fam = S; try { localStorage.setItem(DBKEY, JSON.stringify(DB)); } catch (e) { /* storage blocked or full: keep running in memory */ } }
+async function hashPw(pw, salt){
+  try {
+    const enc = new TextEncoder(), key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256);
+    return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { let h = 7; for (const ch of salt + '|' + pw) h = (h * 31 + ch.charCodeAt(0)) | 0; return 'f' + h; }
+}
+function newDay(){
+  if (!S || S.day === dayKey()) return;
+  S.tasks.forEach(t => { if (t.status === 'approved' || t.status === 'missed'){ if (t.repeat === 'once') t.gone = true; else { t.status = 'todo'; delete t.stars; delete t.reminded; delete t.note; delete t.photo; delete t.paid; } } });
   S.tasks = S.tasks.filter(t => !t.gone); S.day = dayKey(); save();
 }
-const ui = { sheet: null, done: null, buildSel: null, cat: 'Buildings', pk: 'all', appr: {}, draft: null, firstNudge: false, quizPick: null };
+newDay();
+
+const ui = { screen: 'welcome', sheet: null, done: null, buildSel: null, cat: 'Buildings', pk: 'all', appr: {}, draft: null, firstNudge: false, chatKid: null, gift: 0, kd: null, pin: '', lesson: null, err: '' };
+const role = () => DB.session && DB.session.role;
+const isKid = () => role() === 'kid';
 const kidOf = id => S.kids[id];
-const K = () => S.kids[S.active];
+const K = () => (S && (S.kids[DB.session && DB.session.kid] || S.kids[S.order[0]])) || null;
 const todays = kid => S.tasks.filter(t => t.kid === kid && (t.status !== 'todo' || appliesToday(t)));
 function appliesToday(t){ if (t.repeat === 'weekdays') return DOW >= 1 && DOW <= 5; if (t.repeat === 'weekly' || t.repeat === 'custom') return (t.days || []).includes(DOW); return true; }
 const overdue = t => t.status === 'todo' && Date.now() > dueTs(t);
 const placed = (kid, t) => kid.world.some(o => o.t === t);
 const owns = (kid, t) => placed(kid, t) || kid.inv.some(o => o.t === t);
 const repeatTxt = t => t.repeat === 'once' ? 'One time' : t.repeat === 'daily' ? 'Every day' : t.repeat === 'weekdays' ? 'Weekdays' : (t.days || []).slice().sort().map(d => DAYN[d]).join(', ') || 'Pick days';
-const pname = () => S.parentName || 'Parent';
+const pname = () => (S && S.parentName) || 'Parent';
+const doy = () => Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
+const learnedToday = kid => (kid.learned || (kid.learned = {}))[dayKey()] || {};
+const unreadFor = (kidId, from) => S.msgs.filter(m => m.kid === kidId && m.from === from && !m.read).length;
+const parentAv = (sz = 42) => `<span class="pav" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz * .42)}px">${esc(pname().trim().slice(0, 1).toUpperCase() || 'P')}</span>`;
 
 // =====================================================================
 //  RENDER
 // =====================================================================
 const NAVI = {
   home: `<svg viewBox="0 0 26 26"><path d="M4,12 L13,4 L22,12 V22 H4Z" fill="#FFC63A"/><path d="M4,12 L13,4 L22,12" stroke="#FF7466" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"/><rect x="10.5" y="15" width="5" height="7" rx="1.5" fill="#fff"/></svg>`,
+  explore: `<svg viewBox="0 0 26 26"><path d="M3,7 l6,-3 l8,3 l6,-3 v15 l-6,3 l-8,-3 l-6,3z" fill="#7FD3F7"/><path d="M9,4 v15 M17,7 v15" stroke="#fff" stroke-width="1.6"/><path d="M13,17 C10,13 9.5,11.5 9.5,10 a3.5,3.5 0 0 1 7,0 c0,1.5 -.5,3 -3.5,7z" fill="#FF5A8C"/><circle cx="13" cy="10" r="1.4" fill="#fff"/></svg>`,
   build: `<svg viewBox="0 0 26 26"><path d="M4,16 L13,11 L22,16 L13,21Z" fill="#3EC46B"/><path d="M4,16 v3 l9,5 v-3z" fill="#23994C"/><path d="M22,16 v3 l-9,5 v-3z" fill="#2EAE5A"/><path d="M13,3 v8 M9.5,6.5 h7" stroke="#7B5CFA" stroke-width="3" stroke-linecap="round"/></svg>`,
   market: `<svg viewBox="0 0 26 26"><rect x="4" y="10" width="18" height="13" rx="3" fill="#34B2F0"/><path d="M3,10 l2,-6 h16 l2,6 q-2.5,3 -5,0 q-2.5,3 -5,0 q-2.5,3 -5,0 q-2.5,3 -5,0z" fill="#FF5A8C"/><rect x="10" y="15" width="6" height="8" rx="1.5" fill="#fff"/></svg>`,
   buddies: `<svg viewBox="0 0 26 26"><ellipse cx="13" cy="16" rx="9" ry="8" fill="#FFB3C7"/><ellipse cx="9" cy="6" rx="2.6" ry="5.5" fill="#FFB3C7"/><ellipse cx="17" cy="6" rx="2.6" ry="5.5" fill="#FFB3C7"/><circle cx="10" cy="15" r="1.5" fill="#2B2550"/><circle cx="16" cy="15" r="1.5" fill="#2B2550"/></svg>`,
   inbox: `<svg viewBox="0 0 26 26"><path d="M3,14 l3,-9 h14 l3,9 v7 a2,2 0 0 1 -2,2 h-16 a2,2 0 0 1 -2,-2z" fill="#7B5CFA"/><path d="M3,14 h6 l1.5,3 h5 l1.5,-3 h6" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>`,
   tasks: `<svg viewBox="0 0 26 26"><rect x="4" y="3" width="18" height="21" rx="4" fill="#3EC46B"/><path d="M8,10 l2,2 l4,-4 M8,17 l2,2 l4,-4" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M16,11 h3 M16,18 h3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`,
+  chat: `<svg viewBox="0 0 26 26"><path d="M4,5 h18 a2,2 0 0 1 2,2 v10 a2,2 0 0 1 -2,2 h-10 l-5,4 v-4 h-3 a2,2 0 0 1 -2,-2 v-10 a2,2 0 0 1 2,-2z" fill="#FF5A8C"/><circle cx="9" cy="12" r="1.6" fill="#fff"/><circle cx="13" cy="12" r="1.6" fill="#fff"/><circle cx="17" cy="12" r="1.6" fill="#fff"/></svg>`,
   family: `<svg viewBox="0 0 26 26"><rect x="3" y="13" width="5" height="10" rx="2" fill="#FFC63A"/><rect x="10.5" y="7" width="5" height="16" rx="2" fill="#FF5A8C"/><rect x="18" y="3" width="5" height="20" rx="2" fill="#34B2F0"/></svg>`,
   controls: `<svg viewBox="0 0 26 26"><path d="M5,7 h16 M5,13 h16 M5,19 h16" stroke="#C3CAE0" stroke-width="3" stroke-linecap="round"/><circle cx="16" cy="7" r="3.4" fill="#7B5CFA"/><circle cx="9" cy="13" r="3.4" fill="#FF5A8C"/><circle cx="18" cy="19" r="3.4" fill="#3EC46B"/></svg>`
 };
-const KTABS = [['home', 'My World', '#FFE38A'], ['build', 'Build', '#C9F2D6'], ['market', 'Market', '#FFD6E4'], ['buddies', 'Buddies', '#FFE0EA']];
-const PTABS = [['inbox', 'Inbox', '#E4DCFF'], ['tasks', 'Tasks', '#C9F2D6'], ['family', 'Family', '#FFE38A'], ['controls', 'Controls', '#DDEBFF']];
+const MAIL = `<svg viewBox="0 0 30 30" width="30" height="30"><rect x="3" y="8" width="24" height="17" rx="4" fill="#FF5A8C"/><path d="M4,10 l11,8 l11,-8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linejoin="round"/><rect x="3" y="8" width="24" height="17" rx="4" fill="url(#sph)"/></svg>`;
+const KTABS = [['home', 'My World', '#FFE38A'], ['explore', 'Explore', '#CDEFFF'], ['build', 'Build', '#C9F2D6'], ['market', 'Market', '#FFD6E4'], ['buddies', 'Buddies', '#FFE0EA']];
+const PTABS = [['inbox', 'Inbox', '#E4DCFF'], ['tasks', 'Tasks', '#C9F2D6'], ['chat', 'Chat', '#FFD6E4'], ['family', 'Family', '#FFE38A'], ['controls', 'Controls', '#DDEBFF']];
 
 function render(){
-  const kidMode = S.mode === 'kid';
-  $('#mKid').setAttribute('aria-pressed', kidMode); $('#mParent').setAttribute('aria-pressed', !kidMode);
-  const kid = K();
+  const v = $('#view'), tabs = $('#tabs');
+  if (!S){ $('#who').innerHTML = ''; $('#strip').innerHTML = ''; tabs.hidden = true; v.innerHTML = authView(); save(); return; }
+  if (!role() || (isKid() && !S.kids[DB.session.kid])){ DB.session = null; $('#who').innerHTML = ''; $('#strip').innerHTML = ''; tabs.hidden = true; v.innerHTML = whoView(); save(); return; }
+  tabs.hidden = false;
+  const kidMode = isKid(), kid = K();
+  $('#who').innerHTML = `<button class="profile" data-act="switchProfile" aria-label="Switch profile">${kidMode ? `<span class="avatar mini">${headBox(kid.char)}</span>` : parentAv(30)}<span>Switch</span></button>`;
   $('#strip').innerHTML = kidMode ? `<div class="kidstrip">
-      <button class="avatar" data-act="switchKid" aria-label="Switch kid (now ${esc(kid.name)})">${headBox(kid.char)}</button>
-      <button class="kidname" data-act="switchKid"><h1>${esc(kid.name)}'s World</h1><small>Tap to switch kid · ${S.order.map(id => kidOf(id).name).join(' / ')}</small></button>
+      <button class="avatar" data-act="switchProfile" aria-label="Switch profile">${headBox(kid.char)}</button>
+      <div class="kidname"><h1>${esc(kid.name)}'s World</h1><small>Age ${kid.age} · robots teach ${BANDS[bandOf(kid.age)]}</small></div>
+      <button class="mailbtn" data-act="openChat" aria-label="Messages from ${esc(pname())}">${MAIL}${unreadFor(kid.id, 'parent') ? `<span class="badge">${unreadFor(kid.id, 'parent')}</span>` : ''}</button>
       <div class="wallet" id="wallet" aria-label="${kid.coins} coins">${COIN(28)}<span id="walletN">${kid.coins}</span></div></div>` : '';
+  const views = kidMode ? { home: vHome, explore: vExplore, build: vBuild, market: vMarket, buddies: vBuddies } : { inbox: vInbox, tasks: vTasks, chat: vChat, family: vFamily, controls: vControls };
+  const cur = kidMode ? S.tab : S.ptab;
+  v.innerHTML = (views[cur] || (kidMode ? vHome : vInbox))();
   const pending = S.tasks.filter(t => t.status === 'waiting').length + S.requests.length;
-  $('#tabs').innerHTML = (kidMode ? KTABS : PTABS).map(([k, l, c]) => {
-    const cur = kidMode ? S.tab === k : S.ptab === k;
-    return `<button data-act="tab" data-v="${k}" ${cur ? 'aria-current="page"' : ''} style="--tc:${c}"><span class="ti">${NAVI[k]}</span>${l}${!kidMode && k === 'inbox' && pending ? `<span class="badge">${pending}</span>` : ''}</button>`;
+  const unreadKids = S.msgs.filter(m => m.from === 'kid' && !m.read).length;
+  tabs.innerHTML = (kidMode ? KTABS : PTABS).map(([k, l, c]) => {
+    const badge = kidMode ? 0 : k === 'inbox' ? pending : k === 'chat' ? unreadKids : 0;
+    return `<button data-act="tab" data-v="${k}" ${cur === k ? 'aria-current="page"' : ''} style="--tc:${c}"><span class="ti">${NAVI[k]}</span>${l}${badge ? `<span class="badge">${badge}</span>` : ''}</button>`;
   }).join('');
-  const v = $('#view');
-  const views = kidMode ? { home: vHome, build: vBuild, market: vMarket, buddies: vBuddies } : { inbox: vInbox, tasks: vTasks, family: vFamily, controls: vControls };
-  v.innerHTML = (views[kidMode ? S.tab : S.ptab] || vHome)();
   sim.attach();
+  const th = $('#thread'); if (th) th.scrollTop = th.scrollHeight;
   if (kidMode) afterKidRender();
   save();
+}
+
+// ---------- AUTH ----------
+function authView(){
+  if (ui.screen === 'signup') return `<form class="auth card" data-form="signup" novalidate>
+      <h2>Create your family account</h2><p class="sub">You're the grown-up in charge. You'll add your kids next. Kids never need an email.</p>
+      <div class="field"><label for="suName">Your name (kids will see it)</label><input class="text" id="suName" autocomplete="name" placeholder="Mom, Dad, Grandma…" maxlength="20" required></div>
+      <div class="field"><label for="suEmail">Email</label><input class="text" id="suEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+      <div class="field"><label for="suPw">Password</label><input class="text" id="suPw" type="password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required></div>
+      <label class="check"><input type="checkbox" id="suAgree"> <span>I'm the parent or legal guardian of the kids I add, and I agree to the family privacy rules.</span></label>
+      ${ui.err ? `<p class="err" role="alert">${esc(ui.err)}</p>` : ''}
+      <button class="btn big grape" type="submit">Create account</button>
+      <button class="btn ghost" type="button" data-act="screen" data-v="welcome">Back</button>
+      <p class="note-s">In this prototype your account is saved on this device only. Cloud sign-in (Supabase) plugs in next.</p></form>`;
+  if (ui.screen === 'login') return `<form class="auth card" data-form="login" novalidate>
+      <h2>Welcome back</h2><p class="sub">Sign in to your family.</p>
+      <div class="field"><label for="liEmail">Email</label><input class="text" id="liEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="liPw">Password</label><input class="text" id="liPw" type="password" autocomplete="current-password" required></div>
+      ${ui.err ? `<p class="err" role="alert">${esc(ui.err)}</p>` : ''}
+      <button class="btn big grape" type="submit">Sign in</button>
+      <button class="btn ghost" type="button" data-act="screen" data-v="welcome">Back</button></form>`;
+  const known = Object.entries(DB.accounts).filter(([e, a]) => !a.demo);
+  return `<div class="auth welcome">
+    <div class="hero-art">${heroArt()}</div>
+    <h1>Chores that build a world</h1>
+    <p>Kids finish real chores, earn coins and grow their own little island, with buddies and robot teachers along the way. Grown-ups stay in charge.</p>
+    <button class="btn big grape" data-act="screen" data-v="signup">Create a family account</button>
+    ${known.length ? `<button class="btn big ghost" data-act="screen" data-v="login">Sign in</button>` : `<button class="btn ghost" data-act="screen" data-v="login">I already have an account</button>`}
+    <button class="btn big sun" data-act="demo">Try the demo family</button>
+    <p class="note-s">Accounts are created by a parent or guardian. Kids get a profile and an optional PIN, never an email.</p></div>`;
+}
+function heroArt(){
+  const ch = (x, y, s, inner) => `<g transform="translate(${x},${y}) scale(${s})">${inner}</g>`;
+  return `<svg viewBox="-170 -150 340 200" aria-hidden="true">
+    <ellipse cx="0" cy="40" rx="150" ry="16" fill="#9CC9E8" opacity=".35" filter="url(#blur6)"/>
+    ${poly(diamond(0, 0, 3.6), '#8DDA6F', 'stroke="#79C65E"')}${poly([[-TW * 1.8, 0], [0, TH * 1.8], [0, TH * 1.8 + 12], [-TW * 1.8, 12]], '#4FA544')}${poly([[0, TH * 1.8], [TW * 1.8, 0], [TW * 1.8, 12], [0, TH * 1.8 + 12]], '#5DB650')}
+    ${poly(diamond(0, 8, 1.2), '#F2DFB8')}
+    ${R.home(-62, -8)}${R.tree(70, -18)}${R.pine(100, 4)}${R.restaurant(16, -40)}
+    ${ch(-34, 34, .62, robotSVG('bolt', { wave: 1, happy: 1 }))}${ch(14, 36, .62, charSVG(LOOKS[0], { mood: 'cheer' }))}${ch(52, 40, .55, buddySVG('mochi', { cheer: 1 }))}
+  </svg>`;
+}
+function whoView(){
+  return `<div class="who"><h1>Who's playing?</h1><p class="sub">${esc(pname())}'s family</p>
+    <div class="who-grid">${S.order.map(id => { const k = kidOf(id); return `<button class="who-t" data-act="pickKid" data-v="${id}"><span class="who-av">${headBox(k.char)}</span><b>${esc(k.name)}</b><small>Age ${k.age}${k.pin ? ' · PIN' : ''}</small></button>`; }).join('')}
+      <button class="who-t parent" data-act="pickParent"><span class="who-av">${parentAv(84)}</span><b>${esc(pname())}</b><small>Grown-up</small></button></div>
+    ${!S.order.length ? `<p class="note-s">No kids yet. Tap ${esc(pname())} to add your first one.</p>` : ''}
+    <button class="btn ghost small" data-act="signOut">Sign out of this family</button></div>`;
+}
+function pinSheet(kid){
+  const dots = [0, 1, 2, 3].map(k => `<i class="${k < ui.pin.length ? 'on' : ''}"></i>`).join('');
+  return `<div class="grab"></div><div class="pinhead"><span class="who-av sm">${headBox(kid.char)}</span><div><h3>Hi ${esc(kid.name)}!</h3><p class="sub">Type your secret PIN</p></div></div>
+  <div class="pindots ${ui.err ? 'shake' : ''}">${dots}</div>${ui.err ? `<p class="err" role="alert" style="text-align:center">${esc(ui.err)}</p>` : ''}
+  <div class="pinpad">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map(n => n === '' ? '<span></span>' : `<button data-act="pinKey" data-v="${n}" aria-label="${n === '⌫' ? 'Delete' : n}">${n}</button>`).join('')}</div>`;
+}
+function parentGate(){
+  if (S.demo) return `<div class="grab"></div><h3>Grown-up area</h3><p class="sub">This is the demo family, so there's no password. In a real family, ${esc(pname())} types the account password here.</p><button class="btn big grape" data-act="unlockDemo">Enter as ${esc(pname())}</button>`;
+  return `<form data-form="unlock" class="field" novalidate><div class="grab"></div><h3>Grown-ups only</h3><p class="sub">Enter your account password to manage tasks, coins and chat.</p>
+    <input class="text" type="password" id="puPw" autocomplete="current-password" placeholder="Password">${ui.err ? `<p class="err" role="alert">${esc(ui.err)}</p>` : ''}
+    <button class="btn big grape" type="submit">Unlock</button></form>`;
 }
 
 // ---------- KID: home ----------
@@ -1140,18 +1538,19 @@ function vHome(){
   const hud = `<div class="hud tl" title="Energy">${STR_ICON}<div class="meter"><i style="width:${kid.strength}%"></i></div>${kid.strength}%</div>
     <div class="hud tr">${FLAME}${kid.streak} day streak</div>
     ${waiting ? `<div class="workbar"><span class="dot"></span><span>${esc(kid.name)} is ${ACT[waiting.act].verb} at ${ACT[waiting.act].place} while ${esc(pname())} checks “${esc(waiting.title)}”</span><button class="btn small sun" data-act="wait" data-id="${waiting.id}">Play</button></div>`
-      : tired ? `<div class="workbar tired"><span class="dot"></span><span>${esc(kid.name)} is too tired to work. Finish a quest to recharge!</span></div>` : ''}`;
+      : tired ? `<div class="workbar tired"><span class="dot"></span><span>${esc(kid.name)} is too tired to travel or work. Finish a quest to recharge!</span></div>` : ''}`;
   const next = list.filter(t => t.status === 'todo').sort((a, b) => a.due.localeCompare(b.due))[0];
   const B = BUDDIES[kid.buddy];
-  const line = waiting ? `I told ${esc(pname())} about <b>${esc(waiting.title.toLowerCase())}</b>. Fingers crossed!`
+  const unread = unreadFor(kid.id, 'parent');
+  const line = unread ? `${esc(pname())} sent you ${unread > 1 ? unread + ' messages' : 'a message'}! <button class="btn small berry" data-act="openChat">Read</button>`
+    : waiting ? `I told ${esc(pname())} about <b>${esc(waiting.title.toLowerCase())}</b>. Fingers crossed!`
     : next ? (overdue(next) ? `Uh oh, <b>${esc(next.title.toLowerCase())}</b> is late. Let's do it now!` : `Next up: <b>${esc(next.title.toLowerCase())}</b> by ${fmtTime(next.due)}. ${ACT[next.act].place} needs you!`)
-    : `Every quest is done today! Our world is so proud of you.`;
-  const pct = list.length ? doneN / list.length : 0;
+    : `Every quest is done today! Let's go explore and meet the robots.`;
   return `${worldBlock(kid, { hud })}
   <div class="talk"><div class="bud">${budBox(kid.buddy, { cheer: !next })}</div><p class="say"><small>${B.name} says</small>${line}</p></div>
   <div class="sec-h"><h2>Today's quests</h2><small>${doneN} of ${list.length} done</small></div>
   <div class="quests">${list.length ? list.sort(qsort).map(questCard).join('') : `<div class="card empty">${budBox(kid.buddy)}<h3>No quests today</h3><p>Ask ${esc(pname())} to add one.</p></div>`}</div>
-  ${quizCard(kid)}`;
+  ${robotsCard(kid)}`;
 }
 const qorder = { todo: 0, waiting: 1, approved: 2, missed: 3 };
 const qsort = (a, b) => (qorder[a.status] - qorder[b.status]) || a.due.localeCompare(b.due);
@@ -1164,23 +1563,33 @@ function questCard(t){
   else right = `<span class="pill miss">Missed</span>`;
   return `<div class="quest ${t.status === 'approved' ? 'done' : ''}">${icon(t.icon)}<div class="qbody"><h3>${esc(t.title)}</h3><div class="qmeta"><span class="coinchip">${COIN()}${t.coins}</span><span class="${late ? 'late' : ''}">${late ? 'Late! ' : 'by '}${fmtTime(t.due)}</span>${t.status === 'approved' && t.stars ? `<span class="stars">${'★'.repeat(t.stars)}</span>` : `<span>· ${ACT[t.act].name}</span>`}</div></div>${right}</div>`;
 }
-function quizCard(kid){
-  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5);
-  const q = QUIZ[doy % QUIZ.length], ans = kid.quiz[dayKey()];
-  return `<div class="card learn"><span class="tag">Learning corner · +3 coins</span><h3>${esc(q.q)}</h3><div class="answers">${q.a.map((a, k) => `<button data-act="quiz" data-k="${k}" ${ans != null ? 'disabled' : ''} class="${ans != null ? (k === q.ok ? 'right' : k === ans ? 'wrong' : '') : ''}">${esc(a)}</button>`).join('')}</div>${ans != null ? `<p class="note-s">${ans === q.ok ? 'You got it! Come back tomorrow for a new question.' : 'Nice try! The green one is right. New question tomorrow.'}</p>` : ''}</div>`;
+function robotsCard(kid){
+  const lt = learnedToday(kid), n = Object.keys(lt).length;
+  return `<div class="sec-h"><h2>Robot teachers</h2><small>${n} of 7 today</small></div>
+  <div class="robo-strip">${Object.entries(ROBOTS).map(([id, r]) => `<button class="robo ${lt[id] ? 'done' : ''}" data-act="goRobot" data-v="${id}"><span class="rb">${robotBox(id, { happy: !!lt[id] })}</span><b>${r.name}</b><small>${r.topic}</small><span class="pill ${lt[id] ? 'ok' : 'wait'}">${lt[id] ? 'Learned' : '+3 coins'}</span></button>`).join('')}</div>`;
 }
 const STR_ICON = `<svg viewBox="0 0 20 20"><path d="M11,1 L3,11 h6 l-1,8 l8,-10 h-6z" fill="#FFC63A" stroke="#E39A00" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 const FLAME = `<svg viewBox="0 0 20 20"><path d="M10,1 q6,6 5,11 a5,5 0 0 1 -10,0 q0,-3 2,-5 q0,3 2,3 q-1,-5 1,-9z" fill="#FF7A3D"/><path d="M10,9 q3,3 2.6,5 a2.6,2.6 0 0 1 -5.2,0 q0,-2 2.6,-5z" fill="#FFD84A"/></svg>`;
 
+// ---------- KID: explore ----------
+function vExplore(){
+  const kid = K(), lt = learnedToday(kid);
+  return `<div class="sec-h"><h2>Explore</h2><small>Drag to look · tap to walk</small></div>
+  ${worldBlock(kid, { tall: 1, hud: `<div class="hud tl">${STR_ICON}${kid.strength}% energy</div><div class="hud bl" id="travelHud" hidden></div>` })}
+  <div class="flabel">Travel to</div>
+  <div class="chips">${PLACES.map(([n], k) => `<button class="chip" data-act="travel" data-v="${k}">${esc(n)}</button>`).join('')}</div>
+  <div class="flabel">Find a robot</div>
+  <div class="chips">${Object.entries(ROBOTS).map(([id, r]) => `<button class="chip" data-act="goRobot" data-v="${id}">${lt[id] ? '✓ ' : ''}${r.name} · ${r.topic}</button>`).join('')}</div>`;
+}
+
 // ---------- KID: build ----------
 function vBuild(){
-  const kid = K();
-  const groups = {};
+  const kid = K(), groups = {};
   kid.inv.forEach(o => (groups[o.t] = groups[o.t] || []).push(o));
   const sel = ui.buildSel;
   return `<div class="sec-h"><h2>Build mode</h2><small>${kid.inv.length} in your bag</small></div>
-  <p class="note-s" style="margin-top:-8px">${sel ? `Tap a glowing square to place your ${esc(NAMES[sel])}.` : 'Pick something from your bag, then tap an empty square. Tap a building to put it back.'}</p>
-  ${worldBlock(kid, { build: 1, armed: !!sel, id: 'worldMain' })}
+  <p class="note-s" style="margin-top:-8px">${sel ? `Tap a glowing square to place your ${esc(NAMES[sel])}. Drag to find more space.` : 'Pick something from your bag, then tap an empty grass square. Tap your own building to put it back.'}</p>
+  ${worldBlock(kid, { build: 1, armed: !!sel, tall: 1 })}
   <div class="flabel">Your bag</div>
   ${kid.inv.length ? `<div class="tray">${Object.entries(groups).map(([t, arr]) => `<button data-act="pickInv" data-t="${t}" aria-pressed="${sel === t}"><div class="thumb">${thumbBox(t)}</div>${esc(NAMES[t])}${arr.length > 1 ? ' ×' + arr.length : ''}</button>`).join('')}</div>`
     : `<div class="card empty"><h3>Your bag is empty</h3><p>Buy buildings and decorations in the Market.</p><button class="btn berry" data-act="tab" data-v="market">Go to Market</button></div>`}`;
@@ -1227,14 +1636,15 @@ function vBuddies(){
   }).join('')}</div>`;
 }
 
-// ---------- PARENT: inbox ----------
+// ---------- PARENT ----------
+const noKids = () => `<div class="card empty">${budBox('mochi', { cheer: 1 })}<h3>Add your first kid</h3><p>Each kid gets their own island, buddy and robot lessons for their age.</p><button class="btn grape" data-act="addKid">Add a kid</button></div>`;
 function vInbox(){
+  if (!S.order.length) return `<div class="p-hero"><h2>Welcome, ${esc(pname())}!</h2><p>Start by adding your kids. You can add tasks for them right after.</p></div>${noKids()}`;
   const waits = S.tasks.filter(t => t.status === 'waiting');
-  const reqs = S.requests;
-  const n = waits.length + reqs.length;
+  const reqs = S.requests, n = waits.length + reqs.length;
   return `<div class="p-hero"><h2>${n ? `${n} thing${n > 1 ? 's' : ''} to check` : 'All caught up'}</h2><p>${n ? 'Approve, rate and send coins. Your kids see them land right away.' : 'When a kid taps Done!, it shows up here.'}</p></div>
   <div class="inbox">${waits.map(apprCard).join('')}${reqs.map(reqCard).join('')}
-  ${!n ? `<div class="card empty">${budBox('luna', { cheer: 1 })}<h3>Nothing waiting</h3><p>Try it: switch to Kid, tap Done! on a quest, then come back.</p></div>` : ''}</div>`;
+  ${!n ? `<div class="card empty">${budBox('luna', { cheer: 1 })}<h3>Nothing waiting</h3><p>Try it: tap Switch, pick a kid, tap Done! on a quest, then come back.</p></div>` : ''}</div>`;
 }
 function payout(t){
   const kid = kidOf(t.kid), a = ui.appr[t.id] || (ui.appr[t.id] = { stars: 5, bonus: 0 });
@@ -1263,9 +1673,8 @@ function reqCard(r){
     <div style="display:flex;gap:12px;align-items:center"><div class="thumb" style="width:96px;flex:none">${thumb}</div><div class="breakdown" style="flex:1"><div><span>Price</span><span>${it.price}</span></div><div class="tot"><span>Left after</span><span>${kid.coins - it.price}</span></div></div></div>
     <div class="actions"><button class="btn ghost" data-act="reqNo" data-id="${r.id}">Not now</button><button class="btn grape" data-act="reqYes" data-id="${r.id}" ${kid.coins < it.price ? 'disabled' : ''}>Allow it</button></div></div>`;
 }
-
-// ---------- PARENT: tasks ----------
 function vTasks(){
+  if (!S.order.length) return noKids();
   const ids = ui.pk === 'all' ? S.order : [ui.pk];
   const ts = S.tasks.filter(t => ids.includes(t.kid));
   const late = ts.filter(overdue);
@@ -1280,7 +1689,7 @@ function vTasks(){
     const kid = kidOf(t.kid);
     const st = { todo: overdue(t) ? '<span class="pill miss">Late</span>' : '<span class="pill" style="background:#EEF2FB;color:#5F5A86">To do</span>', waiting: '<span class="pill wait">Check it</span>', approved: '<span class="pill ok">Done</span>', missed: '<span class="pill miss">Missed</span>' }[t.status];
     return `<button class="trow" data-act="editTask" data-id="${t.id}" style="text-align:left;width:100%">${icon(t.icon)}<div style="flex:1;min-width:0"><h4>${esc(t.title)}</h4><div class="qmeta"><span>${esc(kid.name)}</span><span>· ${repeatTxt(t)} by ${fmtTime(t.due)}</span><span class="coinchip">${COIN(15)}${t.coins}</span><span style="color:var(--danger)">−${t.penalty}</span></div></div>${st}</button>`;
-  }).join('')}</div>`;
+  }).join('') || '<div class="card empty"><h3>No tasks yet</h3><p>Tap “New task” to add one.</p></div>'}</div>`;
 }
 function taskSheet(){
   const d = ui.draft, kid = kidOf(d.kid);
@@ -1301,27 +1710,72 @@ function taskSheet(){
 }
 const CAM = `<svg viewBox="0 0 26 26" width="26"><rect x="3" y="7" width="20" height="15" rx="4" fill="#7B5CFA"/><rect x="9" y="4" width="8" height="5" rx="2" fill="#7B5CFA"/><circle cx="13" cy="14.5" r="4.6" fill="#fff"/><circle cx="13" cy="14.5" r="2.6" fill="#34B2F0"/></svg>`;
 
-// ---------- PARENT: family ----------
+// ---------- chat ----------
+function bubble(m, viewer){
+  const mine = m.from === viewer;
+  const kid = kidOf(m.kid);
+  const av = m.from === 'parent' ? parentAv(34) : `<span class="avatar mini">${headBox(kid.char)}</span>`;
+  const body = m.sticker ? `<div class="stk">${stickerBox(m.sticker, 72)}</div>` : `<div class="bt">${esc(m.text)}</div>`;
+  return `<div class="msg ${mine ? 'me' : ''}">${mine ? '' : av}<div class="mb">${body}${m.gift ? `<span class="giftchip">${COIN(16)} +${m.gift} coin gift</span>` : ''}<small>${ago(m.ts)}</small></div></div>`;
+}
+function vChat(){
+  if (!S.order.length) return noKids();
+  const kidId = ui.chatKid && S.kids[ui.chatKid] ? ui.chatKid : S.order[0]; ui.chatKid = kidId;
+  const kid = kidOf(kidId);
+  const counts = Object.fromEntries(S.order.map(id => [id, unreadFor(id, 'kid')]));
+  S.msgs.forEach(m => { if (m.kid === kidId && m.from === 'kid') m.read = true; });
+  const thread = S.msgs.filter(m => m.kid === kidId);
+  return `<div class="sec-h"><h2>Chat</h2><small>Only your family</small></div>
+  <div class="chips">${S.order.map(id => `<button class="chip" data-act="chatKid" data-v="${id}" aria-pressed="${id === kidId}">${esc(kidOf(id).name)}${counts[id] && id !== kidId ? ` <span class="dotn">${counts[id]}</span>` : ''}</button>`).join('')}</div>
+  <div class="card chat"><div class="thread" id="thread">${thread.map(m => bubble(m, 'parent')).join('') || `<div class="empty">${budBox(kid.buddy, { cheer: 1 })}<p>Say hi to ${esc(kid.name)}! ${BUDDIES[kid.buddy].name} will deliver it.</p></div>`}</div>
+    <div class="stkrow">${Object.keys(STICKERS).map(k => `<button data-act="pSticker" data-v="${k}" aria-label="Send ${k} sticker">${stickerBox(k, 38)}</button>`).join('')}</div>
+    <div class="chips giftrow"><span class="flabel">Add a gift</span>${[0, 2, 5, 10].map(g => `<button class="chip" data-act="gift" data-v="${g}" aria-pressed="${ui.gift === g}">${g ? '+' + g : 'None'}</button>`).join('')}</div>
+    <form class="composer" data-form="pchat"><input class="text" id="pChatIn" placeholder="Message ${esc(kid.name)}…" maxlength="200" autocomplete="off"><button class="btn grape" type="submit">Send</button></form></div>
+  <p class="note-s">Kids can reply with short messages, quick replies and stickers. Chat stays inside your family; there is no chat with other kids.</p>`;
+}
+function chatSheet(){
+  const kid = K(), thread = S.msgs.filter(m => m.kid === kid.id);
+  return `<div class="grab"></div><div class="pinhead">${parentAv(46)}<div><h3>Chat with ${esc(pname())}</h3><p class="sub">${BUDDIES[kid.buddy].name} carries your messages</p></div></div>
+  <div class="thread" id="kThread">${thread.map(m => bubble(m, 'kid')).join('') || `<p class="note-s">No messages yet. Say hi!</p>`}</div>
+  <div class="chips">${KID_SAYS.map(s => `<button class="chip" data-act="kidSay" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+  <div class="stkrow">${Object.keys(STICKERS).map(k => `<button data-act="kidSticker" data-v="${k}" aria-label="Send ${k} sticker">${stickerBox(k, 40)}</button>`).join('')}</div>
+  <form class="composer" data-form="kchat"><input class="text" id="kChatIn" placeholder="Type a message…" maxlength="120" autocomplete="off"><button class="btn berry" type="submit">Send</button></form>`;
+}
+
+// ---------- family & kids ----------
 function vFamily(){
   const now = new Date();
-  return S.order.map(id => {
+  return `<div class="sec-h"><h2>Family</h2><button class="btn small grape" data-act="addKid">+ Add a kid</button></div>` + (S.order.length ? S.order.map(id => {
     const kid = kidOf(id), h = S.hist.filter(x => x.kid === id);
     const wk = Date.now() - 7 * 864e5;
     const earned = h.filter(x => x.kind === 'earn' && x.ts > wk).reduce((a, x) => a + x.amt, 0);
     const spent = h.filter(x => x.kind === 'spend' && x.ts > wk).reduce((a, x) => a + x.amt, 0);
     const days = [...Array(7)].map((_, k) => { const d = new Date(now); d.setDate(now.getDate() - 6 + k); const key = dayKey(d); return { d, sum: h.filter(x => x.kind === 'earn' && dayKey(new Date(x.ts)) === key).reduce((a, x) => a + x.amt, 0), today: k === 6 }; });
-    const bought = h.filter(x => x.kind === 'spend').slice(-4).reverse();
+    const lt = Object.keys(learnedToday(kid));
     return `<div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}</h3><small>${BUDDIES[kid.buddy].name} the ${BUDDIES[kid.buddy].kind.toLowerCase()} · energy ${kid.strength}%</small></div><button class="btn small sea" data-act="seeKid" data-v="${id}">Open world</button></div>
+      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}</h3><small>${BUDDIES[kid.buddy].name} · energy ${kid.strength}% · lessons for ${BANDS[bandOf(kid.age)]}</small></div><button class="btn small ghost" data-act="editKid" data-v="${id}">Edit</button></div>
       <div class="stats"><div class="stat"><b>${kid.coins}</b><small>Coins now</small></div><div class="stat"><b>+${earned}</b><small>Earned 7d</small></div><div class="stat"><b>−${spent}</b><small>Spent 7d</small></div></div>
       <div><div class="flabel" style="margin-bottom:6px">Coins earned each day · streak ${kid.streak} days</div><div class="week">${days.map(x => `<div class="${x.sum ? 'has' : ''} ${x.today ? 'today' : ''}"><small>${DAYN[x.d.getDay()]}</small>${x.sum || '–'}</div>`).join('')}</div></div>
-      <div><div class="flabel">Recent activity</div><div class="hist">${h.slice(-6).reverse().map(x => `<div><span>${esc(x.label)} <span class="note-s">· ${ago(x.ts)}</span></span><span class="${x.kind === 'earn' ? 'plus' : 'minus'}">${x.kind === 'earn' ? '+' : '−'}${x.amt}</span></div>`).join('') || '<div>No activity yet</div>'}</div></div>
-      ${bought.length ? `<p class="note-s">Bought lately: ${bought.map(b => esc(b.label.replace('Bought ', ''))).join(', ')}</p>` : ''}
+      <div><div class="flabel" style="margin-bottom:6px">Learned with robots today</div>${lt.length ? `<div class="chips">${lt.map(r => `<span class="chip">${ROBOTS[r].name} · ${ROBOTS[r].topic}</span>`).join('')}</div>` : `<p class="note-s">No lessons yet today.</p>`}</div>
+      <div><div class="flabel">Recent activity</div><div class="hist">${h.slice(-5).reverse().map(x => `<div><span>${esc(x.label)} <span class="note-s">· ${ago(x.ts)}</span></span><span class="${x.kind === 'earn' ? 'plus' : 'minus'}">${x.kind === 'earn' ? '+' : '−'}${x.amt}</span></div>`).join('') || '<div>No activity yet</div>'}</div></div>
+      <div class="actions"><button class="btn small sea" data-act="seeKid" data-v="${id}">Open ${esc(kid.name)}'s world</button><button class="btn small berry" data-act="chatWith" data-v="${id}">Message</button></div>
     </div>`;
-  }).join('');
+  }).join('') : noKids());
+}
+function kidSheet(){
+  const d = ui.kd;
+  return `<div class="grab"></div><div><h3>${d.isNew ? 'Add a kid' : 'Edit ' + esc(d.name)}</h3><p class="sub">Robot lessons match the age you pick.</p></div>
+  <div class="field"><label for="kdName">First name or nickname</label><input class="text" id="kdName" data-kd="name" value="${esc(d.name)}" maxlength="14" placeholder="Ava"></div>
+  <div class="field"><span class="flabel">Age</span><div class="chips">${[4, 5, 6, 7, 8, 9, 10, 11, 12].map(a => `<button class="chip" data-act="kdAge" data-v="${a}" aria-pressed="${d.age === a}">${a}</button>`).join('')}</div><p class="note-s">Lessons for ${BANDS[bandOf(d.age)]}</p></div>
+  <div class="field"><span class="flabel">Character</span><div class="looks">${LOOKS.map((l, k) => `<button data-act="kdLook" data-v="${k}" aria-pressed="${d.look === k}" aria-label="Character ${k + 1}">${headBox(l)}</button>`).join('')}</div>${d.isNew ? '' : '<p class="note-s">Kids can fine-tune hair, skin and clothes in Buddies.</p>'}</div>
+  ${d.isNew ? `<div class="field"><span class="flabel">First buddy</span><div class="looks bud">${STARTERS.map(b => `<button data-act="kdBud" data-v="${b}" aria-pressed="${d.buddy === b}" aria-label="${BUDDIES[b].name}">${budBox(b)}<small>${BUDDIES[b].name}</small></button>`).join('')}</div></div>` : ''}
+  <div class="field"><label for="kdPin">Kid PIN (optional, 4 digits)</label><input class="text" id="kdPin" data-kd="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="${esc(d.pin)}" placeholder="Leave empty for no PIN"></div>
+  ${ui.err ? `<p class="err" role="alert">${esc(ui.err)}</p>` : ''}
+  <button class="btn big grape" data-act="saveKid">${d.isNew ? 'Add kid' : 'Save'}</button>
+  ${d.isNew ? '' : `<button class="btn ghost" data-act="removeKid">Remove ${esc(d.name)}</button>`}`;
 }
 
-// ---------- PARENT: controls ----------
+// ---------- controls ----------
 function vControls(){
   const s = S.settings;
   const tog = (k, on, dis) => `<button class="tog" data-act="tog" data-k="${k}" aria-pressed="${on}" ${dis ? 'disabled' : ''} aria-label="${k}"></button>`;
@@ -1337,17 +1791,20 @@ function vControls(){
   </div>
   <div class="card">
     <div class="setrow"><div><b>Friends and world visits</b><small>Coming in Phase 3. You approve every friend.</small></div>${tog('friends', false, 1)}</div>
-    <div class="setrow"><div><b>Public world</b><small>Coming in Phase 3. Moderated, preset stickers only, no chat.</small></div>${tog('publicWorld', false, 1)}</div>
+    <div class="setrow"><div><b>Public world</b><small>Coming in Phase 3. Moderated, preset stickers only, no chat with other kids.</small></div>${tog('publicWorld', false, 1)}</div>
   </div>
-  <div class="card"><div class="setrow"><div><b>Privacy</b><small>Kid profiles live under your account. No personal info is shown, and kids can't buy anything with real money.</small></div></div>
-    <div class="setrow"><div><b>Start the demo over</b><small>Puts back the sample family</small></div><button class="btn small ghost" data-act="reset">Reset</button></div></div>`;
+  <div class="card">
+    <div class="setrow"><div><b>Account</b><small>${S.demo ? 'Demo family (no password)' : esc(S.email)}</small></div><button class="btn small ghost" data-act="signOut">Sign out</button></div>
+    <div class="setrow"><div><b>Cloud sync</b><small>Not connected yet. This prototype saves your family on this device only.</small></div></div>
+    <div class="setrow"><div><b>Privacy</b><small>Kid profiles live under your account. Kids never enter an email, no personal info is shown, and kids can't spend real money.</small></div></div>
+    ${S.demo ? `<div class="setrow"><div><b>Start the demo over</b><small>Puts back the sample family</small></div><button class="btn small ghost" data-act="reset">Reset</button></div>` : ''}</div>`;
 }
 
 // =====================================================================
 //  SHEETS
 // =====================================================================
-function openSheet(html){ ui.sheet = true; $('#sheet').innerHTML = `<div class="sheet-wrap" data-act="sheetBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`; }
-function closeSheet(){ ui.sheet = null; stopCatch(); $('#sheet').innerHTML = ''; }
+function openSheet(html){ ui.sheet = true; $('#sheet').innerHTML = `<div class="sheet-wrap" data-act="sheetBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`; const t = $('#kThread'); if (t) t.scrollTop = t.scrollHeight; }
+function closeSheet(){ ui.sheet = null; ui.err = ''; stopCatch(); try { speechSynthesis.cancel(); } catch (e) {} $('#sheet').innerHTML = ''; }
 function doneSheet(){
   const kid = K(), t = S.tasks.find(x => x.id === ui.done.id);
   const notes = ['All done!', 'It was hard but I did it!', 'Can you come check?', 'I did extra!'];
@@ -1357,13 +1814,13 @@ function doneSheet(){
   <label class="photo-in" for="kPhoto">${ui.done.photo ? `<img src="${ui.done.photo}" alt="">` : `<span class="cam">${CAM}</span>`}<span>${ui.done.photo ? 'Photo added! Tap to change' : 'Add a photo (optional)'}</span><input type="file" accept="image/*" id="kPhoto" data-photo="done"></label>
   <button class="btn big" data-act="sendDone">Send to ${esc(pname())}</button>`;
 }
-let catchTimer = null, catchEnd = null;
+let catchTimer = null;
 function waitSheet(t){
   const kid = K(), A = ACT[t.act];
   return `<div class="grab"></div><div><h3>${esc(kid.name)} is ${A.verb}!</h3><p class="sub">${A.place} · waiting for ${esc(pname())} to check “${esc(t.title)}”</p></div>
   <div class="scene">${sceneSVG(t.act, kid.char)}</div>
   <div class="catch" id="catch"><div class="catch-hud"><span>Waiting room: catch the stars!</span><b id="catchN">0</b></div><div class="bud">${budBox(kid.buddy, { cheer: 1 })}</div></div>
-  <p class="note-s">Prototype tip: switch to <b>Parent</b> at the top to approve it, then come back to see your coins land.</p>
+  <p class="note-s">Prototype tip: tap <b>Switch</b> at the top and open ${esc(pname())} to approve it, then come back to see your coins land.</p>
   <button class="btn ghost big" data-act="closeSheet">Back to my world</button>`;
 }
 function startCatch(){
@@ -1383,6 +1840,20 @@ function startCatch(){
   }, 650);
 }
 function stopCatch(){ if (catchTimer) clearInterval(catchTimer); catchTimer = null; }
+function robotSheet(id){
+  const kid = K(), r = ROBOTS[id], band = bandOf(kid.age), list = LESSONS[id][band];
+  const st = ui.lesson && ui.lesson.id === id ? ui.lesson : (ui.lesson = { id, n: 0, tries: 0, picked: [], right: false });
+  const les = list[(doy() + st.n) % list.length], done = learnedToday(kid)[id];
+  return `<div class="grab"></div>
+  <div class="robohead"><div class="rbig">${robotBox(id, { wave: !st.right, happy: st.right })}</div><div><h3>Hi, I'm ${r.name}!</h3><p class="sub">${r.topic} · for ${BANDS[band]}</p></div></div>
+  <div class="lesson"><p>${esc(les.t)}</p><button class="btn small ghost" data-act="speak" data-v="${esc(les.t + ' ' + les.q)}">🔊 Read it to me</button></div>
+  <h3 style="font-size:19px">${esc(les.q)}</h3>
+  <div class="answers">${les.a.map((a, k) => `<button data-act="answer" data-k="${k}" ${st.right ? 'disabled' : ''} class="${st.right && k === les.ok ? 'right' : st.picked.includes(k) ? 'wrong' : ''}">${esc(a)}</button>`).join('')}</div>
+  ${st.right ? `<p class="feedback ok">Yes! ${esc(les.why)}</p>` : st.picked.length ? `<p class="feedback">Not quite. Try another one!</p>` : ''}
+  <p class="note-s">${done ? `You already earned ${r.name}'s coins today. Keep playing for fun!` : 'Get it right for +3 coins (+1 if it takes a few tries).'}</p>
+  <div class="actions">${st.right ? `<button class="btn ghost" data-act="robotNext" data-v="${id}">Another one</button>` : ''}<button class="btn sea" data-act="closeSheet">Bye, ${r.name}!</button></div>`;
+}
+function openRobot(id){ ui.lesson = null; openSheet(robotSheet(id)); }
 
 // =====================================================================
 //  FX: toasts, nudges, celebration
@@ -1390,26 +1861,23 @@ function stopCatch(){ if (catchTimer) clearInterval(catchTimer); catchTimer = nu
 function toast(html, o = {}){
   const el = document.createElement('div');
   el.className = 'toast';
-  el.innerHTML = `<div class="ico">${o.icon || budBox(K().buddy, { cheer: 1 })}</div><div class="tx">${o.title ? `<small>${o.title}</small>` : ''}${html}</div>${o.btn || ''}`;
+  const k = S && K();
+  el.innerHTML = `<div class="ico">${o.icon || budBox(k ? k.buddy : 'mochi', { cheer: 1 })}</div><div class="tx">${o.title ? `<small>${o.title}</small>` : ''}${html}</div>${o.btn || ''}`;
   $('#toasts').appendChild(el);
   const kill = () => { el.classList.add('out'); setTimeout(() => el.remove(), 300); };
-  el.addEventListener('click', e => { if (!e.target.closest('[data-act]')) kill(); });
+  el.addEventListener('click', e => { if (!e.target.closest('[data-act]')) kill(); else setTimeout(kill, 50); });
   setTimeout(kill, o.ms || 4200);
   return el;
 }
 function celebrate(c){
-  const kid = K();
-  const fx = $('#fx');
+  const kid = K(), fx = $('#fx');
   const wrap = document.createElement('div');
   wrap.className = 'celebrate';
-  wrap.innerHTML = `<div class="cele-card"><div class="rays"></div><div class="bud">${budBox(kid.buddy, { cheer: 1 })}</div><h2>+${c.amount}</h2><p>${c.stars ? `<span class="stars">${'★'.repeat(c.stars)}${'☆'.repeat(5 - c.stars)}</span><br>` : ''}${esc(c.label)}</p><p class="note-s" style="margin-top:6px">${esc(c.sub || 'Coins are flying to your wallet!')}</p></div>`;
+  wrap.innerHTML = `<div class="cele-card"><div class="rays"></div><div class="bud">${c.robot ? robotBox(c.robot, { happy: 1 }) : budBox(kid.buddy, { cheer: 1 })}</div><h2>+${c.amount}</h2><p>${c.stars ? `<span class="stars">${'★'.repeat(c.stars)}${'☆'.repeat(5 - c.stars)}</span><br>` : ''}${esc(c.label)}</p><p class="note-s" style="margin-top:6px">${esc(c.sub || 'Coins are flying to your wallet!')}</p></div>`;
   document.body.appendChild(wrap);
-  // confetti
   const cols = ['#FF5A8C', '#FFC63A', '#3EC46B', '#34B2F0', '#7B5CFA', '#FF8A3D'];
   for (let k = 0; k < 70; k++){
-    const p = document.createElement('i'); p.className = 'confetti';
-    p.style.background = cols[k % cols.length];
-    fx.appendChild(p);
+    const p = document.createElement('i'); p.className = 'confetti'; p.style.background = cols[k % cols.length]; fx.appendChild(p);
     const x0 = innerWidth / 2, y0 = innerHeight / 2.4, ang = Math.random() * Math.PI * 2, sp = 140 + Math.random() * 260;
     p.animate([{ transform: `translate(${x0}px,${y0}px) rotate(0)` }, { transform: `translate(${x0 + Math.cos(ang) * sp}px,${y0 + Math.sin(ang) * sp - 120}px) rotate(${Math.random() * 720}deg)`, offset: .45 }, { transform: `translate(${x0 + Math.cos(ang) * sp * 1.2}px,${innerHeight + 40}px) rotate(${Math.random() * 1080}deg)` }], { duration: 2200 + Math.random() * 900, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => p.remove();
   }
@@ -1418,15 +1886,14 @@ function celebrate(c){
     wrap.remove();
     const w = $('#wallet'); if (!w) return;
     const r = w.getBoundingClientRect(), tx = r.left + 16, ty = r.top + 6;
-    const n = Math.min(14, Math.max(4, c.amount));
-    const end = kid.coins, start = end - c.amount;
-    let shown = start; const num = $('#walletN'); if (num) num.textContent = start;
+    const n = Math.min(14, Math.max(4, c.amount)), end = kid.coins, start = end - c.amount;
+    const num = $('#walletN'); if (num) num.textContent = start;
     for (let k = 0; k < n; k++){
       const el = document.createElement('div'); el.className = 'flycoin'; el.innerHTML = COIN(34); fx.appendChild(el);
       const x0 = innerWidth / 2 - 17 + (Math.random() - .5) * 120, y0 = innerHeight / 2 + (Math.random() - .5) * 80;
       const mx = (x0 + tx) / 2 + (Math.random() - .5) * 160, my = Math.min(y0, ty) - 60 - Math.random() * 80;
       const a = el.animate([{ transform: `translate(${x0}px,${y0}px) scale(.4)`, opacity: 0 }, { transform: `translate(${x0}px,${y0 - 20}px) scale(1.15)`, opacity: 1, offset: .15 }, { transform: `translate(${mx}px,${my}px) scale(1)`, offset: .55 }, { transform: `translate(${tx}px,${ty}px) scale(.6)`, opacity: 1 }], { duration: 900 + k * 70, easing: 'cubic-bezier(.45,0,.35,1)' });
-      a.onfinish = () => { el.remove(); shown = Math.min(end, Math.round(start + (k + 1) / n * c.amount)); if (num) num.textContent = shown; w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); };
+      a.onfinish = () => { el.remove(); if (num) num.textContent = Math.min(end, Math.round(start + (k + 1) / n * c.amount)); w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); };
     }
   };
   wrap.addEventListener('click', finish);
@@ -1438,7 +1905,9 @@ function afterKidRender(){
   const c = S.cele[kid.id];
   if (c && c.length){ const item = c.shift(); save(); setTimeout(() => celebrate(item), 350); return; }
   const nd = S.nudges[kid.id];
-  if (nd && nd.length){ const m = nd.shift(); save(); setTimeout(() => toast(m, { title: BUDDIES[kid.buddy].name + ' · now', ms: 6000 }), 400); return; }
+  if (nd && nd.length){ const m = nd.shift(); save(); setTimeout(() => toast(esc(m), { title: BUDDIES[kid.buddy].name + ' · now', ms: 6000 }), 400); return; }
+  const fresh = S.msgs.find(m => m.kid === kid.id && m.from === 'parent' && !m.read && !m.toasted);
+  if (fresh){ fresh.toasted = true; save(); setTimeout(() => toast(`${esc(pname())} sent you ${fresh.sticker ? 'a sticker' : 'a message'}${fresh.gift ? ' and a gift' : ''}!`, { title: 'New message', icon: parentAv(42), btn: `<button class="btn small berry" data-act="openChat">Read</button>`, ms: 6000 }), 600); return; }
   if (!ui.firstNudge && S.tab === 'home'){
     ui.firstNudge = true;
     const next = todays(kid.id).filter(t => t.status === 'todo').sort((a, b) => a.due.localeCompare(b.due))[0];
@@ -1447,73 +1916,106 @@ function afterKidRender(){
 }
 
 // =====================================================================
-//  WORLD SIM — character walks the paths, goes to work, buddy follows
+//  WORLD SIM — camera, tap-to-walk, work trips, robots, buddy
 // =====================================================================
+function applyCam(){
+  const svg = sim.svg; if (!svg || !svg.isConnected) return;
+  const r = svg.getBoundingClientRect(); if (!r.width) return;
+  const ar = r.height / r.width;
+  cam.w = clamp(cam.w, 300, 1300);
+  const w = cam.w, h = w * ar;
+  cam.cx = clamp(cam.cx, w * .3, MAPW - w * .3); cam.cy = clamp(cam.cy, OY - 60, MAPH - h * .4);
+  svg.setAttribute('viewBox', `${f1(cam.cx - w / 2)} ${f1(cam.cy - h / 2)} ${f1(w)} ${f1(h)}`);
+}
 const sim = {
-  kid: null, fi: 3, fj: 2, path: [], goal: null, face: 1, bi: 3.4, bj: 2.4, last: 0, nextWander: 0, key: '', working: false,
+  kid: null, fi: 9, fj: 6, path: [], face: 1, bi: 9.4, bj: 6.4, last: 0, nextWander: 0, key: '', working: false, manual: null, holdUntil: 0, robot: null, block: new Set(),
   attach(){
     const svg = document.getElementById('worldMain');
     this.svg = svg; if (!svg) return;
     const kid = K();
-    if (this.kid !== kid.id){ this.kid = kid.id; this.fi = 3; this.fj = 2; this.path = []; this.goal = null; this.bi = 3.4; this.bj = 2.4; }
-    const layer = svg.querySelector('#objLayer');
-    this.charG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.budG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.bubG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.charG.style.pointerEvents = this.budG.style.pointerEvents = this.bubG.style.pointerEvents = 'none';
+    if (this.kid !== kid.id){ this.kid = kid.id; this.fi = 9; this.fj = 6; this.path = []; this.bi = 9.4; this.bj = 6.4; this.manual = null; cam.follow = true; const [x, y] = P(9, 6); cam.cx = x; cam.cy = y - 30; }
+    this.block = blockedSet(kid);
+    if (!this.walk(Math.round(this.fi), Math.round(this.fj))){ this.fi = 9; this.fj = 6; this.path = []; }
+    const layer = svg.querySelector('#objLayer'), NS = 'http://www.w3.org/2000/svg';
+    this.charG = document.createElementNS(NS, 'g'); this.budG = document.createElementNS(NS, 'g'); this.bubG = document.createElementNS(NS, 'g');
+    [this.charG, this.budG, this.bubG].forEach(g => g.style.pointerEvents = 'none');
     layer.appendChild(this.budG); layer.appendChild(this.charG); svg.appendChild(this.bubG);
-    this.key = ''; this.placeAll(); this.paint(true);
+    this.key = ''; this.placeAll(); this.paint(true); applyCam();
+    let drag = null;
+    svg.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, cx: cam.cx, cy: cam.cy, moved: false, id: e.pointerId }; });
+    svg.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const r = svg.getBoundingClientRect(), k = cam.w / r.width, dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) > 7){ drag.moved = true; try { svg.setPointerCapture(drag.id); } catch (er) {} }
+      if (drag.moved){ cam.follow = false; cam.cx = drag.cx - dx * k; cam.cy = drag.cy - dy * k; applyCam(); }
+    });
+    svg.addEventListener('pointerup', e => { if (drag && !drag.moved) worldTap(e); drag = null; });
+    svg.addEventListener('pointercancel', () => { drag = null; });
+    svg.addEventListener('wheel', e => { e.preventDefault(); cam.w *= e.deltaY > 0 ? 1.1 : 1 / 1.1; applyCam(); }, { passive: false });
   },
-  state(){
-    const kid = K();
-    const w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting');
-    const tired = kid.strength < 25;
-    return { kid, w, tired };
-  },
-  workTile(act){
-    const kid = K(), b = kid.world.find(o => o.t === ACT[act].b);
-    if (!b) return [3, 2];
-    let best = null, bd = 99;
-    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (isPath(i, j)){ const d = Math.abs(i - b.i) + Math.abs(j - b.j); if (d < bd){ bd = d; best = [i, j]; } }
-    return best;
-  },
+  walk(i, j){ const t = TER(i, j); return t && t !== '~' && !this.block.has(i + ',' + j); },
   bfs(from, to){
     const k = (i, j) => i + ',' + j, prev = { [k(...from)]: null }, q = [from];
-    while (q.length){ const [i, j] = q.shift(); if (i === to[0] && j === to[1]) break;
-      [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([di, dj]) => { const a = i + di, b = j + dj; if (a < 0 || b < 0 || a >= N || b >= N || !isPath(a, b) || k(a, b) in prev) return; prev[k(a, b)] = [i, j]; q.push([a, b]); }); }
-    const out = []; let c = to; if (!(k(...to) in prev)) return [];
+    let found = false;
+    while (q.length){ const [i, j] = q.shift(); if (i === to[0] && j === to[1]){ found = true; break; }
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const a = i + di, b = j + dj; if (!this.walk(a, b) || k(a, b) in prev) continue; prev[k(a, b)] = [i, j]; q.push([a, b]); } }
+    if (!found) return null;
+    const out = []; let c = to;
     while (c && !(c[0] === from[0] && c[1] === from[1])){ out.unshift(c); c = prev[k(...c)]; }
     return out;
   },
+  near(i, j){ // closest walkable tile next to a blocked tile, by path length
+    const cur = [Math.round(this.fi), Math.round(this.fj)];
+    let best = null;
+    for (let r = 1; r <= 3 && !best; r++) for (let a = -r; a <= r; a++) for (let b = -r; b <= r; b++){
+      if (Math.abs(a) + Math.abs(b) !== r || !this.walk(i + a, j + b)) continue;
+      const p = this.bfs(cur, [i + a, j + b]); if (p && (!best || p.length < best.p.length)) best = { t: [i + a, j + b], p };
+    }
+    return best;
+  },
+  goTo(tile, robot){
+    const kid = K();
+    if (kid.strength < 25 && !robot){ toast(`${esc(kid.name)} is too tired to travel. Finish a quest to recharge!`); return false; }
+    const cur = [Math.round(this.fi), Math.round(this.fj)];
+    let p = this.walk(...tile) ? this.bfs(cur, tile) : null, t = tile;
+    if (!p){ const n = this.near(...tile); if (!n){ toast("Can't get there from here."); return false; } p = n.p; t = n.t; }
+    this.path = p; this.manual = t; this.robot = robot || null; cam.follow = true;
+    if (!p.length) this.arrive();
+    return true;
+  },
+  arrive(){ this.manual = null; this.holdUntil = performance.now() + 9000; const h = $('#travelHud'); if (h) h.hidden = true; if (this.robot){ const id = this.robot; this.robot = null; openRobot(id); } },
+  workTile(act){ const b = K().world.find(o => o.t === ACT[act].b); if (!b) return null; const n = this.near(b.i, b.j); return n ? n.t : null; },
   tick(ts){
     if (!this.svg || !this.svg.isConnected) return;
     const dt = Math.min(.05, (ts - (this.last || ts)) / 1000); this.last = ts;
-    const { w, tired, kid } = this.state();
+    const kid = K(); if (!kid) return;
+    const w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting'), tired = kid.strength < 25;
     const cur = [Math.round(this.fi), Math.round(this.fj)];
-    let goal = this.goal;
-    if (w){ goal = this.workTile(w.act); }
-    else if (tired){ goal = null; this.path = []; }
-    else if (!this.path.length && ts > this.nextWander){ const opts = []; for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (isPath(i, j)) opts.push([i, j]); goal = opts[Math.floor(Math.random() * opts.length)]; this.nextWander = ts + 3500 + Math.random() * 4000; }
-    if (goal && (!this.goal || goal[0] !== this.goal[0] || goal[1] !== this.goal[1])){ this.goal = goal; this.path = this.bfs(cur, goal); }
+    if (!this.path.length && !this.manual){
+      if (w && ts > this.holdUntil){ const wt = this.workKey === w.id + kid.id && this.wt ? this.wt : (this.wt = this.workTile(w.act)); this.workKey = w.id + kid.id; if (wt && (wt[0] !== cur[0] || wt[1] !== cur[1])){ const p = this.bfs(cur, wt); if (p) this.path = p; } }
+      else if (!w && !tired && ts > this.nextWander && ts > this.holdUntil){
+        this.nextWander = ts + 4000 + Math.random() * 4000;
+        for (let tries = 0; tries < 12; tries++){ const t = [cur[0] + Math.round((Math.random() - .5) * 8), cur[1] + Math.round((Math.random() - .5) * 8)]; if (this.walk(...t)){ const p = this.bfs(cur, t); if (p && p.length < 9){ this.path = p; break; } } }
+      }
+    }
     let moving = false;
-    if (this.path.length){
+    if (this.path.length && !(tired && !this.manual && !this.robot)){
       const [ti, tj] = this.path[0], di = ti - this.fi, dj = tj - this.fj, d = Math.hypot(di, dj);
-      const sp = (kid.strength < 45 ? .9 : 1.7) * dt;
-      if (d <= sp){ this.fi = ti; this.fj = tj; this.path.shift(); } else { this.fi += di / d * sp; this.fj += dj / d * sp; }
-      const sx = (di - dj); if (Math.abs(sx) > .01) this.face = sx > 0 ? 1 : -1;
+      const sp = (kid.strength < 45 ? 1.1 : this.manual ? 2.6 : 1.7) * dt;
+      if (d <= sp){ this.fi = ti; this.fj = tj; this.path.shift(); if (!this.path.length && this.manual) this.arrive(); } else { this.fi += di / d * sp; this.fj += dj / d * sp; }
+      const sx = di - dj; if (Math.abs(sx) > .01) this.face = sx > 0 ? 1 : -1;
       moving = true;
     }
-    // buddy follows a little behind
-    const tbi = this.fi + .32 * -this.face, tbj = this.fj + .32;
+    const tbi = this.fi + .3 * -this.face, tbj = this.fj + .3;
     this.bi += (tbi - this.bi) * Math.min(1, dt * 3); this.bj += (tbj - this.bj) * Math.min(1, dt * 3);
-    const atWork = !!w && !this.path.length;
-    this.working = atWork;
+    this.working = !!w && !moving && !this.manual && this.wt && cur[0] === this.wt[0] && cur[1] === this.wt[1];
     this.moving = moving;
-    this.paint();
-    this.placeAll();
+    if (cam.follow){ const [x, y] = P(this.fi, this.fj); cam.cx += (x - cam.cx) * Math.min(1, dt * 2.6); cam.cy += (y - 30 - cam.cy) * Math.min(1, dt * 2.6); applyCam(); }
+    if (!this.manual){ const th = document.getElementById('travelHud'); if (th && !th.hidden) th.hidden = true; }
+    this.paint(); this.placeAll();
   },
   paint(force){
-    const { w, tired, kid } = this.state();
+    const kid = K(), w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting'), tired = kid.strength < 25;
     const mode = (this.working ? 'w:' + w.act : tired ? 'tired' : 'idle') + (this.moving ? ':m' : '') + JSON.stringify(kid.char) + kid.buddy;
     if (mode !== this.key || force){
       this.key = mode;
@@ -1525,7 +2027,7 @@ const sim = {
     const [x, y] = P(this.fi, this.fj), [bx, by] = P(this.bi, this.bj);
     this.charG.setAttribute('transform', `translate(${f1(x)},${f1(y + 2)}) scale(${.46 * this.face},.46)`);
     this.budG.setAttribute('transform', `translate(${f1(bx)},${f1(by + 2)}) scale(${.4 * this.face},.4)`);
-    this.bubG.setAttribute('transform', `translate(${f1(x)},${f1(y - 44)})`);
+    this.bubG.setAttribute('transform', `translate(${f1(x)},${f1(y - 50)})`);
   },
   placeAll(){ this.place(this.charG, this.fi + this.fj + .01); this.place(this.budG, this.bi + this.bj + .01); },
   place(el, d){
@@ -1536,6 +2038,23 @@ const sim = {
     if (nx !== ref) layer.insertBefore(el, ref);
   }
 };
+function worldTap(e){
+  const svg = sim.svg, m = svg.getScreenCTM(); if (!m) return;
+  const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+  const kid = K(), build = svg.classList.contains('building');
+  if (!build) for (const [id, r] of Object.entries(ROBOTS)){ const [rx, ry] = P(...r.tile); if (Math.abs(p.x - rx) < 22 && p.y > ry - 64 && p.y < ry + 10){ const cur = [Math.round(sim.fi), Math.round(sim.fj)]; if (Math.abs(cur[0] - r.tile[0]) + Math.abs(cur[1] - r.tile[1]) <= 1) openRobot(id); else { sim.goTo(r.tile, id); travelHud(`Walking to ${r.name}…`); } return; } }
+  const a = (p.x - OX) / (TW / 2), b = (p.y - OY) / (TH / 2), i = Math.round((a + b) / 2), j = Math.round((b - a) / 2);
+  const t = TER(i, j); if (!t) return;
+  if (build) return A.tileAt(i, j);
+  const ob = kid.world.find(o => o.i === i && o.j === j) || SCEN.find(o => o.i === i && o.j === j);
+  if (t === '~') return toast('Splash! That is water. Try the bridge.', { ms: 2200 });
+  if (sim.goTo([i, j])){
+    ripple(i, j);
+    travelHud(ob ? `Walking to ${ob.text || NAMES[ob.t] || 'there'}…` : 'Walking…');
+  }
+}
+function ripple(i, j){ const f = sim.svg && sim.svg.querySelector('#fxLayer'); if (!f) return; const [x, y] = P(i, j); f.innerHTML = `<ellipse class="tapring" cx="${x}" cy="${y}" rx="18" ry="9" fill="none" stroke="#fff" stroke-width="3"/>`; }
+function travelHud(text){ const h = $('#travelHud'); if (h){ h.hidden = false; h.textContent = text; } }
 (function loop(ts){ try { sim.tick(ts); } catch (e) { console.error(e); } requestAnimationFrame(loop); })(0);
 
 // =====================================================================
@@ -1554,30 +2073,66 @@ function readPhoto(file, cb){
   fr.onload = () => { const img = new Image(); img.onload = () => { const m = 360, sc = Math.min(1, m / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', .72)); }; img.onerror = () => toast('That file is not a photo. Try a JPG or PNG.'); img.src = fr.result; };
   fr.readAsDataURL(file);
 }
+function sendMsg(m){ S.msgs.push({ id: uid(), ts: Date.now(), read: false, ...m }); if (S.msgs.length > 600) S.msgs.splice(0, S.msgs.length - 600); save(); }
+function claimGifts(kid){
+  let total = 0;
+  S.msgs.forEach(m => { if (m.kid === kid.id && m.from === 'parent'){ if (!m.read && m.gift && !m.claimed){ total += m.gift; m.claimed = true; } m.read = true; } });
+  if (total){ kid.coins += total; addHist(kid.id, 'earn', total, 'Gift from ' + pname()); }
+  return total;
+}
 const A = {
-  mode(el){ S.mode = el.dataset.v; closeSheet(); render(); $('#view').scrollTop = 0; },
-  tab(el){ if (S.mode === 'kid') S.tab = el.dataset.v; else S.ptab = el.dataset.v; ui.buildSel = null; render(); $('#view').scrollTop = 0; },
-  switchKid(){ const i = S.order.indexOf(S.active); S.active = S.order[(i + 1) % S.order.length]; ui.firstNudge = false; render(); },
-  seeKid(el){ S.active = el.dataset.v; S.mode = 'kid'; S.tab = 'home'; ui.firstNudge = true; render(); },
+  // ---- accounts
+  screen(el){ ui.screen = el.dataset.v; ui.err = ''; render(); },
+  demo(){ const key = 'demo@chorebuddies.app'; if (!DB.accounts[key]) DB.accounts[key] = { demo: true, fam: seedDemo() }; DB.current = key; S = DB.accounts[key].fam; newDay(); DB.session = null; sim.kid = null; render(); },
+  signOut(){ closeSheet(); DB.current = null; DB.session = null; S = null; ui.screen = 'welcome'; sim.kid = null; render(); },
+  switchProfile(){ closeSheet(); DB.session = null; render(); },
+  pickKid(el){ const kid = kidOf(el.dataset.v); if (!kid.pin){ DB.session = { role: 'kid', kid: kid.id }; S.tab = 'home'; ui.firstNudge = false; render(); return; } ui.pin = ''; ui.err = ''; ui.pinKid = kid.id; openSheet(pinSheet(kid)); },
+  pinKey(el){
+    const kid = kidOf(ui.pinKid), v = el.dataset.v;
+    ui.err = '';
+    if (v === '⌫') ui.pin = ui.pin.slice(0, -1); else if (ui.pin.length < 4) ui.pin += v;
+    if (ui.pin.length === 4){
+      if (ui.pin === kid.pin){ closeSheet(); DB.session = { role: 'kid', kid: kid.id }; S.tab = 'home'; ui.firstNudge = false; render(); return; }
+      ui.err = 'Oops, that is not it. Try again!'; ui.pin = '';
+    }
+    openSheet(pinSheet(kid));
+  },
+  pickParent(){ ui.err = ''; openSheet(parentGate()); setTimeout(() => { const i = $('#puPw'); if (i) i.focus(); }, 50); },
+  unlockDemo(){ closeSheet(); DB.session = { role: 'parent' }; render(); },
+  // ---- kid navigation
+  tab(el){ if (isKid()) S.tab = el.dataset.v; else S.ptab = el.dataset.v; ui.buildSel = null; if (el.dataset.v === 'build') cam.follow = false; render(); $('#view').scrollTop = 0; },
+  seeKid(el){ DB.session = { role: 'kid', kid: el.dataset.v }; S.tab = 'home'; ui.firstNudge = true; closeSheet(); render(); },
+  zoom(el){ const v = el.dataset.v; if (v === 'in') cam.w /= 1.25; else if (v === 'out') cam.w *= 1.25; else cam.follow = true; applyCam(); },
+  travel(el){ const [n, t] = PLACES[+el.dataset.v]; if (sim.goTo(t)) travelHud(`Walking to ${n}…`); },
+  goRobot(el){ const id = el.dataset.v; if (S.tab !== 'explore'){ S.tab = 'explore'; render(); $('#view').scrollTop = 0; } const r = ROBOTS[id], cur = [Math.round(sim.fi), Math.round(sim.fj)]; if (Math.abs(cur[0] - r.tile[0]) + Math.abs(cur[1] - r.tile[1]) <= 1) openRobot(id); else if (sim.goTo(r.tile, id)) travelHud(`Walking to ${r.name}…`); },
+  speak(el){ try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(el.dataset.v); u.rate = .92; u.pitch = 1.25; speechSynthesis.speak(u); } catch (e) { toast('Read-aloud is not available on this device.'); } },
+  answer(el){
+    const kid = K(), st = ui.lesson, id = st.id, list = LESSONS[id][bandOf(kid.age)], les = list[(doy() + st.n) % list.length], k = +el.dataset.k;
+    if (k === les.ok){
+      st.right = true;
+      const lt = (kid.learned[dayKey()] = kid.learned[dayKey()] || {});
+      if (!lt[id]){ const amt = st.picked.length ? 1 : 3; lt[id] = 1; kid.coins += amt; addHist(kid.id, 'earn', amt, `Learned ${ROBOTS[id].topic.toLowerCase()} with ${ROBOTS[id].name}`); save(); openSheet(robotSheet(id)); render(); celebrate({ amount: amt, label: `${ROBOTS[id].name} says: great thinking!`, sub: ROBOTS[id].topic + ' lesson', robot: id }); return; }
+    } else if (!st.picked.includes(k)) st.picked.push(k);
+    openSheet(robotSheet(id));
+  },
+  robotNext(el){ const st = ui.lesson; st.n++; st.right = false; st.picked = []; openSheet(robotSheet(el.dataset.v)); },
   done(el){ const t = S.tasks.find(x => x.id === el.dataset.id); const kid = K(); const ok = t.act === 'home' || placed(kid, ACT[t.act].b); ui.done = { id: t.id, act: ok ? t.act : 'home', note: 'All done!', photo: null }; openSheet(doneSheet()); },
   pickAct(el){ ui.done.act = el.dataset.v; openSheet(doneSheet()); },
   pickNote(el){ ui.done.note = el.dataset.v; openSheet(doneSheet()); },
   sendDone(){
     const t = S.tasks.find(x => x.id === ui.done.id);
     Object.assign(t, { status: 'waiting', act: ui.done.act, note: ui.done.note, photo: ui.done.photo, doneAt: Date.now() });
-    if (K().strength < 25) K().strength = 25; // starting a quest wakes them up
+    if (K().strength < 25) K().strength = 25;
+    sim.wt = null; sim.holdUntil = 0; sim.manual = null; sim.path = [];
     save(); render(); openSheet(waitSheet(t)); startCatch();
   },
   wait(el){ const t = S.tasks.find(x => x.id === el.dataset.id); openSheet(waitSheet(t)); startCatch(); },
   closeSheet(){ closeSheet(); },
   sheetBg(el, e){ if (e.target === el) closeSheet(); },
   screenOk(){ ui.screenOk = true; closeSheet(); },
-  quiz(el){
-    const kid = K(); const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 864e5); const q = QUIZ[doy % QUIZ.length];
-    const k = +el.dataset.k; kid.quiz[dayKey()] = k;
-    if (k === q.ok){ kid.coins += 3; addHist(kid.id, 'earn', 3, 'Learning corner'); render(); celebrate({ amount: 3, label: 'Smart thinking!', sub: 'Learning corner coins' }); }
-    else render();
-  },
+  openChat(){ $('#toasts').innerHTML = ''; const kid = K(); const g = claimGifts(kid); save(); render(); openSheet(chatSheet()); if (g) setTimeout(() => celebrate({ amount: g, label: `A gift from ${pname()}!`, sub: 'Coins are flying to your wallet!' }), 300); },
+  kidSay(el){ sendMsg({ kid: K().id, from: 'kid', text: el.dataset.v }); openSheet(chatSheet()); },
+  kidSticker(el){ sendMsg({ kid: K().id, from: 'kid', sticker: el.dataset.v }); openSheet(chatSheet()); },
   cat(el){ ui.cat = el.dataset.v; render(); },
   toMarket(el){ ui.cat = el.dataset.v; S.tab = 'market'; render(); },
   buy(el){
@@ -1589,12 +2144,14 @@ const A = {
     toast(it.kind === 'place' ? `${esc(it.name)} is in your bag. Go to Build to place it!` : it.kind === 'outfit' ? `${esc(it.name)} unlocked! Wear it in Buddies.` : `${esc(it.name)} joined your crew!`, { title: 'New!', icon: it.kind === 'buddy' ? budBox(it.v, { cheer: 1 }) : it.kind === 'place' ? thumbBox(it.t) : outfitBox(kid, it.v), btn: it.kind === 'place' ? `<button class="btn small" data-act="tab" data-v="build">Build</button>` : '' });
   },
   pickInv(el){ ui.buildSel = ui.buildSel === el.dataset.t ? null : el.dataset.t; render(); },
-  tile(el){
-    const kid = K(), i = +el.dataset.i, j = +el.dataset.j;
-    if (isPath(i, j)) return toast('Paths stay clear so your character can walk.');
+  tileAt(i, j){
+    const kid = K(), t = TER(i, j);
     const ob = kid.world.find(o => o.i === i && o.j === j);
     if (ob){ openSheet(`<div class="grab"></div><div style="display:flex;gap:12px;align-items:center"><div class="thumb" style="width:110px;flex:none">${thumbBox(ob.t)}</div><div><h3>${esc(NAMES[ob.t])}</h3><p class="sub">Put it back in your bag? You can place it again anytime.${Object.values(ACT).some(a => a.b === ob.t) && ob.t !== 'home' ? ' Its job stays locked until you place it again.' : ''}</p></div></div><div class="actions"><button class="btn ghost" data-act="closeSheet">Keep it here</button><button class="btn sun" data-act="storeObj" data-id="${ob.id}">Put in bag</button></div>`); return; }
+    if (SCEN.some(o => o.i === i && o.j === j) || Object.values(ROBOTS).some(r => r.tile[0] === i && r.tile[1] === j)) return toast('That spot belongs to the island. Try an empty grass square.');
+    if (!buildable(t)) return toast(t === '=' || t === 'b' ? 'Paths stay clear so everyone can walk.' : t === '~' ? 'You can’t build on water.' : 'Build on grass squares.');
     if (!ui.buildSel) return toast('Pick something from your bag first.');
+    if (Math.round(sim.fi) === i && Math.round(sim.fj) === j) return toast(`${esc(kid.name)} is standing there! Pick another square.`);
     const idx = kid.inv.findIndex(o => o.t === ui.buildSel);
     const it = kid.inv.splice(idx, 1)[0];
     kid.world.push({ id: it.id, t: it.t, i, j });
@@ -1641,7 +2198,7 @@ const A = {
     S.nudges[kid.id].push(`We missed “${t.title}” today${amt ? ` and lost ${amt} coins` : ''}. I'm a bit sleepy. One quest and we're back!`);
     closeSheet(); save(); render();
   },
-  newTask(){ ui.draft = { isNew: true, kid: ui.pk === 'all' ? S.active : ui.pk, title: '', icon: 'paw', coins: 8, penalty: 2, due: '18:00', repeat: 'daily', days: [DOW], act: 'home', example: null }; openSheet(taskSheet()); },
+  newTask(){ ui.draft = { isNew: true, kid: ui.pk === 'all' ? S.order[0] : ui.pk, title: '', icon: 'paw', coins: 8, penalty: 2, due: '18:00', repeat: 'daily', days: [DOW], act: 'home', example: null }; openSheet(taskSheet()); },
   editTask(el){ const t = S.tasks.find(x => x.id === el.dataset.id); ui.draft = { ...t, days: [...(t.days || [])], isNew: false }; openSheet(taskSheet()); },
   dk(el){ ui.draft.kid = el.dataset.v; const kid = kidOf(ui.draft.kid); if (ui.draft.act !== 'home' && !placed(kid, ACT[ui.draft.act].b)) ui.draft.act = 'home'; openSheet(taskSheet()); },
   dIcon(el){ ui.draft.icon = el.dataset.v; openSheet(taskSheet()); },
@@ -1651,16 +2208,36 @@ const A = {
   step(el){ const f = el.dataset.f; ui.draft[f] = clamp(ui.draft[f] + +el.dataset.v, 0, 99); $(f === 'coins' ? '#dCoins' : '#dPen').textContent = ui.draft[f]; },
   saveTask(){
     const d = ui.draft;
-    if (!d.title.trim()) { $('#dTitle').focus(); return toast('Give the task a title first.', { icon: CAM }); }
+    if (!d.title.trim()){ $('#dTitle').focus(); return toast('Give the task a title first.', { icon: CAM }); }
     if ((d.repeat === 'weekly' || d.repeat === 'custom') && !d.days.length) return toast('Pick at least one day.');
     const { isNew, ...t } = d; t.title = t.title.trim();
-    if (isNew){ S.tasks.push({ ...t, id: uid(), status: 'todo' }); } else { const k = S.tasks.findIndex(x => x.id === t.id); S.tasks[k] = { ...S.tasks[k], ...t }; }
+    if (isNew) S.tasks.push({ ...t, id: uid(), status: 'todo' }); else { const k = S.tasks.findIndex(x => x.id === t.id); S.tasks[k] = { ...S.tasks[k], ...t }; }
     closeSheet(); save(); render(); toast(isNew ? `Added “${esc(t.title)}” for ${esc(kidOf(t.kid).name)}.` : 'Task saved.', { icon: headBox(kidOf(t.kid).char) });
   },
   delTask(){ S.tasks = S.tasks.filter(x => x.id !== ui.draft.id); closeSheet(); save(); render(); toast('Task deleted.'); },
+  // chat
+  chatKid(el){ ui.chatKid = el.dataset.v; render(); },
+  chatWith(el){ ui.chatKid = el.dataset.v; S.ptab = 'chat'; render(); },
+  gift(el){ ui.gift = +el.dataset.v; render(); },
+  pSticker(el){ sendMsg({ kid: ui.chatKid, from: 'parent', sticker: el.dataset.v, gift: ui.gift || undefined }); ui.gift = 0; render(); },
+  // kids
+  addKid(){ ui.err = ''; ui.kd = { isNew: true, name: '', age: 7, look: 0, buddy: 'mochi', pin: '' }; openSheet(kidSheet()); },
+  editKid(el){ const k = kidOf(el.dataset.v); ui.err = ''; ui.kd = { isNew: false, id: k.id, name: k.name, age: k.age, look: -1, pin: k.pin || '' }; openSheet(kidSheet()); },
+  kdAge(el){ ui.kd.age = +el.dataset.v; openSheet(kidSheet()); },
+  kdLook(el){ ui.kd.look = +el.dataset.v; openSheet(kidSheet()); },
+  kdBud(el){ ui.kd.buddy = el.dataset.v; openSheet(kidSheet()); },
+  saveKid(){
+    const d = ui.kd; d.name = d.name.trim();
+    if (!d.name){ ui.err = 'Add a name first.'; return openSheet(kidSheet()); }
+    if (d.pin && !/^\d{4}$/.test(d.pin)){ ui.err = 'A PIN needs exactly 4 numbers, or leave it empty.'; return openSheet(kidSheet()); }
+    if (d.isNew){ const kid = makeKid({ name: d.name, age: d.age, look: d.look, buddy: d.buddy, pin: d.pin }); addKidTo(S, kid); S.tasks.push(...starterTasks(kid.id)); closeSheet(); save(); render(); toast(`${esc(kid.name)} is ready! We added 4 starter tasks you can change.`, { icon: headBox(kid.char), ms: 5200 }); }
+    else { const k = kidOf(d.id); k.name = d.name; k.age = d.age; k.pin = d.pin; if (d.look >= 0){ k.char = { ...LOOKS[d.look] }; if (!k.outfits.includes(k.char.acc)) k.outfits.push(k.char.acc); } closeSheet(); save(); render(); toast('Saved.', { icon: headBox(k.char) }); }
+  },
+  removeKid(){ const d = ui.kd; openSheet(`<div class="grab"></div><h3>Remove ${esc(d.name)}?</h3><p class="sub">This deletes ${esc(d.name)}'s world, coins, tasks and messages on this device. It can't be undone.</p><div class="actions"><button class="btn ghost" data-act="closeSheet">Keep ${esc(d.name)}</button><button class="btn red" data-act="removeKidYes">Remove</button></div>`); },
+  removeKidYes(){ const id = ui.kd.id; delete S.kids[id]; S.order = S.order.filter(x => x !== id); S.tasks = S.tasks.filter(t => t.kid !== id); S.msgs = S.msgs.filter(m => m.kid !== id); S.requests = S.requests.filter(r => r.kid !== id); if (ui.chatKid === id) ui.chatKid = null; ui.pk = 'all'; closeSheet(); save(); render(); },
   tog(el){ const k = el.dataset.k; S.settings[k] = !S.settings[k]; if (k === 'screenOn') ui.screenOk = false; render(); },
   reset(){ openSheet(`<div class="grab"></div><h3>Start the demo over?</h3><p class="sub">This puts back Ava, Leo and the sample tasks. Anything you changed is cleared.</p><div class="actions"><button class="btn ghost" data-act="closeSheet">Cancel</button><button class="btn red" data-act="resetYes">Reset demo</button></div>`); },
-  resetYes(){ S = seed(); ui.firstNudge = false; ui.appr = {}; sim.kid = null; closeSheet(); render(); toast('Demo reset.'); }
+  resetYes(){ S = DB.accounts[DB.current].fam = seedDemo(); ui.firstNudge = false; ui.appr = {}; sim.kid = null; DB.session = { role: 'parent' }; closeSheet(); render(); toast('Demo reset.'); }
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
@@ -1669,12 +2246,46 @@ document.addEventListener('click', e => {
 document.addEventListener('input', e => {
   const el = e.target;
   if (el.dataset.f && ui.draft) ui.draft[el.dataset.f] = el.value;
+  if (el.dataset.kd && ui.kd) ui.kd[el.dataset.kd] = el.value.replace(el.dataset.kd === 'pin' ? /\D/g : /(?!)/, '');
   if (el.dataset.set){ const k = el.dataset.set; if (k === 'parentName') S.parentName = el.value.trim() || 'Parent'; else S.settings[k] = el.type === 'number' ? Math.max(0, +el.value || 0) : el.value; save(); }
 });
 document.addEventListener('change', e => {
   const el = e.target;
   if (el.dataset.photo && el.files && el.files[0]) readPhoto(el.files[0], url => { if (el.dataset.photo === 'done'){ ui.done.photo = url; openSheet(doneSheet()); } else { ui.draft.example = url; openSheet(taskSheet()); } });
-  if (el.dataset.set && S.mode === 'parent') render();
+  if (el.dataset.set && role() === 'parent') render();
+});
+document.addEventListener('submit', async e => {
+  const f = e.target.dataset.form; if (!f) return;
+  e.preventDefault();
+  const val = id => ($(id) ? $(id).value.trim() : '');
+  if (f === 'signup'){
+    const name = val('#suName'), email = val('#suEmail').toLowerCase(), pw = $('#suPw').value;
+    ui.err = !name ? 'Add your name.' : !/^\S+@\S+\.\S+$/.test(email) ? 'That email doesn’t look right.' : pw.length < 8 ? 'Use a password with at least 8 characters.' : !$('#suAgree').checked ? 'Please confirm you are the parent or guardian.' : DB.accounts[email] ? 'There is already an account with that email. Try signing in.' : '';
+    if (ui.err) return render();
+    const salt = uid() + uid();
+    DB.accounts[email] = { salt, hash: await hashPw(pw, salt), fam: newFamily(name, email) };
+    DB.current = email; S = DB.accounts[email].fam; DB.session = { role: 'parent' }; ui.err = ''; sim.kid = null;
+    render(); setTimeout(() => A.addKid(), 250);
+  }
+  if (f === 'login'){
+    const email = val('#liEmail').toLowerCase(), pw = $('#liPw').value, acc = DB.accounts[email];
+    if (!acc || acc.demo || (await hashPw(pw, acc.salt)) !== acc.hash){ ui.err = 'Email or password is not right.'; return render(); }
+    DB.current = email; S = acc.fam; newDay(); DB.session = null; ui.err = ''; sim.kid = null; render();
+  }
+  if (f === 'unlock'){
+    const acc = DB.accounts[DB.current];
+    if ((await hashPw($('#puPw').value, acc.salt)) !== acc.hash){ ui.err = 'That password is not right.'; openSheet(parentGate()); return; }
+    closeSheet(); DB.session = { role: 'parent' }; render();
+  }
+  if (f === 'pchat'){
+    const text = val('#pChatIn'); if (!text && !ui.gift) return;
+    sendMsg({ kid: ui.chatKid, from: 'parent', text: text || 'A little gift for you!', gift: ui.gift || undefined }); ui.gift = 0; render();
+    const i = $('#pChatIn'); if (i) i.focus();
+  }
+  if (f === 'kchat'){
+    const text = val('#kChatIn'); if (!text) return;
+    sendMsg({ kid: K().id, from: 'kid', text }); openSheet(chatSheet()); const i = $('#kChatIn'); if (i) i.focus();
+  }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.sheet) closeSheet(); });
 
