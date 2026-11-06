@@ -260,7 +260,7 @@ nav#tabs button[aria-current="page"] .ti{background:var(--tc,#FFE38A);transform:
 input[type=time].num{width:104px}
 
 /* ---------- sheets ---------- */
-.sheet-wrap{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(32,24,70,.42);backdrop-filter:blur(3px);animation:fade .18s}
+.sheet-wrap{position:fixed;inset:0;z-index:59;display:flex;align-items:flex-end;justify-content:center;background:rgba(32,24,70,.42);backdrop-filter:blur(3px);animation:fade .18s}
 @keyframes fade{from{opacity:0}}
 .sheet{width:100%;max-width:480px;max-height:92%;overflow-y:auto;background:var(--app);border-radius:30px 30px 0 0;padding-block:8px calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px;animation:up .26s cubic-bezier(.2,1.3,.4,1)}
 @keyframes up{from{transform:translateY(60%)}}
@@ -829,6 +829,20 @@ body.worldfull nav#tabs{visibility:hidden}
 .dots i{width:7px;height:7px;border-radius:50%;background:var(--grape);animation:hintBob .9s ease-in-out infinite}
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 .pill.off{background:#F1F1F6;color:#8A86A8}
+.gate{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:6px 4px 12px}
+.gate > svg{width:110px;height:110px}
+.gate-lock{position:relative;width:130px;height:120px}
+.gate-lock svg{width:100%;height:100%}
+.gate-pad{position:absolute;right:0;bottom:4px;font-size:36px;animation:wig 2s ease-in-out infinite;transform-origin:50% 0}
+.gate h3{font-size:22px}
+.gate .saybox,.gate > div:not(.gate-lock):not(.gate-dots):not(.gate-list):not(.actions){width:100%}
+.gate-dots{display:flex;gap:8px;justify-content:center}
+.gate-dots span{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:17px;background:#fff;box-shadow:inset 0 0 0 2px var(--line);color:var(--ink-2)}
+.gate-dots span.on{background:#2FBF5B;color:#fff;box-shadow:0 3px 0 #1E8E40}
+.gate-list{display:flex;flex-direction:column;gap:6px;width:100%}
+.gate-t{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:6px 12px;box-shadow:inset 0 0 0 1.5px var(--line);text-align:left}
+.gate-t svg{width:34px;height:34px;flex:none}
+.playleft{display:block;font-size:11.5px;font-weight:800;color:#7B5CFA}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -6283,6 +6297,99 @@ try {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 } catch (e) {}
+
+// =====================================================================
+//  v13 — full-screen world fixes, and "chores first, then games" with a play-time limit
+// =====================================================================
+
+// ---------- 1. FULL-SCREEN WORLD stays one live world ----------
+// Any redraw (leaving a place, finishing a lesson, coins landing) builds a fresh world in the page.
+// Move that live one into full screen and throw away the old frozen copy, so taps always move her.
+const _renderFull = render;
+render = function(){
+  _renderFull();
+  const fresh = document.querySelector('#view .world-wrap');
+  if (ui.worldFull && fresh){ setFull(true); return; }
+  document.querySelectorAll('body > .world-wrap').forEach(x => x.remove());
+  if (ui.worldFull){ ui.worldFull = false; document.body.classList.remove('worldfull'); }
+};
+
+// ---------- 2. CHORES FIRST, THEN GAMES ----------
+const LEARN_TABS = { school: '*', library: '*' };
+const isLearnTab = (room, tab) => LEARN_TABS[room] === '*' || (LEARN_TABS[room] || []).includes?.(tab);
+const gateSet = () => { const s = S.settings; return { on: !!s.gateOn, n: s.gateN || 2, min: s.playMin || 0 }; };
+function choresToday(kid){
+  const list = todays(kid.id), done = list.filter(t => t.status === 'waiting' || t.status === 'approved');
+  return { list, done: done.length, need: Math.min(gateSet().n, list.length) };
+}
+const playMsToday = kid => (kid.playMs && kid.playMs[dayKey()]) || 0;
+function playLock(roomT, tabK){
+  if (!isKid() || isLearnTab(roomT, tabK)) return null;
+  const g = gateSet(), kid = K(); if (!kid) return null;
+  if (g.on){ const c = choresToday(kid); if (c.done < c.need) return { why: 'chores', c }; }
+  if (g.min && playMsToday(kid) >= g.min * 60000) return { why: 'time' };
+  return null;
+}
+function lockHTML(roomT, lk){
+  const kid = K(), learn = Object.keys(LEARN_TABS).filter(k => kid.world.some(o => o.t === k));
+  const learnBtns = learn.length ? `<p class="note-s center">You can still learn while you wait:</p><div class="actions">${learn.map(k => `<button class="btn ghost" data-act="lockLearn" data-v="${k}">${esc(ROOMS[k].title)}</button>`).join('')}</div>` : '';
+  if (lk.why === 'time') return `<div class="gate">${budBox(kid.buddy, { cheer: 0 })}<h3>Play time is all done for today!</h3>${sayBox(`Great playing today, ${esc(kid.name)}! The games will be ready again tomorrow.`)}${learnBtns}</div>`;
+  const c = lk.c, left = c.need - c.done;
+  return `<div class="gate">
+    <div class="gate-lock">${budBox(kid.buddy, { cheer: 1 })}<span class="gate-pad">🔒</span></div>
+    <h3>Do ${left} more chore${left === 1 ? '' : 's'} to play!</h3>
+    ${sayBox(`${esc(pname())} says: finish ${c.need} chore${c.need === 1 ? '' : 's'} first, then the games open up. You did ${c.done}!`)}
+    <div class="gate-dots">${[...Array(c.need)].map((_, k) => `<span class="${k < c.done ? 'on' : ''}">${k < c.done ? '✓' : k + 1}</span>`).join('')}</div>
+    <div class="gate-list">${c.list.filter(t => t.status === 'todo').slice(0, 4).map(t => `<div class="gate-t">${icon(t.icon)}<b>${esc(t.title)}</b></div>`).join('')}</div>
+    <div class="actions"><button class="btn big sun" data-act="lockChores">Go to my chores</button></div>
+    ${learnBtns}
+  </div>`;
+}
+const _drawRoomGate = drawRoom;
+drawRoom = function(){
+  const r = ui.room; if (!r || !ROOMS[r.t]) return _drawRoomGate();
+  const def = ROOMS[r.t], tab = def.tabs.find(t => t[0] === r.tab) || def.tabs[0];
+  const lk = playLock(r.t, tab[0]);
+  if (lk){ const h = tab[2], i = tab[3]; tab[2] = () => lockHTML(r.t, lk); tab[3] = null; try { _drawRoomGate(); } finally { tab[2] = h; tab[3] = i; } }
+  else _drawRoomGate();
+  playChip();
+};
+A.lockChores = function(){ roomClose(); if (ui.worldFull) setFull(false); S.tab = 'home'; render(); };
+A.lockLearn = function(el){ const k = el.dataset.v, ob = K().world.find(o => o.t === k); if (ob) openRoom(ob); };
+// play-time counter: only while a play game is open and the app is on screen
+function playChip(){
+  const r = ui.room, el = document.querySelector('#room .rm-title small'); if (!r || !el) return;
+  const g = gateSet(), kid = K(), tab = (ROOMS[r.t].tabs.find(t => t[0] === r.tab) || ROOMS[r.t].tabs[0])[0];
+  let chip = document.getElementById('playLeft');
+  if (!isKid() || !g.min || isLearnTab(r.t, tab) || playLock(r.t, tab)){ if (chip) chip.remove(); return; }
+  const left = Math.max(0, Math.ceil((g.min * 60000 - playMsToday(kid)) / 60000));
+  if (!chip){ chip = document.createElement('span'); chip.id = 'playLeft'; chip.className = 'playleft'; el.after(chip); }
+  chip.textContent = left > 0 ? `⏱ ${left} min of play left` : '⏱ Play time done';
+}
+let playTick = 0;
+setInterval(() => {
+  const r = ui.room; if (!r || !S || !isKid() || document.hidden) return;
+  const g = gateSet(); if (!g.min) return;
+  const tab = (ROOMS[r.t] && (ROOMS[r.t].tabs.find(t => t[0] === r.tab) || ROOMS[r.t].tabs[0]))[0];
+  if (isLearnTab(r.t, tab) || playLock(r.t, tab)) return;
+  const kid = K(); kid.playMs = kid.playMs || {}; const d = dayKey();
+  Object.keys(kid.playMs).forEach(k => { if (k !== d) delete kid.playMs[k]; });
+  kid.playMs[d] = (kid.playMs[d] || 0) + 5000;
+  if (++playTick % 6 === 0) save();
+  if (kid.playMs[d] >= g.min * 60000){ save(); drawRoom(); say('Play time is all done for today!', { force: true }); }
+  else playChip();
+}, 5000);
+// parent controls
+const _soundCtlGate = soundControls;
+soundControls = function(){
+  const g = gateSet();
+  return _soundCtlGate() + `<div class="card"><div class="setrow"><div><b>Chores first, then games</b><small>Games in the places (pizza, salon, pool, fishing and more) open only after today's chores are done or waiting for your OK. School, Library and the teachers are always open.</small></div><button class="tog" data-act="gateToggle" aria-pressed="${g.on}" aria-label="Chores first"></button></div>
+    ${g.on ? `<div class="field"><span class="flabel">Chores to finish first each day</span><div class="chips">${[1, 2, 3, 4, 5].map(n => `<button class="chip" data-act="gateN" data-v="${n}" aria-pressed="${g.n === n}">${n}</button>`).join('')}</div><p class="note-s">If a kid has fewer chores today, they need to finish all of them. No chores today means games are open.</p></div>` : ''}
+    <div class="field"><span class="flabel">Game time limit each day</span><div class="chips">${[[0, 'No limit'], [15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '1 hour']].map(([m, l]) => `<button class="chip" data-act="playMin" data-v="${m}" aria-pressed="${g.min === m}">${l}</button>`).join('')}</div><p class="note-s">Only time in games counts. Learning places never use it up.${S.order.length ? ' Today: ' + S.order.map(id => `${esc(kidOf(id).name)} ${Math.round(playMsToday(kidOf(id)) / 60000)} min`).join(', ') + '.' : ''}</p></div></div>`;
+};
+A.gateToggle = function(){ S.settings.gateOn = !S.settings.gateOn; if (!S.settings.gateN) S.settings.gateN = 2; save(); render(); };
+A.gateN = function(el){ S.settings.gateN = +el.dataset.v; save(); render(); };
+A.playMin = function(el){ S.settings.playMin = +el.dataset.v; save(); render(); };
 
 injectDefs();
 injectDefs2();
