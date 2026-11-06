@@ -703,6 +703,65 @@ h2 .hearbtn,h3 .hearbtn{width:28px;height:28px}
 .hearagain .ha-bud svg{width:34px;height:34px}
 .hearagain:active{transform:translateY(3px);box-shadow:0 1px 0 var(--sea-d)}
 
+/* ---------- v8 ---------- */
+.world-wrap{overflow:hidden;overflow:clip}
+.mbtn.need{background:var(--grape);color:#fff;animation:needp 1.2s ease-in-out infinite}
+@keyframes needp{50%{box-shadow:0 0 0 7px rgba(123,92,250,.25)}}
+#chore{position:fixed;top:0;bottom:0;left:0;right:0;z-index:61;display:flex;flex-direction:column;max-width:480px;margin:0 auto;background:linear-gradient(180deg,#FFF6D8 0%,#F2F9FF 60%);padding-top:env(safe-area-inset-top,0px);animation:roomIn .28s cubic-bezier(.2,1.2,.4,1)}
+.chore-timer{font-family:var(--display);font-weight:800;font-size:22px;color:var(--grape);background:#fff;border-radius:14px;padding:2px 12px;box-shadow:0 2px 0 var(--line);font-variant-numeric:tabular-nums}
+.chore-count{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(255,255,255,.95);border-radius:999px;padding:5px 14px;font-family:var(--display);font-weight:800;font-size:17px;color:var(--grape);box-shadow:0 4px 10px -4px rgba(43,37,80,.3);white-space:nowrap}
+.gobtn{gap:4px}
+.quest.doing{box-shadow:0 0 0 3px var(--sea),0 3px 0 var(--line)}
+.doingtag{color:var(--sea-d);font-weight:900;animation:twk 1.6s ease-in-out infinite}
+.world-wrap .wfull-x,.world-wrap .wfull-bar{display:none}
+.world-wrap.full{position:fixed;top:0;bottom:0;left:0;right:0;z-index:58;border-radius:0;aspect-ratio:auto;height:auto;max-width:480px;margin:0 auto}
+.world-wrap.full > svg.world{touch-action:none}
+.world-wrap.full .wfull-btn{display:none}
+.world-wrap.full .wfull-x{display:grid;position:absolute;z-index:6;left:12px;top:calc(56px + env(safe-area-inset-top,0px));width:44px;height:44px;border-radius:50%;background:#fff;font-size:20px;font-weight:900;place-items:center;box-shadow:0 4px 0 #C9D6EE}
+.world-wrap.full .wfull-bar{display:block;position:absolute;z-index:5;left:0;right:0;bottom:0;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(0deg,rgba(43,37,80,.35),transparent)}
+.world-wrap.full .wfull-bar .chips{flex-wrap:nowrap;overflow-x:auto}
+.world-wrap.full .wfull-bar .chip{flex:none}
+.world-wrap.full .workbar{bottom:62px}
+.world-wrap.full .hud.tl,.world-wrap.full .hud.tr,.world-wrap.full .wctl{top:calc(10px + env(safe-area-inset-top,0px))}
+.world-wrap.full .wctl{top:calc(56px + env(safe-area-inset-top,0px))}
+body.worldfull nav#tabs{visibility:hidden}
+.wxpick{position:absolute;z-index:7;right:56px;top:50px;background:#fff;border-radius:20px;padding:10px;box-shadow:0 14px 30px -10px rgba(43,37,80,.45);width:min(260px,70%)}
+.wxpick b{display:block;font-family:var(--display);margin-bottom:6px}
+.wxrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.wxrow button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;background:var(--card-2);font-weight:800;font-size:10.5px;line-height:1.1}
+.wxrow button svg{width:28px;height:28px}
+.wxrow button[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--grape);background:#fff}
+.sky-rain{background:linear-gradient(180deg,#7D8FAD 0%,#A9B9CF 55%,#DCE4EE 100%)}
+.sky-rain .skysun{opacity:.25}
+.sky-rain .cloud{filter:grayscale(.5) brightness(.9)}
+.sky-rain .rainbow{display:none}
+.p-rain{top:-8%!important;width:2px;height:16px;background:linear-gradient(transparent,rgba(255,255,255,.85));transform:rotate(14deg);animation:rainfall linear infinite}
+@keyframes rainfall{to{transform:translate(-90px,560px) rotate(14deg)}}
+.p-ff{width:7px;height:7px;border-radius:50%;background:#FFF6A0;box-shadow:0 0 10px 3px rgba(255,240,140,.8);animation:ffly ease-in-out infinite alternate}
+@keyframes ffly{0%{transform:translate(0,0);opacity:.2}50%{opacity:1}100%{transform:translate(26px,-30px);opacity:.4}}
+.npc-say{position:absolute;z-index:6;transform:translate(-50%,-100%);background:#fff;border-radius:16px;padding:6px 10px;font-weight:800;font-size:12.5px;max-width:170px;box-shadow:0 8px 18px -8px rgba(43,37,80,.45);pointer-events:none;animation:pop2 .3s}
+.npc-say b{display:block;font-family:var(--display);color:var(--berry);font-size:12px}
+.npc-say:after{content:"";position:absolute;left:50%;bottom:-7px;margin-left:-7px;border:7px solid transparent;border-top-color:#fff;border-bottom:0}
+.talk .bud{cursor:pointer;padding:0}
+.petjump{animation:petj .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes petj{30%{transform:translateY(-14px) rotate(-8deg) scale(1.08)}60%{transform:translateY(0) rotate(6deg)}}
+.pet-heart{position:fixed;z-index:90;width:22px;height:22px;pointer-events:none;animation:petheart 1.3s ease-out forwards}
+.pet-heart svg{width:100%;height:100%}
+@keyframes petheart{from{transform:translateY(0) scale(.5);opacity:1}to{transform:translateY(-70px) scale(1.2);opacity:0}}
+.giftcard{display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#FFF0F6,#FFF8DC)}
+.giftbox{width:76px;height:76px;flex:none;padding:0}
+.giftbox svg{width:100%;height:100%;animation:hov 2s ease-in-out infinite}
+.giftshake svg{animation:gshake .45s!important}
+@keyframes gshake{20%{transform:rotate(-14deg) scale(1.08)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg)}80%{transform:rotate(5deg)}}
+.giftcard b{display:block;font-family:var(--display);font-size:19px}
+.giftcard small{display:block;color:var(--ink-2);font-weight:700}
+.gifttaps{display:flex;gap:6px;margin-top:6px}
+.gifttaps i{width:14px;height:14px;border-radius:50%;background:#F3D6E2}
+.gifttaps i.on{background:var(--berry)}
+.bigcode{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:.18em;text-align:center;color:var(--grape);background:#fff;border-radius:18px;padding:8px;box-shadow:inset 0 0 0 2px var(--line)}
+.vol{width:100%;accent-color:var(--grape);margin-top:6px}
+.verify .hero-art svg{width:120px;height:auto;margin:0 auto;display:block}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -1821,12 +1880,12 @@ function parentGate(){
 // ---------- KID: home ----------
 function vHome(){
   const kid = K(), list = todays(kid.id);
-  const waiting = list.find(t => t.status === 'waiting');
+  const waiting = list.find(t => t.status === 'waiting') || list.find(t => isDoing(t));
   const doneN = list.filter(t => t.status === 'approved').length;
   const tired = kid.strength < 25;
   const hud = `<div class="hud tl" title="Energy">${STR_ICON}<div class="meter"><i style="width:${kid.strength}%"></i></div>${kid.strength}%</div>
     <div class="hud tr">${FLAME}${kid.streak} day streak</div>
-    ${waiting ? `<div class="workbar"><span class="dot"></span><span>${esc(kid.name)} is ${ACT[waiting.act].verb} at ${ACT[waiting.act].place} while ${esc(pname())} checks “${esc(waiting.title)}” · <b id="workCount">${workCount(waiting)} ${WORKN[waiting.act] || 'jobs done'}!</b></span><button class="btn small sun" data-act="wait" data-id="${waiting.id}">Play</button></div>`
+    ${waiting ? `<div class="workbar"><span class="dot"></span><span>${esc(kid.name)} is ${ACT[waiting.act].verb} at ${ACT[waiting.act].place} ${waiting.status === 'waiting' ? `while ${esc(pname())} checks “${esc(waiting.title)}”` : `while you do “${esc(waiting.title)}” for real`} · <b id="workCount">${workCount(waiting)} ${WORKN[waiting.act] || 'jobs done'}!</b></span>${waiting.status === 'waiting' ? `<button class="btn small sun" data-act="wait" data-id="${waiting.id}">Play</button>` : `<button class="btn small sun" data-act="choreStart" data-id="${waiting.id}">Watch</button>`}</div>`
       : tired ? `<div class="workbar tired"><span class="dot"></span><span>${esc(kid.name)} is too tired to travel or work. Finish a quest to recharge!</span></div>` : ''}`;
   const next = list.filter(t => t.status === 'todo').sort((a, b) => a.due.localeCompare(b.due))[0];
   const B = BUDDIES[kid.buddy];
@@ -1837,7 +1896,8 @@ function vHome(){
     : `Every quest is done today! Let's go explore and meet the robots.`;
   return `${worldBlock(kid, { hud })}
   ${eventCard(kid)}
-  <div class="talk"><div class="bud">${budBox(kid.buddy, { cheer: !next })}</div><p class="say"><small>${B.name} says</small>${line}</p></div>
+  ${giftCard(kid)}
+  <div class="talk"><button class="bud" data-act="petBuddy" aria-label="Pet ${B.name}">${budBox(kid.buddy, { cheer: !next })}</button><p class="say"><small>${B.name} says</small>${line}</p></div>
   <div class="sec-h"><h2>Today's quests</h2><small>${doneN} of ${list.length} done</small></div>
   <div class="quests">${list.length ? list.sort(qsort).map(questCard).join('') : `<div class="card empty">${budBox(kid.buddy)}<h3>No quests today</h3><p>Ask ${esc(pname())} to add one.</p></div>`}</div>
   ${placesCard(kid)}
@@ -1980,7 +2040,7 @@ function vTasks(){
   }).join('')}<p class="note-s">Fair play: a reminder always goes first. Coin loss is capped at ${S.settings.lossCap} a day, never goes below zero, and bought items are never taken away.</p></div>` : ''}
   <div class="tlist">${ts.map(t => {
     const kid = kidOf(t.kid);
-    const st = { todo: overdue(t) ? '<span class="pill miss">Late</span>' : '<span class="pill" style="background:#EEF2FB;color:#5F5A86">To do</span>', waiting: '<span class="pill wait">Check it</span>', approved: '<span class="pill ok">Done</span>', missed: '<span class="pill miss">Missed</span>' }[t.status];
+    const st = { todo: isDoing(t) ? '<span class="pill wait">Doing it now</span>' : overdue(t) ? '<span class="pill miss">Late</span>' : '<span class="pill" style="background:#EEF2FB;color:#5F5A86">To do</span>', waiting: '<span class="pill wait">Check it</span>', approved: '<span class="pill ok">Done</span>', missed: '<span class="pill miss">Missed</span>' }[t.status];
     return `<button class="trow" data-act="editTask" data-id="${t.id}" style="text-align:left;width:100%">${icon(t.icon)}<div style="flex:1;min-width:0"><h4>${esc(t.title)}</h4><div class="qmeta"><span>${esc(kid.name)}</span><span>· ${repeatTxt(t)} by ${fmtTime(t.due)}</span><span class="coinchip">${COIN(15)}${t.coins}</span><span style="color:var(--danger)">−${t.penalty}</span></div></div>${st}</button>`;
   }).join('') || '<div class="card empty"><h3>No tasks yet</h3><p>Tap “New task” to add one.</p></div>'}</div>`;
 }
@@ -2091,7 +2151,7 @@ function vControls(){
   </div>
   ${soundControls()}${evControls()}<div class="card">
     <div class="setrow"><div><b>Account</b><small>${S.demo ? 'Demo family (no password)' : esc(S.email)}</small></div><button class="btn small ghost" data-act="signOut">Sign out</button></div>
-    <div class="setrow"><div><b>Cloud sync</b><small>Not connected yet. This prototype saves your family on this device only.</small></div></div>
+    
     <div class="setrow"><div><b>Privacy</b><small>Kid profiles live under your account. Kids never enter an email, no personal info is shown, and kids can't spend real money.</small></div></div>
     ${S.demo ? `<div class="setrow"><div><b>Start the demo over</b><small>Puts back the sample family</small></div><button class="btn small ghost" data-act="reset">Reset</button></div>` : ''}</div>`;
 }
@@ -2287,7 +2347,7 @@ const sim = {
     if (!this.svg || !this.svg.isConnected) return;
     const dt = Math.min(.05, (ts - (this.last || ts)) / 1000); this.last = ts;
     const kid = K(); if (!kid) return;
-    const w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting'), tired = kid.strength < 25;
+    const w = workTask(kid.id), tired = kid.strength < 25;
     const cur = [Math.round(this.fi), Math.round(this.fj)];
     if (!this.path.length && !this.manual){
       if (w && ts > this.holdUntil){ const wt = this.workKey === w.id + kid.id && this.wt ? this.wt : (this.wt = this.workTile(w.act)); this.workKey = w.id + kid.id; if (wt && (wt[0] !== cur[0] || wt[1] !== cur[1])){ const p = this.bfs(cur, wt); if (p) this.path = p; } }
@@ -2315,7 +2375,7 @@ const sim = {
     this.paint(); this.placeAll();
   },
   paint(force){
-    const kid = K(), w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting'), tired = kid.strength < 25;
+    const kid = K(), w = workTask(kid.id), tired = kid.strength < 25;
     const mode = (this.working ? 'w:' + w.act + ':' + workCount(w) : tired ? 'tired' : 'idle') + (this.moving ? ':m' : '') + JSON.stringify(kid.char) + kid.buddy;
     if (this.working) updateWorkCounters(w);
     if (mode !== this.key || force){
@@ -4646,7 +4706,7 @@ A.robotNext = function(el){ const st = ui.lesson; st.cur = null; st.right = fals
 const WA = { restaurant: ['-16;10;-16', '.45'], school: ['0;-10;0', '1.3'], boutique: ['-28;22;-28', '.8'], greenhouse: ['0;26;26;0', '1.6'], hotel: ['-32;26;-32', '.55'], home: ['-24;14;-24', '.6'], fish: ['0;-6;0', '2.2'] };
 function workAnim(w){ const a = WA[w]; if (!a) return ''; return `<animateTransform attributeName="transform" type="rotate" values="${a[0].split(';').map(v => v + ' 18 -34').join(';')}" dur="${a[1]}s" repeatCount="indefinite"/>`; }
 const WORKN = { restaurant: 'plates sparkling', school: 'pages read', boutique: 'poses struck', greenhouse: 'plants watered', hotel: 'rooms dusted', home: 'spots swept' };
-const workCount = w => Math.min(99, 1 + Math.floor((Date.now() - (w.doneAt || Date.now())) / 5000));
+const workCount = w => Math.min(99, 1 + Math.floor((Date.now() - ((w.status === 'waiting' ? w.doneAt : w.doing) || Date.now())) / 5000));
 function workFx(act){
   const d = k => ['', 'd2', 'd3'][k % 3];
   switch (act){
@@ -4886,7 +4946,7 @@ function screenNarration(){
   switch (S.tab){
     case 'home': {
       const todo = todays(kid.id).filter(t => t.status === 'todo').length, buddyLine = txt('.talk .say').replace(/^[^.]*says\.\s*/i, '');
-      return `Hi ${nm}! ${buddyLine} You have ${todo} ${todo === 1 ? 'chore' : 'chores'} to do today. Tap a speaker to hear a chore. When you finish one, tap the green Done button.`;
+      return `Hi ${nm}! ${buddyLine} You have ${todo} ${todo === 1 ? 'chore' : 'chores'} to do today. Tap a speaker to hear a chore. Tap the yellow Start button, and your character does the chore with you! You can also pet me by tapping me.`;
     }
     case 'explore': return 'Explore your island! Tap anywhere to walk there. Tap a robot to learn something new.';
     case 'build': return 'Build mode! Tap something in your bag. Then tap a glowing square to put it on your island.';
@@ -4901,7 +4961,7 @@ const SPK = `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 const hearBtn = text => `<button class="hearbtn" data-act="hear" data-v="${esc(cleanSpeech(text))}" aria-label="Hear it">${SPK}</button>`;
 function questSpeech(q){
   const h = q.querySelector('h3'), title = h ? h.textContent : '', coins = (q.querySelector('.coinchip') || {}).textContent || '';
-  const st = q.querySelector('.pill.wait') ? 'Waiting for your grown-up to check it.' : q.querySelector('.pill.ok') ? 'All done. Great job!' : q.querySelector('.pill.miss') ? 'This one was missed.' : 'When you finish, tap the green Done button.';
+  const st = q.querySelector('.pill.wait') ? 'Waiting for your grown-up to check it.' : q.querySelector('.pill.ok') ? 'All done. Great job!' : q.querySelector('.pill.miss') ? 'This one was missed.' : 'Tap the yellow Start button and do it together with your character!';
   return `${title}. You earn ${coins.trim()} coins. ${st}`;
 }
 function addHears(){
@@ -5001,6 +5061,419 @@ function addRosie(F){
 }
 const _seedRA = seedDemo; seedDemo = function(){ const F = _seedRA(); addRosie(F); return F; };
 function migrateV7(){ Object.values(DB.accounts).forEach(acc => { if (acc.demo && acc.fam && acc.fam.kids) addRosie(acc.fam); }); save(); }
+
+// =====================================================================
+//  v8 — music that really plays, a friendlier voice, Chore Time, full-screen world,
+//       weather, more fun in the world, and accounts that sync across phones
+// =====================================================================
+
+// ---------- 1. MUSIC THAT REALLY PLAYS (iPhone/iPad + silent switch) ----------
+MUS.vol = .6; try { const v = JSON.parse(localStorage.getItem('cb.sound') || '{}'); if (v.vol != null) MUS.vol = v.vol; } catch (e) {}
+const saveSound2 = () => { try { localStorage.setItem('cb.sound', JSON.stringify({ on: MUS.on, sfx: MUS.sfx, vol: MUS.vol })); } catch (e) {} };
+function silentWav(){ const n = 2205, b = new Uint8Array(44 + n), v = new DataView(b.buffer), w = (o, s) => [...s].forEach((c, i) => b[o + i] = c.charCodeAt(0)); w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 22050, true); v.setUint32(28, 22050, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, 'data'); v.setUint32(40, n, true); b.fill(128, 44); let s = ''; b.forEach(x => s += String.fromCharCode(x)); return 'data:audio/wav;base64,' + btoa(s); }
+function unlockAudio(){
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  audioStart(); if (!MUS.ctx) return;
+  if (MUS.master) MUS.master.gain.value = MUS.vol;
+  try { const s = MUS.ctx.createBufferSource(); s.buffer = MUS.ctx.createBuffer(1, 1, 22050); s.connect(MUS.ctx.destination); s.start(0); } catch (e) {}
+  if (!MUS.html){ MUS.html = true; try { const a = new Audio(silentWav()); a.loop = true; a.setAttribute('playsinline', ''); a.play().catch(() => { MUS.html = false; }); MUS.silentEl = a; } catch (e) { MUS.html = false; } }
+  if (MUS.ctx.state !== 'running') MUS.ctx.resume().then(() => { MUS.cur = undefined; musicUpdate(); }).catch(() => {}); else musicUpdate();
+}
+['pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { MUS.started = true; if (!MUS.ctx || MUS.ctx.state !== 'running' || !MUS.html) unlockAudio(); }, { capture: true, passive: true }));
+function duck(on){ if (!MUS.master || !MUS.ctx) return; MUS.master.gain.setTargetAtTime(on ? MUS.vol * .22 : MUS.vol, MUS.ctx.currentTime, .15); }
+const _updBtn = updateMusicBtn;
+updateMusicBtn = function(){ _updBtn(); const b = $('#musicBtn'); if (!b) return; const waiting = musicAllowed() && (!MUS.ctx || MUS.ctx.state !== 'running'); b.classList.toggle('need', waiting); b.title = waiting ? 'Tap to start the music' : ''; };
+A.musicVol = el => { MUS.vol = +el.value; saveSound2(); if (MUS.master) MUS.master.gain.value = MUS.vol; };
+
+// ---------- 2. A FRIENDLIER VOICE ----------
+const VPREF = { name: '', rate: .95, pitch: 1.1 };
+try { Object.assign(VPREF, JSON.parse(localStorage.getItem('cb.voice') || '{}')); } catch (e) {}
+const saveVoice = () => { try { localStorage.setItem('cb.voice', JSON.stringify(VPREF)); } catch (e) {} };
+function voiceScore(v){
+  if (!/^en/i.test(v.lang)) return -99; let s = 0;
+  if (/en[-_](US|GB|AU|CA|IE|NZ)/i.test(v.lang)) s += 2;
+  if (/natural|neural|premium|enhanced|online/i.test(v.name)) s += 12;
+  if (/Samantha|Ava|Allison|Nicky|Aria|Jenny|Google US English|Google UK English Female|Karen|Moira|Serena|Libby|Sonia|Michelle|Emma|Susan|Joanna|Salli|Kendra|Ivy/i.test(v.name)) s += 7;
+  if (/compact|eSpeak|Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Deranged|Hysterical|Jester|Organ|Superstar|Trinoids|Whisper|Zarvox|Bahh|Wobble|Junior|Ralph|Kathy|Grandpa|Grandma|Rocko|Shelley|Reed|Eddy|Flo/i.test(v.name)) s -= 25;
+  return s;
+}
+function goodVoices(){ try { return speechSynthesis.getVoices().filter(v => voiceScore(v) > -50).sort((a, b) => voiceScore(b) - voiceScore(a)); } catch (e) { return []; } }
+function pickVoice(){ const vs = goodVoices(); SAY.voice = (VPREF.name && vs.find(v => v.name === VPREF.name)) || vs[0] || null; }
+function say(text, o = {}){
+  const t = cleanSpeech(text); if (!t) return;
+  if (!o.noRepeat) SAY.last = t;
+  try {
+    const ss = window.speechSynthesis; if (!ss) return;
+    if (!o.queue) ss.cancel();
+    const u = new SpeechSynthesisUtterance(t); if (!SAY.voice) pickVoice(); if (SAY.voice){ u.voice = SAY.voice; u.lang = SAY.voice.lang; }
+    u.rate = VPREF.rate; u.pitch = VPREF.pitch; u.volume = 1;
+    u.onstart = () => duck(true); u.onend = () => duck(false); u.onerror = () => duck(false);
+    clearTimeout(SAY.duckT); SAY.duckT = setTimeout(() => duck(false), 1500 + t.length * 85 / VPREF.rate);
+    ss.speak(u);
+  } catch (e) {}
+}
+function voiceControls(){
+  const vs = goodVoices().slice(0, 14);
+  return `<div class="card"><div class="setrow"><div><b>Buddy voice</b><small>The voice that reads things out loud. Voices with “Natural”, “Enhanced” or “Premium” in the name sound the friendliest.</small></div><button class="btn small sea" data-act="voiceTest">Test</button></div>
+  <div class="field" style="padding:6px 0"><select class="text" id="voiceSel" data-voice="name">${vs.length ? vs.map(v => `<option value="${esc(v.name)}" ${SAY.voice && SAY.voice.name === v.name ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('') : '<option>Default voice</option>'}</select>
+  <div class="chips">${[['Slow', .8], ['Normal', .95], ['Quick', 1.08]].map(([l, r]) => `<button class="chip" data-act="voiceRate" data-v="${r}" aria-pressed="${VPREF.rate === r}">${l}</button>`).join('')}${[['Warm', 1], ['Bright', 1.1], ['Cartoony', 1.3]].map(([l, p]) => `<button class="chip" data-act="voicePitch" data-v="${p}" aria-pressed="${VPREF.pitch === p}">${l}</button>`).join('')}</div>
+  <p class="note-s">On iPhone and iPad you can download nicer voices in Settings › Accessibility › Spoken Content › Voices (try “Ava (Premium)” or “Samantha (Enhanced)”).</p></div></div>`;
+}
+Object.assign(A, {
+  voiceTest(){ say(`Hi! I'm your buddy. Let's have so much fun together!`); },
+  voiceRate(el){ VPREF.rate = +el.dataset.v; saveVoice(); render(); say('This is how fast I talk!'); },
+  voicePitch(el){ VPREF.pitch = +el.dataset.v; saveVoice(); render(); say('Hello there, friend!'); }
+});
+document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.voice){ VPREF.name = e.target.value; saveVoice(); pickVoice(); say('Hi! Do you like my voice?'); } });
+
+// ---------- 3. CHORE TIME — do the real chore while your character does it too ----------
+INST.kazoo = { w: [['sawtooth', 1, 1], ['square', 1.002, .3]], a: .02, d: .1, s: .7, r: .05, vol: .07, lp: 1700, vib: 7, vibD: 28 };
+SONGS.scrubadub = { step: .1, spb: 16, chords: ['C', 'G', 'G7', 'C', 'F', 'C', 'G', 'C'], lead: 'kazoo', bass: 'oompah', bassI: 'bass', comp: 'oom', compI: 'pluck', drums: { k: 'x.......x.......', w: '....x.......x...', h: '..x...x...x...x.' },
+  mel: 'E5/2 G5/2 C6/2 G5/2 E5/2 G5/2 C6/4 D5/2 G5/2 B5/2 G5/2 D5/2 G5/2 B5/4 F5/2 G5/2 B5/2 D6/2 F6/4 D6/4 E6/4 C6/4 G5/4 -/4 A5/2 C6/2 F6/2 C6/2 A5/2 C6/2 F6/4 G5/2 C6/2 E6/2 C6/2 G5/2 E5/2 C5/4 D5/2 F5/2 G5/2 B5/2 D6/4 B5/4 C6/4 G5/2 E5/2 C5/4 -/4' };
+SONGNAME.scrubadub = 'Scrub-a-Dub Polka';
+const CHORESONG = { restaurant: 'scrubadub', home: 'scrubadub', hotel: 'scrubadub', school: 'march', boutique: 'disco', greenhouse: 'pastoral' };
+const isDoing = t => t.status === 'todo' && t.doing && Date.now() - t.doing < 3 * 3600e3;
+function workTask(kidId){ return S.tasks.find(t => t.kid === kidId && t.status === 'waiting') || S.tasks.find(t => t.kid === kidId && isDoing(t)); }
+const CHEERS = {
+  restaurant: ['Scrub-a-dub-dub! Look at all those bubbles!', 'Plate by plate, you are doing great!', 'Pasta Palace has never been so shiny!', 'Sing along with the polka while you scrub!'],
+  home: ['Swish, swish! Every corner is getting tidy!', 'You are a cleaning superstar!', 'Our cottage is so cozy now!'],
+  hotel: ['Dust, dust, sparkle! The rooms look amazing!', 'Fluff those pillows, champ!'],
+  school: ['Every page makes your brain stronger!', 'Smart thinking! Keep going!', 'You are learning so much!'],
+  boutique: ['Hang it up and strike a pose!', 'Your closet is runway ready!', 'So neat and stylish!'],
+  greenhouse: ['Splish splash, the plants say thank you!', 'Look how happy the flowers are!']
+};
+const CHEER_ALL = ['You are doing amazing!', 'Keep going, superstar!', 'I am so proud of you!', 'Wow, look at you go!', 'High five! Almost there!'];
+const choreMove = (dx, dy, dur) => `<animateTransform attributeName="transform" type="translate" values="0 0;${dx} ${dy};${dx} ${dy};0 0;0 0" keyTimes="0;.32;.5;.82;1" dur="${dur}s" repeatCount="indefinite"/>`;
+const notesFx = () => [['♪', 40, 60], ['♫', 300, 50], ['♪', 170, 40], ['♫', 90, 110]].map(([n, x, y], k) => TX(x, y, n, 18, ['#FF5A8C', '#7B5CFA', '#34B2F0', '#FFB800'][k], `class="rise ${['', 'd2', 'd3', ''][k]}"`)).join('');
+function choreScene(act, c, buddy){
+  const me = (x, y, s, dx, dy, dur) => `<g>${choreMove(dx, dy, dur)}${grp(x, y, s, charSVG(c, { work: act, mood: 'cheer' }), 'class="bob"')}</g>`;
+  const bud = (x, y) => grp(x, y, .8, buddySVG(buddy, { cheer: 1 }), 'class="jump"');
+  let s = '';
+  switch (act){
+    case 'restaurant':
+      s = roomShell({ wall: '#FFE9D6', wp: 'tiles', floor: '#E9C9A6', fp: 'check' }) + IP.bunting(40, 320, 6) + IP.window(250, 26, 70, 56, { curtain: '#E8414F' }) + IP.pendant(150, 20, '#FF5A8C') + IP.chalk(90, 24, 120, 44, [{ t: 'Dish Duty!', s: 16 }, { t: 'scrub-a-dub-dub', s: 11, c: '#FFE36B' }]);
+      s += me(110, 214, 1, 100, 0, 7) + bud(330, 216);
+      s += `<polygon points="0,190 360,190 360,250 0,250" fill="#F7EFE6"/><rect y="188" width="360" height="5" fill="#fff"/><rect y="250" width="360" height="20" fill="#E8414F"/>`;
+      s += `<ellipse cx="205" cy="212" rx="48" ry="12" fill="#9CC6E0"/><ellipse cx="205" cy="211" rx="43" ry="9" fill="url(#water)"/><path d="M205,170 v18 q0,6 6,6" stroke="#A9B3C9" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+      s += [0, 1, 2, 3, 4, 5].map(k => `<circle class="rise ${['', 'd2', 'd3'][k % 3]}" cx="${180 + k * 10}" cy="206" r="${3 + k % 3 * 1.6}" fill="#fff" stroke="#BFEAFF" stroke-width="1.4"/>`).join('');
+      s += rr(268, 150, 70, 46, 6, '#C9D3E6') + `<path d="M272,160 h62 M272,176 h62" stroke="#9AA3B8" stroke-width="2"/>`;
+      break;
+    case 'home':
+      s = roomShell({ wall: '#FFE3EC', wp: 'dots', floor: '#E2B98A', fp: 'wood' }) + IP.window(140, 30, 70, 60, { curtain: '#FF8FB8' }) + IP.frame(250, 40, 46, 34, '#C98A55', '<rect x="250" y="40" width="46" height="34" fill="url(#skyIn)"/>');
+      s += grp(70, 236, .8, FURN.sofa.d()) + grp(312, 250, .8, FURN.toychest.d());
+      s += me(110, 258, .95, 120, 0, 6) + bud(40, 262) + [0, 1, 2].map(k => `<circle class="smoke s${k + 1}" cx="${120 + k * 40}" cy="256" r="7" fill="#E9D5B5"/>`).join('');
+      break;
+    case 'hotel':
+      s = roomShell({ wall: '#E6DDFF', wp: 'stripes', floor: '#D9CCF7', fp: 'tile' }) + IP.window(60, 30, 64, 56, { curtain: '#7B5CFA' }) + IP.frame(250, 42, 50, 36, '#FFC63A', '<rect x="250" y="42" width="50" height="36" fill="url(#skyIn)"/>');
+      s += grp(230, 244, .95, FURN.bed.d()) + me(90, 258, .95, 90, 0, 6.5) + bud(330, 262);
+      break;
+    case 'school':
+      s = roomShell({ wall: '#CDEBFF', wp: 'dots', floor: '#E5C79F', fp: 'wood' }) + IP.bunting(40, 320, 4) + rr(120, 120, 140, 12, 4, '#FF8A3D') + rr(130, 132, 8, 50, 2, '#9A6340') + rr(244, 132, 8, 50, 2, '#9A6340');
+      s += me(110, 240, 1, 40, 0, 8) + bud(310, 250) + ['A', 'B', 'C', '1', '2', '3'].map((l, k) => TX(150 + k * 22, 110, l, 16, ['#34B2F0', '#FF5A8C', '#3EC46B', '#FFB800', '#7B5CFA', '#FF8A3D'][k], `class="rise ${['', 'd2', 'd3'][k % 3]}"`)).join('');
+      break;
+    case 'boutique':
+      s = `<rect width="360" height="270" fill="#3B2B63"/><path d="M60,0 L10,270 H150 L110,0Z" fill="url(#spot)"/><path d="M300,0 L250,270 H390 L340,0Z" fill="url(#spot)"/><path d="M0,0 h46 q-12,90 0,270 h-46z" fill="#E2406F"/><path d="M360,0 h-46 q12,90 0,270 h46z" fill="#E2406F"/><path d="M126,270 L156,96 H204 L234,270Z" fill="#FF8FB8"/>`;
+      s += me(180, 150, .7, 0, 90, 6) + bud(300, 262) + [0, 1, 2, 3].map(k => `<circle class="twinkle ${['', 'd2', 'd3'][k % 3]}" cx="${pick([60, 80, 290, 310])}" cy="${120 + k * 30}" r="9" fill="#fff" opacity=".85"/>`).join('');
+      break;
+    default:
+      s = roomShell({ wall: '#DDF7EE', wp: 'panes', floor: '#CFC8BC', fp: 'tile' }) + rr(36, 222, 288, 10, 3, '#C98A55');
+      s += me(80, 262, .9, 170, 0, 8) + bud(330, 264);
+  }
+  return `<svg viewBox="0 0 360 270" class="rm-svg" aria-label="Your character doing the chore">${s}<g id="choreDyn"></g>${notesFx()}</svg>`;
+}
+function choreDyn(act, n){
+  switch (act){
+    case 'restaurant': { const dirty = Math.max(0, 7 - (n % 8)), clean = Math.min(12, n); return [...Array(dirty)].map((_, k) => `<ellipse cx="62" cy="${186 - k * 6}" rx="22" ry="5" fill="#fff" stroke="#C9A16A" stroke-width="1.5"/><circle cx="${56 + k % 3 * 5}" cy="${185 - k * 6}" r="1.6" fill="#C9654B"/>`).join('') + [...Array(clean)].map((_, k) => `<rect x="${274 + (k % 6) * 10}" y="${k < 6 ? 152 : 168}" width="6" height="14" rx="3" fill="#fff" stroke="#8FD0FF"/>`).join('') + `<path class="twinkle" d="${starPath(300, 146, 5, 2, 4)}" fill="#FFE36B"/>`; }
+    case 'home': { const left = Math.max(0, 6 - n); return [[150, 252, '#E8414F'], [200, 262, '#34B2F0'], [240, 250, '#FFC63A'], [170, 266, '#3EC46B'], [220, 258, '#B58CFF'], [260, 264, '#FF8A3D']].slice(0, left).map(([x, y, col]) => rr(x - 6, y - 12, 12, 12, 2, col)).join('') + (left === 0 ? `<path class="twinkle" d="${starPath(200, 230, 8, 3, 4)}" fill="#FFE36B"/>` : ''); }
+    case 'hotel': return [...Array(Math.min(10, n))].map((_, k) => `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(150 + (k * 37) % 160, 150 + (k * 23) % 70, 5, 1.8, 4)}" fill="#fff"/>`).join('');
+    case 'school': return IP.books(140, 120, Math.min(10, 1 + n), 26);
+    case 'boutique': return [...Array(Math.min(8, n))].map((_, k) => `<path d="${starPath(30 + k * 40, 30, 7, 3)}" fill="#FFE36B"/>`).join('');
+    default: return [70, 130, 190, 250, 310].map((x, k) => `<path d="M${x - 14},222 h28 l-4,22 h-20z" fill="#E07A5F"/><g transform="translate(${x},222)">${plantSVG(['sunflower', 'tulip', 'rose', 'strawberry', 'carrot'][k], Math.min(3, Math.floor((n + k) / 3)))}</g>`).join('');
+  }
+}
+function choreOpen(t){
+  const kid = K(), act = t.act === 'home' || placed(kid, ACT[t.act].b) ? t.act : 'home';
+  if (!t.doing || !isDoing(t)) t.doing = Date.now(); save();
+  ui.chore = { id: t.id, act };
+  let el = $('#chore'); if (!el){ document.body.insertAdjacentHTML('beforeend', '<div id="chore" hidden></div>'); el = $('#chore'); }
+  el.hidden = false;
+  el.innerHTML = `<div class="rm-top"><button class="rm-back" data-act="choreClose">${BACK}Pause</button><div class="rm-title"><h2>Chore Time!</h2><small>${esc(t.title)} · ${esc(ACT[act].place)}</small></div><div class="chore-timer" id="choreTimer">0:00</div></div>
+  <div class="rm-body"><div class="rm-scene chore-stage">${choreScene(act, kid.char, kid.buddy)}<div class="chore-count" id="choreCount"></div></div>
+  <div class="rmsay-wrap"><span class="rmsay-av">${budBox(kid.buddy, { cheer: 1 })}</span><p class="rmsay" id="choreSay">Let's do it together! Go do “${esc(t.title)}” for real. I'll be ${esc(ACT[act].verb)} at ${esc(ACT[act].place)}!</p></div>
+  <p class="note-s center">♪ ${esc(SONGNAME[CHORESONG[act]] || '')} is playing. Turn it up and dance while you work!</p>
+  <button class="btn big" data-act="choreFinish">I finished!</button></div>`;
+  if (RA()) say(`Chore time! Go do ${t.title} for real. Your character is ${ACT[act].verb} at ${ACT[act].place} with you. When you finish, tap the big green button.`);
+  const tick = () => {
+    const sec = Math.floor((Date.now() - t.doing) / 1000), n = Math.min(99, 1 + Math.floor(sec / 5));
+    const tm = $('#choreTimer'); if (!tm){ clearInterval(ui.choreT); return; } tm.textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    if (ui.choreN !== n){ ui.choreN = n; const d = $('#choreDyn'); if (d) d.innerHTML = choreDyn(act, n); const c = $('#choreCount'); if (c) c.textContent = `${n} ${WORKN[act] || 'jobs done'}!`; }
+    if (sec > 0 && sec % 15 === 0){ const line = pick([...(CHEERS[act] || []), ...CHEER_ALL]), sEl = $('#choreSay'); if (sEl){ sEl.textContent = line; sEl.classList.remove('pop'); void sEl.offsetWidth; sEl.classList.add('pop'); } if (RA()) say(line); }
+  };
+  ui.choreN = -1; clearInterval(ui.choreT); tick(); ui.choreT = setInterval(tick, 1000);
+  musicUpdate(); sim.wt = null; sim.holdUntil = 0; sim.manual = null; sim.path = [];
+}
+function choreClose(){ clearInterval(ui.choreT); ui.chore = null; const el = $('#chore'); if (el){ el.hidden = true; el.innerHTML = ''; } render(); }
+Object.assign(A, {
+  choreStart(el){ const t = S.tasks.find(x => x.id === el.dataset.id); if (t && t.status === 'todo') choreOpen(t); },
+  choreClose(){ choreClose(); },
+  choreFinish(){ const id = ui.chore && ui.chore.id, act = ui.chore && ui.chore.act; choreClose(); const t = S.tasks.find(x => x.id === id); if (!t) return; ui.done = { id, act, note: 'All done!', photo: null }; openSheet(doneSheet()); }
+});
+const _sendDoneCT = A.sendDone; A.sendDone = function(el, e){ const t = ui.done && S.tasks.find(x => x.id === ui.done.id); _sendDoneCT(el, e); if (t){ delete t.doing; save(); } };
+function questCard(t){
+  const late = overdue(t), doing = isDoing(t);
+  let right = '';
+  if (t.status === 'todo') right = doing ? `<button class="btn sea" data-act="choreStart" data-id="${t.id}">Doing…</button>` : `<button class="btn sun gobtn" data-act="choreStart" data-id="${t.id}"><svg viewBox="0 0 20 20" width="16" height="16"><path d="M6,4 L16,10 L6,16Z" fill="currentColor"/></svg>Start</button>`;
+  else if (t.status === 'waiting') right = `<span class="pill wait">Sent to ${esc(pname())}</span>`;
+  else if (t.status === 'approved') right = `<span class="pill ok">+${t.paid ?? t.coins}</span>`;
+  else right = `<span class="pill miss">Missed</span>`;
+  return `<div class="quest ${t.status === 'approved' ? 'done' : ''} ${doing ? 'doing' : ''}">${icon(t.icon)}<div class="qbody"><h3>${esc(t.title)}</h3><div class="qmeta"><span class="coinchip">${COIN()}${t.coins}</span><span class="${late ? 'late' : ''}">${late ? 'Late! ' : 'by '}${fmtTime(t.due)}</span>${t.status === 'approved' && t.stars ? `<span class="stars">${'★'.repeat(t.stars)}</span>` : doing ? `<span class="doingtag">● Doing it now</span>` : `<span>· ${ACT[t.act].name}</span>`}</div></div>${right}</div>`;
+}
+
+// ---------- 4. FULL-SCREEN WORLD + 5. WEATHER ----------
+const WEATHERS = { auto: { n: 'Today' }, sunny: { n: 'Sunny', sky: '', fx: '' }, rain: { n: 'Rainy', sky: 'rain', fx: 'rain' }, snow: { n: 'Snowy', sky: 'snow', fx: 'snow', pal: 'winter' }, autumn: { n: 'Autumn', sky: 'autumn', fx: 'leaves', pal: 'autumn' }, spring: { n: 'Spring', sky: 'spring', fx: 'petals', pal: 'spring' }, night: { n: 'Starry night', sky: 'night', fx: 'fireflies' }, rainbow: { n: 'Rainbow', sky: 'lucky', fx: 'bubbles' } };
+const WXI = {
+  auto: `<circle cx="12" cy="12" r="9" fill="#7B5CFA"/><text x="12" y="16.5" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="12" fill="#fff">A</text>`,
+  sunny: `<circle cx="12" cy="12" r="5.5" fill="#FFC63A"/>${[...Array(8)].map((_, k) => `<path d="M${f1(12 + Math.cos(k * .785) * 8)},${f1(12 + Math.sin(k * .785) * 8)} L${f1(12 + Math.cos(k * .785) * 10.5)},${f1(12 + Math.sin(k * .785) * 10.5)}" stroke="#FFC63A" stroke-width="2" stroke-linecap="round"/>`).join('')}`,
+  rain: `<g fill="#9AA9C4"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="9" r="6"/><rect x="5" y="9" width="15" height="6" rx="3"/></g><path d="M8,17 l-1,3 M12,17 l-1,3 M16,17 l-1,3" stroke="#34B2F0" stroke-width="2" stroke-linecap="round"/>`,
+  snow: `<g stroke="#5FB6EE" stroke-width="2" stroke-linecap="round">${[0, 60, 120].map(a => `<path d="M12,3 V21" transform="rotate(${a} 12 12)"/>`).join('')}</g>`,
+  autumn: `<path d="M12,3 l2,5 4,-2 -1,5 4,1 -4,3 1,4 -6,-2 -6,2 1,-4 -4,-3 4,-1 -1,-5 4,2z" fill="#F08A3C"/><path d="M12,13 v8" stroke="#9A6340" stroke-width="1.6"/>`,
+  spring: `${[0, 1, 2, 3, 4].map(k => `<circle cx="${f1(12 + Math.cos(k * 1.2566) * 5)}" cy="${f1(12 + Math.sin(k * 1.2566) * 5)}" r="4" fill="#FFB3CC"/>`).join('')}<circle cx="12" cy="12" r="3" fill="#FFD84A"/>`,
+  night: `<path d="M15,4 a8,8 0 1 0 5,13 a7,7 0 0 1 -5,-13z" fill="#FFE68A"/><path d="${starPath(6, 6, 2.4, 1, 4)}" fill="#fff"/>`,
+  rainbow: `${['#FF8A8A', '#FFC07A', '#A6E88C', '#8FD0FF'].map((c, k) => `<path d="M${3 + k * 2},18 a${9 - k * 2},${9 - k * 2} 0 0 1 ${18 - k * 4},0" stroke="${c}" stroke-width="2" fill="none"/>`).join('')}`
+};
+function curWeather(){
+  const kid = S && isKid() ? K() : null, ch = kid && kid.weather || 'auto';
+  if (ch !== 'auto') return WEATHERS[ch];
+  const ev = activeEvent(); if (ev){ const E = EVENTS[ev.id]; return { sky: E.sky, fx: E.fx, pal: { winter: 'winter', harvest: 'autumn', halloween: 'autumn', easter: 'spring' }[ev.id] || '' }; }
+  const m = new Date().getMonth(); return m === 11 || m < 2 ? WEATHERS.snow : m < 5 ? WEATHERS.spring : m < 8 ? { sky: 'summer', fx: 'bubbles' } : WEATHERS.autumn;
+}
+function applySeason(){
+  const w = curWeather();
+  Object.keys(TPAL0).forEach(k => TPAL[k] = TPAL0[k].slice()); TREEC.splice(0, 3, '#43B450', '#4CBF58', '#57CA60'); SNOWY = false;
+  if (w.pal === 'winter'){ TPAL['.'] = ['#EEF6FF', '#E6F1FD', '#D3E4F5', '#9FB8D2']; TPAL['*'] = ['#F2F8FF', '#E9F3FE', '#D3E4F5', '#9FB8D2']; TPAL['f'] = ['#E2EEFA', '#DAE8F7', '#C7DAEE', '#8FA9C6']; SNOWY = true; }
+  if (w.pal === 'autumn'){ TREEC.splice(0, 3, '#F08A3C', '#E8604C', '#FFB13D'); TPAL['.'] = ['#A9D06C', '#A0C964', '#90BB57', '#6E9A3C']; TPAL['f'] = ['#8DBA55', '#86B350', '#78A645', '#5E8A36']; }
+  if (w.pal === 'spring') TREEC.splice(0, 3, '#FFB3CC', '#FF9AC0', '#FFC9DC');
+}
+function evSky(){ const w = curWeather(); return w.sky ? ' sky-' + w.sky : ''; }
+function evFx(){
+  const fx = curWeather().fx; if (!fx) return '';
+  const n = { fireworks: 6, bats: 5, rain: 34, fireflies: 14 }[fx] || 16; let h = '';
+  for (let k = 0; k < n; k++){
+    const l = (rnd(k * 7.3) * 100).toFixed(1), d = (4 + rnd(k * 3.1) * 6).toFixed(1), dl = (rnd(k * 5.7) * 8).toFixed(1), sz = (0.7 + rnd(k * 9.9) * .7).toFixed(2);
+    const st = `left:${l}%;animation-duration:${d}s;animation-delay:-${dl}s;--s:${sz}`;
+    if (fx === 'snow') h += `<i class="p-snow" style="${st}"></i>`;
+    if (fx === 'leaves') h += `<i class="p-leaf" style="${st};background:${['#F08A3C', '#E8604C', '#FFB13D', '#C9654B'][k % 4]}"></i>`;
+    if (fx === 'petals') h += `<i class="p-petal" style="${st};background:${['#FFB3CC', '#FFFFFF', '#FFD6E6'][k % 3]}"></i>`;
+    if (fx === 'hearts') h += `<i class="p-heart" style="${st}">${tokBox('heart')}</i>`;
+    if (fx === 'clovers') h += k % 2 ? `<i class="p-leaf p-clov" style="${st}">${tokBox('clover')}</i>` : `<i class="p-glint" style="${st};top:${(rnd(k) * 60).toFixed(0)}%"></i>`;
+    if (fx === 'bubbles') h += `<i class="p-bub" style="${st}"></i>`;
+    if (fx === 'rain') h += `<i class="p-rain" style="left:${l}%;animation-duration:${(.55 + rnd(k) * .4).toFixed(2)}s;animation-delay:-${(rnd(k * 2) * 2).toFixed(2)}s"></i>`;
+    if (fx === 'fireflies') h += `<i class="p-ff" style="left:${l}%;top:${(20 + rnd(k * 4.1) * 70).toFixed(0)}%;animation-duration:${(3 + rnd(k) * 4).toFixed(1)}s;animation-delay:-${dl}s"></i>`;
+    if (fx === 'bats') h += `<i class="p-bat" style="top:${(6 + rnd(k * 4.4) * 30).toFixed(0)}%;animation-duration:${(9 + k * 2)}s;animation-delay:-${(k * 3.3).toFixed(1)}s"><svg viewBox="-20 -10 40 20"><path d="M0,2 q-6,-10 -18,-6 q6,2 4,8 q4,-4 8,0 q2,-6 6,-2 q4,-4 6,2 q4,-4 8,0 q-2,-6 4,-8 q-12,-4 -18,6z" fill="#2B2550"/></svg></i>`;
+    if (fx === 'fireworks') h += `<i class="p-fw" style="left:${(10 + rnd(k * 2.2) * 80).toFixed(0)}%;top:${(6 + rnd(k * 6.6) * 30).toFixed(0)}%;animation-delay:-${(k * .55).toFixed(2)}s"><svg viewBox="-30 -30 60 60">${[...Array(12)].map((_, q) => `<path d="M${f1(Math.cos(q * .5236) * 8)},${f1(Math.sin(q * .5236) * 8)} L${f1(Math.cos(q * .5236) * 26)},${f1(Math.sin(q * .5236) * 26)}" stroke="${['#FFD84A', '#FF5A8C', '#8FD0FF', '#B6F59A'][(k + q) % 4]}" stroke-width="3" stroke-linecap="round"/>`).join('')}</svg></i>`;
+  }
+  return `<div class="evfx" aria-hidden="true">${h}</div>`;
+}
+const FULLI = `<svg viewBox="0 0 20 20" width="18" height="18"><path d="M3,8 V3 H8 M12,3 H17 V8 M17,12 V17 H12 M8,17 H3 V12" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`;
+function weatherPicker(){ const cur = (S && isKid() && K().weather) || 'auto'; return `<div class="wxpick" id="wxPick" ${ui.wxOpen ? '' : 'hidden'}><b>Weather</b><div class="wxrow">${Object.entries(WEATHERS).map(([k, w]) => `<button data-act="weather" data-v="${k}" aria-pressed="${cur === k}" aria-label="${w.n}"><svg viewBox="0 0 24 24">${WXI[k]}</svg><small>${w.n}</small></button>`).join('')}</div></div>`; }
+function fullBar(){ const kid = K(); return `<button class="wfull-x" data-act="worldFullClose" aria-label="Close full screen">✕</button><div class="wfull-bar"><div class="chips">${PLACES.map(([n], k) => `<button class="chip" data-act="travel" data-v="${k}">${esc(n)}</button>`).join('')}${kid.world.filter(o => ROOMS[o.t]).map(o => `<button class="chip" data-act="walkIn" data-id="${o.id}">${esc(NAMES[o.t])}</button>`).join('')}</div></div>`; }
+const _worldBlockFS = worldBlock;
+worldBlock = function(kid, o = {}){
+  let h = _worldBlockFS(kid, o);
+  if (o.thumb) return h;
+  h = h.replace('<div class="world-wrap', `<div class="world-wrap${ui.worldFull ? ' full' : ''}`);
+  h = h.replace('<div class="wctl">', `<div class="wctl"><button data-act="worldFull" class="wfull-btn" aria-label="Play in full screen">${FULLI}</button><button data-act="weatherOpen" aria-label="Change the weather"><svg viewBox="0 0 24 24" width="20" height="20">${WXI[(isKid() && kid.weather) || 'auto'] || WXI.sunny}</svg></button>`);
+  const i = h.lastIndexOf('</div>'); return h.slice(0, i) + weatherPicker() + (isKid() ? fullBar() : '') + `<div class="npc-say" id="npcSay" hidden></div>` + h.slice(i);
+};
+function setFull(on){
+  ui.worldFull = on;
+  const cur = document.querySelector('#view .world-wrap') || document.querySelector('body > .world-wrap');
+  document.querySelectorAll('body > .world-wrap').forEach(x => { if (x !== cur) x.remove(); });
+  if (cur){
+    cur.classList.toggle('full', on);
+    if (on && cur.parentElement !== document.body){ const ph = document.createElement('div'); ph.id = 'worldSpot'; cur.replaceWith(ph); document.body.appendChild(cur); }
+    if (!on){ const ph = $('#worldSpot'); if (ph) ph.replaceWith(cur); }
+  }
+  document.body.classList.toggle('worldfull', on);
+  const ww = document.querySelector('.world-wrap'); if (ww){ ww.scrollLeft = 0; ww.scrollTop = 0; if (!ww.dataset.noscroll){ ww.dataset.noscroll = 1; ww.addEventListener('scroll', () => { ww.scrollLeft = 0; ww.scrollTop = 0; }); } }
+  requestAnimationFrame(() => { applyCam(); if (on) cam.follow = true; });
+}
+Object.assign(A, {
+  worldFull(){ setFull(true); if (RA()) say('Big world! Tap anywhere to walk there. Tap the X to go back.'); sfx('pop'); },
+  worldFullClose(){ setFull(false); },
+  weatherOpen(){ ui.wxOpen = !ui.wxOpen; const p = $('#wxPick'); if (p) p.hidden = !ui.wxOpen; },
+  weather(el){ const kid = K(); kid.weather = el.dataset.v; ui.wxOpen = false; save(); document.querySelectorAll('body > .world-wrap').forEach(x => x.remove()); render(); setFull(!!ui.worldFull); const w = el.dataset.v === 'auto' ? 'Today’s weather' : WEATHERS[el.dataset.v].n; toast(`${w} on your island!`, { title: 'Weather', icon: `<svg viewBox="0 0 24 24">${WXI[el.dataset.v]}</svg>`, ms: 2200 }); }
+});
+const _tabFS = A.tab; A.tab = function(el, e){ if (ui.worldFull) setFull(false); _tabFS(el, e); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.worldFull && !ui.sheet && !ui.room) setFull(false); });
+
+// ---------- 6. MORE FUN: wandering friends, pet your buddy, a daily surprise ----------
+const NPC_LINES = ['Nice day for a walk!', 'Have you met the robots?', 'I love your island!', 'Let’s go to the Scoop Shop!', 'Psst… something is hiding by the trees!', 'Wanna race? Just kidding, I’m slow!', 'Your buddy is so cute!', 'I heard the fountain grants wishes!', 'Wheee! I love this place!', 'Did you do your chores? You’re awesome!'];
+sim.npcs = null;
+const _attachNPC = sim.attach;
+sim.attach = function(){
+  _attachNPC.call(this); if (!this.svg) return;
+  const kid = K(), layer = this.svg.querySelector('#objLayer'), NS = 'http://www.w3.org/2000/svg';
+  if (!this.npcs || this.npcKid !== kid.id){ this.npcKid = kid.id; const types = Object.keys(BUDDIES).filter(t => t !== kid.buddy && t !== 'snowpuff'); this.npcs = shuffle(types).slice(0, 4).map((t, k) => { const st = PLACES[k % PLACES.length][1]; return { t, fi: st[0], fj: st[1], path: [], next: 0, face: 1, sayUntil: 0, line: '' }; }); }
+  this.npcs.forEach(n => { n.el = document.createElementNS(NS, 'g'); n.el.style.pointerEvents = 'none'; n.el.innerHTML = `<g class="bob">${buddySVG(n.t, { cheer: 1 })}</g>`; layer.appendChild(n.el); n.moving = true; });
+};
+const _tickNPC = sim.tick;
+sim.tick = function(ts){
+  _tickNPC.call(this, ts);
+  if (!this.svg || !this.svg.isConnected || !this.npcs) return;
+  const dt = .016;
+  this.npcs.forEach(n => {
+    if (!n.el) return;
+    if (!n.path.length && ts > n.next){ n.next = ts + 3000 + Math.random() * 5000; const cur = [Math.round(n.fi), Math.round(n.fj)]; for (let k = 0; k < 10; k++){ const t = [cur[0] + RI(-5, 5), cur[1] + RI(-5, 5)]; if (this.walk(...t)){ const p = this.bfs(cur, t); if (p && p.length < 10){ n.path = p; break; } } } }
+    let mv = false;
+    if (n.path.length && ts > n.sayUntil){ const [ti, tj] = n.path[0], di = ti - n.fi, dj = tj - n.fj, d = Math.hypot(di, dj), sp = 1.0 * dt; if (d <= sp){ n.fi = ti; n.fj = tj; n.path.shift(); } else { n.fi += di / d * sp; n.fj += dj / d * sp; } const sx = di - dj; if (Math.abs(sx) > .01) n.face = sx > 0 ? 1 : -1; mv = true; }
+    if (mv !== n.moving){ n.moving = mv; n.el.firstChild.setAttribute('class', mv ? 'bob' : ''); }
+    const [x, y] = P(n.fi, n.fj); n.el.setAttribute('transform', `translate(${f1(x)},${f1(y + 2)}) scale(${.36 * n.face},.36)`); this.place(n.el, n.fi + n.fj + .01);
+  });
+  const talker = this.npcs.find(n => ts < n.sayUntil), bub = $('#npcSay');
+  if (bub){ if (talker && this.svg){ const [x, y] = P(talker.fi, talker.fj), m = this.svg.getScreenCTM(), r = this.svg.parentElement.getBoundingClientRect(); if (m){ const pt = new DOMPoint(x, y - 30).matrixTransform(m); bub.style.left = (pt.x - r.left) + 'px'; bub.style.top = (pt.y - r.top) + 'px'; } if (bub.hidden || bub.dataset.t !== talker.line){ bub.dataset.t = talker.line; bub.innerHTML = `<b>${BUDDIES[talker.t].name}</b>${esc(talker.line)}`; bub.hidden = false; } } else if (!bub.hidden) bub.hidden = true; }
+};
+const _worldTapNPC = worldTap;
+worldTap = function(e){
+  const svg = sim.svg, m = svg && svg.getScreenCTM();
+  if (m && sim.npcs && !svg.classList.contains('building')){
+    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    const n = sim.npcs.find(n => { const [x, y] = P(n.fi, n.fj); return Math.abs(p.x - x) < 18 && p.y > y - 34 && p.y < y + 8; });
+    if (n){ n.line = pick(NPC_LINES); n.sayUntil = performance.now() + 3200; sfx('pop'); if (RA()) say(`${BUDDIES[n.t].name} says: ${n.line}`); const f = svg.querySelector('#fxLayer'); if (f){ const [x, y] = P(n.fi, n.fj); f.innerHTML = [0, 1, 2].map(k => `<path class="rise ${['', 'd2', 'd3'][k]}" d="M${x - 8 + k * 8},${y - 26} c-4,-3 -4,-7 -1,-7 c1,0 1,1 1,1.5 c0,-.5 0,-1.5 1,-1.5 c3,0 3,4 -1,7z" fill="#FF5A8C"/>`).join(''); setTimeout(() => { if (f.isConnected) f.innerHTML = ''; }, 2200); } return; }
+  }
+  return _worldTapNPC(e);
+};
+const PET_LINES = ['Hee hee, that tickles!', 'I love you!', 'Wheee!', 'You are my best friend!', 'Let’s do a chore together!', 'Boop! Do it again!', 'Yay! Hugs!'];
+A.petBuddy = function(el){
+  const kid = K(); kid.pets = (kid.pets || 0) + 1; save();
+  el.classList.remove('petjump'); void el.offsetWidth; el.classList.add('petjump');
+  const r = el.getBoundingClientRect();
+  for (let k = 0; k < 5; k++){ const h = document.createElement('div'); h.className = 'pet-heart'; h.innerHTML = tokBox('heart'); h.style.left = (r.left + r.width / 2 - 10 + (Math.random() - .5) * 50) + 'px'; h.style.top = (r.top + 10) + 'px'; h.style.animationDelay = (k * .08) + 's'; document.body.appendChild(h); setTimeout(() => h.remove(), 1400); }
+  const line = pick(PET_LINES), s = document.querySelector('.talk .say'); if (s) s.innerHTML = `<small>${BUDDIES[kid.buddy].name} says</small>${esc(line)}`;
+  sfx('pop'); say(line);
+};
+const GIFT_SVG = `<svg viewBox="-34 -40 68 70"><ellipse cx="0" cy="26" rx="26" ry="5" fill="#2a1a40" opacity=".15"/><rect x="-24" y="-6" width="48" height="32" rx="5" fill="#FF5A8C"/><rect x="-24" y="-6" width="48" height="32" rx="5" fill="url(#fsR)"/><rect x="-28" y="-16" width="56" height="13" rx="4" fill="#FF7FA8"/><rect x="-5" y="-16" width="10" height="42" fill="#FFD84A"/><path d="M0,-16 q-18,-22 -20,-6 q0,6 20,6 q20,0 20,-6 q-2,-16 -20,6" fill="#FFD84A" stroke="#E9A400" stroke-width="1"/><path class="twinkle" d="${starPath(26, -26, 5, 2, 4)}" fill="#FFE36B"/><path class="twinkle d2" d="${starPath(-28, -20, 4, 1.4, 4)}" fill="#fff"/></svg>`;
+function giftCard(kid){ if (kid.giftDay === dayKey()) return ''; return `<div class="card giftcard"><button class="giftbox" data-act="giftTap" aria-label="Open your daily surprise">${GIFT_SVG}</button><div><b>Daily surprise!</b><small>Tap the present 3 times to open it</small><span class="gifttaps">${[0, 1, 2].map(k => `<i class="${k < (ui.giftTaps || 0) ? 'on' : ''}"></i>`).join('')}</span></div></div>`; }
+A.giftTap = function(el){
+  const kid = K(); if (kid.giftDay === dayKey()) return;
+  ui.giftTaps = (ui.giftTaps || 0) + 1; el.classList.remove('giftshake'); void el.offsetWidth; el.classList.add('giftshake'); sfx('pop');
+  document.querySelectorAll('.gifttaps i').forEach((d, k) => d.classList.toggle('on', k < ui.giftTaps));
+  if (RA()) say(ui.giftTaps < 3 ? ['One!', 'Two!'][ui.giftTaps - 1] : 'Three! Surprise!');
+  if (ui.giftTaps < 3) return;
+  ui.giftTaps = 0; kid.giftDay = dayKey();
+  const roll = Math.random(), F = ['plant', 'teddy', 'lamp', 'garland', 'poster', 'beanbag', 'chair'];
+  let c;
+  if (roll < .55){ const n = RI(3, 9); kid.coins += n; addHist(kid.id, 'earn', n, 'Daily surprise'); c = { amount: n, label: `Surprise! ${n} shiny coins!`, sub: 'Come back tomorrow for another present.' }; }
+  else if (roll < .8){ const f = pick(F); kid.furn = kid.furn || { ...STARTER_FURN }; kid.furn[f] = (kid.furn[f] || 0) + 1; c = { amount: 0, title: 'Surprise!', label: `A ${FURN[f].name} for your home!`, sub: 'Find it when you decorate your Cozy Cottage.' }; }
+  else { c = { amount: 0, title: '+40 XP!', label: 'A big XP boost!', sub: 'You are closer to the next level.' }; setTimeout(() => addXP(kid, 40), 2600); }
+  save(); render(); celebrate(c);
+};
+
+// ---------- 7. ONE ACCOUNT ON MANY PHONES (Supabase, with email confirmation) ----------
+const SUPA_URL = '';   // ← paste your Supabase project URL here (or set it in Controls › Cloud sync)
+const SUPA_KEY = '';   // ← paste your Supabase anon public key here
+const CL = { url: SUPA_URL, key: SUPA_KEY, client: null, ready: false, user: null, famId: null, chan: null, pushT: 0, dev: uid(), last: 0, status: 'off', err: '' };
+try { const v = JSON.parse(localStorage.getItem('cb.cloud') || '{}'); if (v.url) CL.url = v.url; if (v.key) CL.key = v.key; } catch (e) {}
+const cloudOn = () => !!(CL.url && CL.key);
+function cloudInit(){
+  if (!cloudOn()) return Promise.resolve(false); if (CL.ready) return Promise.resolve(true);
+  return new Promise(res => {
+    const go = () => { try { CL.client = window.supabase.createClient(CL.url, CL.key, { auth: { persistSession: true, detectSessionInUrl: true } }); CL.ready = true; CL.status = 'ready';
+      CL.client.auth.onAuthStateChange((ev, sess) => { CL.user = sess && sess.user || null; if (ev === 'SIGNED_IN' && CL.user && !CL.famId) cloudLoadFamily().catch(e => { CL.err = e.message; }); }); res(true); } catch (e) { CL.err = e.message; res(false); } };
+    if (window.supabase) return go();
+    const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'; s.onload = go; s.onerror = () => { CL.status = 'blocked'; CL.err = 'The cloud library could not load here.'; res(false); }; document.head.appendChild(s);
+  });
+}
+async function cloudLoadFamily(){
+  if (!CL.user) return; const uid0 = CL.user.id;
+  const { data: mem, error: e1 } = await CL.client.from('family_members').select('family_id').eq('user_id', uid0).limit(1); if (e1) throw e1;
+  let famId = mem && mem[0] && mem[0].family_id;
+  if (!famId){
+    if (ui.joinCode){ const { data, error } = await CL.client.rpc('join_family', { p_code: ui.joinCode.trim().toUpperCase() }); if (error) throw error; famId = data; ui.joinCode = ''; }
+    else { const F = ui.bringLocal || newFamily((CL.user.user_metadata && CL.user.user_metadata.parent_name) || 'Parent', CL.user.email); F.demo = false; F.email = CL.user.email; const { data, error } = await CL.client.rpc('create_family', { p_data: F }); if (error) throw error; famId = data; ui.bringLocal = null; }
+  }
+  const { data: doc, error } = await CL.client.from('family_docs').select('data').eq('id', famId).single(); if (error) throw error;
+  CL.famId = famId; S = doc.data; S.cloud = { famId };
+  DB.accounts[CL.user.email] = { cloud: true, fam: S }; DB.current = CL.user.email; if (!DB.session) DB.session = null;
+  newDay(); localSaveCL(); cloudSubscribe(); CL.status = 'synced'; CL.last = Date.now(); render();
+}
+function cloudSubscribe(){
+  if (CL.chan) CL.client.removeChannel(CL.chan);
+  CL.chan = CL.client.channel('fam-' + CL.famId).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'family_docs', filter: 'id=eq.' + CL.famId }, p => {
+    const d = p.new && p.new.data; if (!d || d._dev === CL.dev) return;
+    S = d; S.cloud = { famId: CL.famId }; DB.accounts[DB.current].fam = S; localSaveCL(); CL.last = Date.now();
+    if (!ui.sheet && !ui.room && !ui.chore) render();
+  }).subscribe();
+}
+async function cloudPush(){ if (!CL.famId || !CL.user) return; S._rev = (S._rev || 0) + 1; S._dev = CL.dev; const { error } = await CL.client.from('family_docs').update({ data: S, updated_at: new Date().toISOString(), updated_by: CL.user.id }).eq('id', CL.famId); CL.status = error ? 'error' : 'synced'; CL.err = error ? error.message : ''; CL.last = Date.now(); }
+const localSaveCL = save;
+save = function(){ localSaveCL(); if (CL.famId && CL.user){ clearTimeout(CL.pushT); CL.pushT = setTimeout(cloudPush, 1200); } };
+// cloud sign-up / sign-in replace the on-device ones when a project is connected
+document.addEventListener('submit', async e => {
+  const f = e.target.dataset && e.target.dataset.form; if (!cloudOn() || (f !== 'signup' && f !== 'login')) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (!(await cloudInit())){ ui.err = 'Cloud sync could not start: ' + CL.err; return render(); }
+  const val = id => ($(id) ? $(id).value.trim() : '');
+  try {
+    if (f === 'signup'){
+      const name = val('#suName'), email = val('#suEmail').toLowerCase(), pw = $('#suPw').value; ui.joinCode = val('#suCode');
+      ui.err = !name ? 'Add your name.' : !/^\S+@\S+\.\S+$/.test(email) ? 'That email doesn’t look right.' : pw.length < 8 ? 'Use a password with at least 8 characters.' : !$('#suAgree').checked ? 'Please confirm you are the parent or guardian.' : '';
+      if (ui.err) return render();
+      if (S && S.order && S.order.length && !S.cloud) ui.bringLocal = S;
+      const { data, error } = await CL.client.auth.signUp({ email, password: pw, options: { data: { parent_name: name }, emailRedirectTo: location.origin + location.pathname } });
+      if (error) throw error;
+      if (data.session){ CL.user = data.user; await cloudLoadFamily(); } else { ui.verifyEmail = email; ui.screen = 'verify'; ui.err = ''; render(); }
+    } else {
+      const email = val('#liEmail').toLowerCase(), pw = $('#liPw').value; if ($('#liCode')) ui.joinCode = val('#liCode');
+      const { data, error } = await CL.client.auth.signInWithPassword({ email, password: pw });
+      if (error){ if (/confirm/i.test(error.message)){ ui.verifyEmail = email; ui.screen = 'verify'; ui.err = 'Please confirm your email first. Check your inbox for our link.'; return render(); } throw error; }
+      CL.user = data.user; ui.err = ''; await cloudLoadFamily();
+    }
+  } catch (err){ ui.err = /fetch|network|Failed/i.test(err.message) ? 'Can’t reach the cloud from here. Open the app from your own website (like Cloudflare Pages) to use cloud accounts.' : err.message; render(); }
+}, true);
+const _authViewCL = authView;
+authView = function(){
+  if (ui.screen === 'verify') return `<div class="auth card verify"><div class="hero-art" style="padding:10px">${budBox('mochi', { cheer: 1 })}</div><h2>Check your email!</h2><p class="sub">We sent a link to <b>${esc(ui.verifyEmail || '')}</b>. Tap it to confirm the account is really yours, then come back and sign in. This keeps anyone else from using your email.</p>${ui.err ? `<p class="err">${esc(ui.err)}</p>` : ''}<button class="btn big grape" data-act="screen" data-v="login">I confirmed it, sign in</button><button class="btn ghost" data-act="cloudResend">Send the email again</button></div>`;
+  let h = _authViewCL();
+  if (!cloudOn()) return h.replace('Cloud sign-in (Supabase) plugs in next.', 'To use the same account on several phones with email confirmation, a grown-up connects cloud sync in Controls.');
+  h = h.replace(/<p class="note-s">In this prototype[^<]*<\/p>/, '<p class="note-s">We’ll email you a link to confirm the account is really yours. Then you can sign in on every phone in the family.</p>');
+  if (ui.screen === 'signup') h = h.replace('<label class="check">', `<div class="field"><label for="suCode">Family code (only if another grown-up invited you)</label><input class="text" id="suCode" placeholder="e.g. K7Q2MX" maxlength="8" value="${esc(ui.joinCode || '')}"></div><label class="check">`);
+  if (ui.screen === 'login') h = h.replace('<button class="btn big grape" type="submit">Sign in</button>', `<div class="field"><label for="liCode">Family code (optional, to join a family)</label><input class="text" id="liCode" maxlength="8" placeholder="Only if you were invited"></div><button class="btn big grape" type="submit">Sign in</button>`);
+  if (ui.screen !== 'signup' && ui.screen !== 'login') h = h.replace('<button class="btn big sun" data-act="demo">', '<span class="pill ok" style="align-self:center">☁ Works on all your family’s phones</span><button class="btn big sun" data-act="demo">');
+  return h;
+};
+const _signOutCL = A.signOut; A.signOut = function(el, e){ if (CL.user){ try { CL.client.auth.signOut(); } catch (er) {} if (CL.chan) CL.client.removeChannel(CL.chan); CL.user = null; CL.famId = null; CL.status = 'ready'; } _signOutCL(el, e); };
+Object.assign(A, {
+  async cloudResend(){ if (!(await cloudInit())) return toast('Cloud is not connected.'); const { error } = await CL.client.auth.resend({ type: 'signup', email: ui.verifyEmail }); toast(error ? esc(error.message) : 'Sent! Check your inbox (and spam folder).'); },
+  cloudSaveCfg(){ const url = ($('#clUrl') || {}).value || '', key = ($('#clKey') || {}).value || ''; try { localStorage.setItem('cb.cloud', JSON.stringify({ url: url.trim(), key: key.trim() })); } catch (e) {} CL.url = url.trim(); CL.key = key.trim(); CL.ready = false; cloudInit().then(ok => { toast(ok ? 'Cloud connected! Sign out and create your cloud account to sync phones.' : 'Could not connect: ' + esc(CL.err)); render(); }); },
+  async cloudInvite(){
+    if (!CL.famId) return toast('Sign in with a cloud account first.');
+    const code = Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+    const { error } = await CL.client.from('family_invites').insert({ code, family_id: CL.famId }); if (error) return toast(esc(error.message));
+    openSheet(`<div class="grab"></div><h3>Invite another grown-up</h3><p class="sub">Give them this family code. It works for 7 days.</p><div class="bigcode">${code}</div><p class="note-s">They open Chore Buddies on their phone, tap “Create a family account”, use their own email, type this code, and confirm their email. Then you both see the same kids, tasks and chat.</p><button class="btn big" data-act="closeSheet">Done</button>`);
+  }
+});
+function cloudControls(){
+  if (!cloudOn()) return `<div class="card"><div class="setrow"><div><b>Use on several phones</b><small>Right now this family lives on this device only. Connect a free Supabase project so both parents and every kid’s tablet share one account, with email confirmation.</small></div></div>
+    <div class="field"><label for="clUrl">Supabase project URL</label><input class="text" id="clUrl" placeholder="https://xxxx.supabase.co"></div><div class="field"><label for="clKey">Supabase anon public key</label><input class="text" id="clKey" placeholder="eyJhbGci…"></div>
+    <button class="btn small grape" data-act="cloudSaveCfg">Connect</button><p class="note-s">Setup steps are in chore-buddies/supabase/002_cloud_sync.txt. Cloud accounts only work when the app runs from your own website (like Cloudflare Pages), not inside this preview.</p></div>`;
+  return `<div class="card"><div class="setrow"><div><b>Cloud sync</b><small>${CL.famId ? `Synced as ${esc(CL.user.email)} · last update ${CL.last ? ago(CL.last) : 'just now'}${CL.status === 'error' ? ' · problem: ' + esc(CL.err) : ''}` : 'Connected. Sign out and sign in with a cloud account to start syncing.'}</small></div>${CL.famId ? '<span class="pill ok">☁ On</span>' : ''}</div>
+    ${CL.famId ? `<div class="setrow"><div><b>Invite another grown-up</b><small>They use their own email and password and join this family with a code.</small></div><button class="btn small grape" data-act="cloudInvite">Get a code</button></div><div class="setrow"><div><b>Kids’ phones and tablets</b><small>Sign in with your account once, then pick the kid on “Who’s playing?”. Each device remembers who is playing.</small></div></div>` : ''}</div>`;
+}
+if (cloudOn()) cloudInit().then(async ok => { if (!ok) return; const { data } = await CL.client.auth.getSession(); if (data && data.session){ CL.user = data.session.user; try { await cloudLoadFamily(); } catch (e) { CL.err = e.message; } } });
+
+// ---------- glue ----------
+const _musicForCT = musicFor; musicFor = function(){ if (ui.chore) return CHORESONG[ui.chore.act] || 'scrubadub'; return _musicForCT(); };
+const _soundCtlL = soundControls;
+soundControls = function(){ return _soundCtlL() + `<div class="card"><div class="setrow"><div><b>Music volume on this device</b><small>If you hear nothing on an iPhone, tap the ♪ button once. Music now plays even with the silent switch on.</small></div></div><input type="range" min="0" max="1" step="0.05" value="${MUS.vol}" id="musVol" aria-label="Music volume" class="vol"></div>` + voiceControls() + cloudControls(); };
+document.addEventListener('input', e => { if (e.target.id === 'musVol') A.musicVol(e.target); });
+document.addEventListener('submit', async e => {
+  if (!(e.target.dataset && e.target.dataset.form === 'unlock')) return;
+  const acc = DB.accounts[DB.current]; if (!acc || !acc.cloud) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  try { const { error } = await CL.client.auth.signInWithPassword({ email: CL.user.email, password: $('#puPw').value }); if (error) throw error; closeSheet(); DB.session = { role: 'parent' }; render(); }
+  catch (err){ ui.err = 'That password is not right.'; openSheet(parentGate()); }
+}, true);
 
 injectDefs();
 injectDefs2();
