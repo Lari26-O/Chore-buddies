@@ -674,12 +674,21 @@ input[type=time].num{width:104px}
 .rlv small{font-size:11.5px;color:var(--ink-3);flex:none;max-width:48%}
 .lvbig{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:17px;color:#fff;background:var(--grape);border-radius:50%}
 
+
+/* ---------- v6: music + work ---------- */
+.mbtn{width:38px;height:38px;border-radius:50%;background:#fff;display:grid;place-items:center;color:var(--grape);box-shadow:inset 0 0 0 1.5px var(--line);flex:none}
+.mbtn[aria-pressed="true"]{animation:mpulse 2.4s ease-in-out infinite}
+@keyframes mpulse{50%{box-shadow:inset 0 0 0 1.5px var(--line),0 0 0 5px rgba(123,92,250,.15)}}
+.np{color:var(--grape);font-weight:900}
+.workcount{text-align:center;font-family:var(--display);font-weight:800;font-size:18px;color:var(--grape);margin-top:-4px}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
 <div id="app">
   <header class="topbar">
     <div class="brand"><svg viewBox="-20 -20 40 40" aria-hidden="true"><use href="#coin" x="-20" y="-20" width="40" height="40"/></svg><span>Chore <b>Buddies</b></span></div>
+    <button id="musicBtn" class="mbtn" data-act="musicToggle" aria-label="Music"></button>
     <div id="who"></div>
   </header>
   <div id="strip"></div>
@@ -1274,7 +1283,7 @@ function charSVG(c, o = {}){
   s += legsSVG(c);
   const armUp = !!work;
   s += `<ellipse cx="-17" cy="-29" rx="5.6" ry="10" fill="${shade(sh, -.06)}" transform="rotate(18 -17 -29)"/><circle cx="-20" cy="-20" r="4.7" fill="${sk}"/>`;
-  s += armUp ? `<ellipse cx="18" cy="-36" rx="5.6" ry="10" fill="${shade(sh, -.1)}" transform="rotate(-50 18 -36)"/><circle cx="25" cy="-42" r="4.7" fill="${sk}"/>`
+  s += armUp ? `<g>${workAnim(work)}<ellipse cx="18" cy="-36" rx="5.6" ry="10" fill="${shade(sh, -.1)}" transform="rotate(-50 18 -36)"/><circle cx="25" cy="-42" r="4.7" fill="${sk}"/></g>`
              : `<ellipse cx="17" cy="-29" rx="5.6" ry="10" fill="${shade(sh, -.1)}" transform="rotate(-18 17 -29)"/><circle cx="20" cy="-20" r="4.7" fill="${sk}"/>`;
   const bodyD = 'M-15,-15 C-17,-32 -12,-43 0,-43 C12,-43 17,-32 15,-15 C8,-12 -8,-12 -15,-15Z';
   s += topSVG(c, bodyD);
@@ -1312,7 +1321,7 @@ function charSVG(c, o = {}){
     home: `<g transform="${H} rotate(-20)"><path d="M0,-18 v26" stroke="#C98A55" stroke-width="2.6" stroke-linecap="round"/><path d="M-6,8 h12 l3,9 h-18z" fill="#FFC63A"/></g>`,
     boutique: `<g transform="${H}"><path d="M0,0 v-10" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path class="twinkle" d="${starPath(0, -14, 6, 2.6)}" fill="#FFD84A" stroke="#E9A400" stroke-width=".8"/></g>`
   };
-  s += props[work] || '';
+  s += props[work] ? `<g>${workAnim(work)}${props[work]}</g>` : '';
   return s;
 }
 function accSVG(a){
@@ -1796,7 +1805,7 @@ function vHome(){
   const tired = kid.strength < 25;
   const hud = `<div class="hud tl" title="Energy">${STR_ICON}<div class="meter"><i style="width:${kid.strength}%"></i></div>${kid.strength}%</div>
     <div class="hud tr">${FLAME}${kid.streak} day streak</div>
-    ${waiting ? `<div class="workbar"><span class="dot"></span><span>${esc(kid.name)} is ${ACT[waiting.act].verb} at ${ACT[waiting.act].place} while ${esc(pname())} checks “${esc(waiting.title)}”</span><button class="btn small sun" data-act="wait" data-id="${waiting.id}">Play</button></div>`
+    ${waiting ? `<div class="workbar"><span class="dot"></span><span>${esc(kid.name)} is ${ACT[waiting.act].verb} at ${ACT[waiting.act].place} while ${esc(pname())} checks “${esc(waiting.title)}” · <b id="workCount">${workCount(waiting)} ${WORKN[waiting.act] || 'jobs done'}!</b></span><button class="btn small sun" data-act="wait" data-id="${waiting.id}">Play</button></div>`
       : tired ? `<div class="workbar tired"><span class="dot"></span><span>${esc(kid.name)} is too tired to travel or work. Finish a quest to recharge!</span></div>` : ''}`;
   const next = list.filter(t => t.status === 'todo').sort((a, b) => a.due.localeCompare(b.due))[0];
   const B = BUDDIES[kid.buddy];
@@ -2058,7 +2067,7 @@ function vControls(){
     <div class="setrow"><div><b>Friends and world visits</b><small>Coming in Phase 3. You approve every friend.</small></div>${tog('friends', false, 1)}</div>
     <div class="setrow"><div><b>Public world</b><small>Coming in Phase 3. Moderated, preset stickers only, no chat with other kids.</small></div>${tog('publicWorld', false, 1)}</div>
   </div>
-  ${evControls()}<div class="card">
+  ${soundControls()}${evControls()}<div class="card">
     <div class="setrow"><div><b>Account</b><small>${S.demo ? 'Demo family (no password)' : esc(S.email)}</small></div><button class="btn small ghost" data-act="signOut">Sign out</button></div>
     <div class="setrow"><div><b>Cloud sync</b><small>Not connected yet. This prototype saves your family on this device only.</small></div></div>
     <div class="setrow"><div><b>Privacy</b><small>Kid profiles live under your account. Kids never enter an email, no personal info is shown, and kids can't spend real money.</small></div></div>
@@ -2084,6 +2093,7 @@ function waitSheet(t){
   const kid = K(), A = ACT[t.act];
   return `<div class="grab"></div><div><h3>${esc(kid.name)} is ${A.verb}!</h3><p class="sub">${A.place} · waiting for ${esc(pname())} to check “${esc(t.title)}”</p></div>
   <div class="scene">${sceneSVG(t.act, kid.char)}</div>
+  <p class="workcount" id="workCount2">${workCount(t)} ${WORKN[t.act] || 'jobs done'}!</p>
   <div class="catch" id="catch"><div class="catch-hud"><span>Waiting room: catch the stars!</span><b id="catchN">0</b></div><div class="bud">${budBox(kid.buddy, { cheer: 1 })}</div></div>
   <p class="note-s">Prototype tip: tap <b>Switch</b> at the top and open ${esc(pname())} to approve it, then come back to see your coins land.</p>
   <button class="btn ghost big" data-act="closeSheet">Back to my world</button>`;
@@ -2250,7 +2260,7 @@ const sim = {
     return true;
   },
   arrive(){ this.manual = null; this.holdUntil = performance.now() + 9000; const h = $('#travelHud'); if (h) h.hidden = true; if (this.robot){ const id = this.robot; this.robot = null; openRobot(id); } if (this.enter){ const ob = K().world.find(o => o.id === this.enter); this.enter = null; if (ob) openRoom(ob); } },
-  workTile(act){ const b = K().world.find(o => o.t === ACT[act].b); if (!b) return null; const n = this.near(b.i, b.j); return n ? n.t : null; },
+  workTile(act){ const b = K().world.find(o => o.t === ACT[act].b); if (!b) return null; const spots = workSpots(act); if (spots.length) return spots[0]; const n = this.near(b.i, b.j); return n ? n.t : null; },
   tick(ts){
     if (!this.svg || !this.svg.isConnected) return;
     const dt = Math.min(.05, (ts - (this.last || ts)) / 1000); this.last = ts;
@@ -2275,6 +2285,7 @@ const sim = {
     const tbi = this.fi + .3 * -this.face, tbj = this.fj + .3;
     this.bi += (tbi - this.bi) * Math.min(1, dt * 3); this.bj += (tbj - this.bj) * Math.min(1, dt * 3);
     this.working = !!w && !moving && !this.manual && this.wt && cur[0] === this.wt[0] && cur[1] === this.wt[1];
+    if (this.working){ if (!this.paceAt) this.paceAt = ts + 5000 + Math.random() * 2500; else if (ts > this.paceAt){ this.paceAt = 0; const alt = workSpots(w.act).filter(t => t[0] !== cur[0] || t[1] !== cur[1]); if (alt.length) this.wt = pick(alt); } } else if (!w) this.paceAt = 0;
     this.moving = moving;
     if (cam.follow){ const [x, y] = P(this.fi, this.fj); cam.cx += (x - cam.cx) * Math.min(1, dt * 2.6); cam.cy += (y - 30 - cam.cy) * Math.min(1, dt * 2.6); applyCam(); }
     evHuntCheck([Math.round(this.fi), Math.round(this.fj)]);
@@ -2283,12 +2294,13 @@ const sim = {
   },
   paint(force){
     const kid = K(), w = S.tasks.find(t => t.kid === kid.id && t.status === 'waiting'), tired = kid.strength < 25;
-    const mode = (this.working ? 'w:' + w.act : tired ? 'tired' : 'idle') + (this.moving ? ':m' : '') + JSON.stringify(kid.char) + kid.buddy;
+    const mode = (this.working ? 'w:' + w.act + ':' + workCount(w) : tired ? 'tired' : 'idle') + (this.moving ? ':m' : '') + JSON.stringify(kid.char) + kid.buddy;
+    if (this.working) updateWorkCounters(w);
     if (mode !== this.key || force){
       this.key = mode;
       this.charG.innerHTML = `<g class="${this.moving ? 'bob' : this.working ? 'workwiggle' : ''}">${charSVG(kid.char, { work: this.working ? w.act : '', mood: tired ? 'tired' : this.working ? 'cheer' : 'happy' })}</g>`;
       this.budG.innerHTML = `<g class="${this.moving ? 'bob' : ''}">${buddySVG(kid.buddy, { sleepy: tired })}</g>`;
-      this.bubG.innerHTML = this.working ? `<g class="bubble-pop"><path d="M-20,-30 h40 a10,10 0 0 1 10,10 v10 a10,10 0 0 1 -10,10 h-14 l-6,7 l-6,-7 h-14 a10,10 0 0 1 -10,-10 v-10 a10,10 0 0 1 10,-10z" fill="#fff" stroke="#E2E8F7"/><g transform="translate(0,-15) scale(.62)"><svg x="-17" y="-17" width="34" height="34" viewBox="0 0 34 34">${ICONS[w.icon]?.svg || ''}</svg></g></g>`
+      this.bubG.innerHTML = this.working ? workBubble(w)
         : tired ? `<text x="8" y="-14" font-family="Baloo 2,Trebuchet MS,sans-serif" font-weight="800" font-size="16" fill="#7B5CFA">z<tspan font-size="12" dy="-6">z</tspan><tspan font-size="9" dy="-5">z</tspan></text>` : '';
     }
     const [x, y] = P(this.fi, this.fj), [bx, by] = P(this.bi, this.bj);
@@ -4470,6 +4482,354 @@ function migrateV5(){
 
 function migKid(k){ if (k.v5) return; k.v5 = true; ensureCloset(k); if (k.xp == null) k.xp = k.id === 'ava' ? 1180 : k.id === 'leo' ? 160 : 40; for (let L = 2; L <= lvlInfo(k.xp).L; L++) (LV_GIFTS[L] || []).forEach(id => giveItem(k, id)); }
 const _seedLv = seedDemo; seedDemo = function(){ const F = _seedLv(); Object.values(F.kids).forEach(migKid); return F; };
+
+// =====================================================================
+//  v6 — way more robot questions, characters working in the world, a song for every place
+// =====================================================================
+
+// ---------- 1. ROBOT QUESTIONS ----------
+const RI = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+function mkQ(t, q, ans, wrong, why){
+  const opts = [String(ans)]; wrong.map(String).forEach(w => { if (!opts.includes(w) && opts.length < 3) opts.push(w); });
+  let k = 1; while (opts.length < 3){ const v = String((+ans || 0) + k * 3); if (!opts.includes(v)) opts.push(v); k++; }
+  return { t, q, a: opts, ok: 0, why };
+}
+const nearN = (n, ...d) => d.map(x => n + x).filter(x => x >= 0);
+const GEN = {
+  bolt: {
+    little: () => pick([
+      () => { const a = RI(1, 5), b = RI(1, 5); return mkQ(`Let's add! Start at ${a}, then count up ${b} more.`, `What is ${a} + ${b}?`, a + b, nearN(a + b, 1, -1, 2), `${a} + ${b} = ${a + b}.`); },
+      () => { const a = RI(4, 10), b = RI(1, a - 1); return mkQ('Taking away means we end up with fewer.', `You have ${a} apples and eat ${b}. How many are left?`, a - b, nearN(a - b, 1, -1, 2), `${a} − ${b} = ${a - b}.`); },
+      () => { const s = RI(1, 5), d = pick([1, 2, 5]); return mkQ('Patterns repeat a rule. Look at how much it grows each time!', `What comes next? ${s}, ${s + d}, ${s + 2 * d}, ?`, s + 3 * d, nearN(s + 3 * d, 1, -1, d + 1), `It goes up by ${d} each time.`); },
+      () => { const [n, c] = pick([['triangle', 3], ['square', 4], ['pentagon', 5], ['hexagon', 6]]); return mkQ('Count the sides of a shape by touching each straight edge.', `How many sides does a ${n} have?`, c, nearN(c, 1, -1, 2), `A ${n} has ${c} sides.`); },
+      () => { const a = RI(1, 20); let b = RI(1, 20); while (b === a) b = RI(1, 20); return mkQ('Bigger numbers are further along when you count.', `Which number is bigger: ${a} or ${b}?`, Math.max(a, b), [Math.min(a, b), Math.min(a, b) - 1 > 0 ? Math.min(a, b) - 1 : Math.max(a, b) + 1], `${Math.max(a, b)} comes after ${Math.min(a, b)}.`); },
+      () => { const n = RI(2, 5); return mkQ('Doubles are a number plus itself.', `What is ${n} + ${n}?`, 2 * n, nearN(2 * n, 1, -1, -2), `Double ${n} is ${2 * n}.`); }
+    ])(),
+    middle: () => pick([
+      () => { const a = RI(2, 10), b = RI(2, 10); return mkQ(`${a} × ${b} means ${a} groups of ${b}.`, `What is ${a} × ${b}?`, a * b, nearN(a * b, a, -b, 1), `${a} × ${b} = ${a * b}.`); },
+      () => { const a = RI(12, 79), b = RI(5, 19); return mkQ('Add the ones first, then the tens. Carry if the ones make 10 or more!', `What is ${a} + ${b}?`, a + b, nearN(a + b, 10, -1, 1), `${a} + ${b} = ${a + b}.`); },
+      () => { const a = RI(30, 99), b = RI(5, 29); return mkQ('Subtract the ones, then the tens. Borrow if you need to.', `What is ${a} − ${b}?`, a - b, nearN(a - b, 10, 1, -1), `${a} − ${b} = ${a - b}.`); },
+      () => { const b = RI(2, 9), q = RI(2, 10); return mkQ('Dividing means sharing into equal groups.', `${b * q} stickers are shared by ${b} friends. How many each?`, q, nearN(q, 1, -1, 2), `${b * q} ÷ ${b} = ${q}.`); },
+      () => { const n = RI(11, 99); return { t: 'Even numbers end in 0, 2, 4, 6 or 8. Odd numbers end in 1, 3, 5, 7 or 9.', q: `Is ${n} even or odd?`, a: [n % 2 ? 'Odd' : 'Even', n % 2 ? 'Even' : 'Odd', 'Neither'], ok: 0, why: `${n} ends in ${n % 10}.` }; },
+      () => { const n = RI(11, 99); return mkQ('In a two-digit number, the left digit is the tens.', `In ${n}, which digit is in the tens place?`, Math.floor(n / 10), [n % 10, Math.floor(n / 10) + 1], `${n} has ${Math.floor(n / 10)} tens.`); },
+      () => { const h = RI(1, 11), m = pick([0, 15, 30, 45]); const nh = (h % 12) + 1; return mkQ('One hour later means the hour goes up by 1.', `It is ${h}:${String(m).padStart(2, '0')}. What time is it 1 hour later?`, `${nh}:${String(m).padStart(2, '0')}`, [`${h}:${String((m + 30) % 60).padStart(2, '0')}`, `${(nh % 12) + 1}:${String(m).padStart(2, '0')}`], `Add one hour: ${nh}:${String(m).padStart(2, '0')}.`); }
+    ])(),
+    big: () => pick([
+      () => { const d = pick([2, 3, 4, 5]), n = d * RI(2, 12); return mkQ(`To find 1/${d} of a number, divide it by ${d}.`, `What is 1/${d} of ${n}?`, n / d, nearN(n / d, 1, -1, d), `${n} ÷ ${d} = ${n / d}.`); },
+      () => { const [b, p] = pick([[40, 25], [80, 25], [60, 50], [200, 10], [50, 10], [120, 25], [90, 10]]); return mkQ('Percent means out of 100. 50% is half, 25% is a quarter, 10% is a tenth.', `What is ${p}% of ${b}?`, b * p / 100, nearN(b * p / 100, 5, -5, b / 10), `${p}% of ${b} = ${b * p / 100}.`); },
+      () => { const a = RI(11, 25), b = RI(3, 9); return mkQ('Break it apart: multiply the tens, then the ones, then add.', `What is ${a} × ${b}?`, a * b, nearN(a * b, b, -b, 10), `${a} × ${b} = ${a * b}.`); },
+      () => { const a = RI(2, 9), b = RI(2, 6), c = RI(2, 6); return mkQ('Order of operations: multiply before you add.', `What is ${a} + ${b} × ${c}?`, a + b * c, [(a + b) * c, a + b + c], `${b} × ${c} = ${b * c}, then + ${a} = ${a + b * c}.`); },
+      () => { const w = RI(3, 12), h = RI(2, 9); return mkQ('Area of a rectangle = length × width.', `A garden is ${w} m long and ${h} m wide. What is its area?`, w * h + ' m²', [2 * (w + h) + ' m²', w + h + ' m²'], `${w} × ${h} = ${w * h} square meters.`); },
+      () => { const m = RI(4, 15), d = RI(1, 3); return mkQ('The average is the total divided by how many numbers there are.', `What is the average of ${m - d}, ${m} and ${m + d}?`, m, nearN(m, 1, -1, d), `Total ${3 * m} ÷ 3 = ${m}.`); },
+      () => { const [x, y] = pick([[0.25, 0.5], [0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [1.5, 0.25]]); return mkQ('Line up the decimal points, then add.', `What is ${x} + ${y}?`, x + y, [+(x + y + 0.25).toFixed(2), +(x + y - 0.1).toFixed(2)], `${x} + ${y} = ${x + y}.`); },
+      () => { const a = RI(2, 9); return mkQ('A number squared is the number times itself.', `What is ${a}²?`, a * a, [a * 2, a * a + a], `${a} × ${a} = ${a * a}.`); }
+    ])()
+  },
+  penny: {
+    little: () => pick([
+      () => { const p = RI(5, 12), h = RI(1, p - 1); return mkQ('Saving means keeping coins until you have enough.', `A toy costs ${p} coins. You have ${h}. How many more do you need?`, p - h, nearN(p - h, 1, -1, 2), `${p} − ${h} = ${p - h}.`); },
+      () => { const a = RI(1, 5), b = RI(1, 5); return mkQ('To find the total, add the prices together.', `A juice costs ${a} coins and a cookie costs ${b}. How much for both?`, a + b, nearN(a + b, 1, -1, 2), `${a} + ${b} = ${a + b} coins.`); },
+      () => { const a = RI(2, 15); let b = RI(2, 15); while (b === a) b = RI(2, 15); return { t: 'The bigger price costs more coins.', q: `Which costs more: a ball for ${a} coins or a kite for ${b} coins?`, a: [a > b ? 'The ball' : 'The kite', a > b ? 'The kite' : 'The ball', 'They cost the same'], ok: 0, why: `${Math.max(a, b)} is more than ${Math.min(a, b)}.` }; },
+      () => { const [n, w] = pick([['Shoes for school', 'A toy robot'], ['Healthy food', 'A candy bar'], ['A warm coat', 'A sticker book'], ['Water', 'A soda'], ['A toothbrush', 'A video game']]); return { t: 'A need is something you must have. A want is nice to have.', q: 'Which one is a need?', a: [n, w, 'Neither'], ok: 0, why: `${n} is something you really need.` }; },
+      () => { const c = RI(2, 6); return mkQ('Each coin here is worth 2. Count by 2s!', `How much are ${c} two-coin pieces worth?`, c * 2, nearN(c * 2, 1, -2, 2), `${c} × 2 = ${c * 2}.`); }
+    ])(),
+    middle: () => pick([
+      () => { const p = RI(5, 18); return mkQ('Change is what you get back: what you paid minus the price.', `You pay 20 coins for a ${p}-coin book. How much change?`, 20 - p, nearN(20 - p, 1, -1, 2), `20 − ${p} = ${20 - p}.`); },
+      () => { const e = 2 * RI(5, 25); return mkQ('Saving half means splitting your coins into two equal parts.', `You earn ${e} coins and save half. How many do you save?`, e / 2, nearN(e / 2, 2, -2, 5), `Half of ${e} is ${e / 2}.`); },
+      () => { const n = RI(2, 6), p = RI(2, 9); return mkQ('Same price many times? Multiply!', `${n} toys cost ${p} coins each. What is the total?`, n * p, nearN(n * p, p, -1, 1), `${n} × ${p} = ${n * p}.`); },
+      () => { const b = RI(30, 60), s = RI(5, 25); return mkQ('A budget is a plan. Subtract what you spend to see what is left.', `Your budget is ${b} coins. You spend ${s}. How much is left?`, b - s, nearN(b - s, 10, -1, 1), `${b} − ${s} = ${b - s}.`); },
+      () => { const p = RI(10, 30), off = pick([2, 3, 5]); return mkQ('On sale means a lower price. Subtract the discount.', `A hat costs ${p}. It is ${off} coins off. What is the sale price?`, p - off, [p + off, p - off - 1], `${p} − ${off} = ${p - off}.`); }
+    ])(),
+    big: () => pick([
+      () => { const [p, d] = pick([[50, 20], [40, 25], [80, 10], [60, 50], [120, 25]]); return mkQ('To find a discount, take that percent of the price and subtract it.', `A ${p}-coin game is ${d}% off. What does it cost now?`, p - p * d / 100, [p * d / 100, p - d], `${d}% of ${p} is ${p * d / 100}, so ${p} − ${p * d / 100} = ${p - p * d / 100}.`); },
+      () => { const s = pick([100, 200, 50, 300]); return mkQ('Interest is extra money the bank adds. 10% interest adds a tenth.', `You save ${s} coins with 10% interest. How much after one year?`, s * 1.1, [s + 10, s * 2], `${s} + ${s / 10} = ${s * 1.1}.`); },
+      () => { const n = RI(3, 8), w = n * RI(4, 9); return mkQ('To reach a goal, divide the goal by how much you save each week.', `You save ${n} coins a week. How many weeks to save ${w}?`, w / n, nearN(w / n, 1, -1, 2), `${w} ÷ ${n} = ${w / n} weeks.`); },
+      () => { const k = RI(2, 6), t = k * RI(5, 12); return mkQ('Splitting a cost fairly means dividing by the number of people.', `${k} friends split a ${t}-coin pizza evenly. How much each?`, t / k, nearN(t / k, 1, -1, 2), `${t} ÷ ${k} = ${t / k}.`); },
+      () => { const a = RI(2, 4), pa = a * RI(2, 3), b = RI(5, 8), pb = b * 1; return { t: 'Unit price = price ÷ how many. The lower unit price is the better deal.', q: `Which is the better deal: ${a} apples for ${pa} coins, or ${b} apples for ${pb} coins?`, a: [pa / a < pb / b ? `${a} for ${pa}` : `${b} for ${pb}`, pa / a < pb / b ? `${b} for ${pb}` : `${a} for ${pa}`, 'They are the same'], ok: 0, why: `${a} for ${pa} is ${(pa / a).toFixed(2)} each; ${b} for ${pb} is ${(pb / b).toFixed(2)} each.` }; }
+    ])()
+  },
+  lexi: {
+    little: () => { const fam = [['cat', 'hat', 'bat', 'mat'], ['dog', 'log', 'frog', 'fog'], ['sun', 'fun', 'run', 'bun'], ['cake', 'lake', 'bake', 'snake'], ['bee', 'tree', 'see', 'key'], ['star', 'car', 'jar', 'far'], ['pig', 'wig', 'dig', 'big']]; const f = pick(fam), w = shuffle(f).slice(0, 2), o = shuffle(fam.filter(x => x !== f)).slice(0, 2).map(x => pick(x)); return { t: 'Words that rhyme end with the same sound.', q: `Which word rhymes with “${w[0]}”?`, a: [w[1], ...o], ok: 0, why: `${w[0]} and ${w[1]} both end the same way.` }; },
+    middle: () => { const P = [['happy', 'sad'], ['big', 'small'], ['fast', 'slow'], ['loud', 'quiet'], ['open', 'closed'], ['early', 'late'], ['full', 'empty'], ['hot', 'cold'], ['light', 'dark'], ['win', 'lose']]; const p = pick(P), o = shuffle(P.filter(x => x !== p)).slice(0, 2).map(x => x[1]); return { t: 'Antonyms are opposites, like up and down.', q: `What is the opposite of “${p[0]}”?`, a: [p[1], ...o], ok: 0, why: `${p[0]} and ${p[1]} are opposites.` }; },
+    big: () => { const P = [['huge', 'enormous'], ['tiny', 'minuscule'], ['smart', 'clever'], ['angry', 'furious'], ['scared', 'terrified'], ['happy', 'joyful'], ['tired', 'exhausted'], ['begin', 'commence'], ['brave', 'courageous'], ['quick', 'rapid']]; const p = pick(P), o = shuffle(P.filter(x => x !== p)).slice(0, 2).map(x => x[1]); return { t: 'Synonyms are words that mean nearly the same thing. Strong writers swap in exciting synonyms.', q: `Which word means almost the same as “${p[0]}”?`, a: [p[1], ...o], ok: 0, why: `${p[0]} and ${p[1]} mean nearly the same.` }; }
+  }
+};
+const MORE = {
+  lexi: {
+    little: [L('Capital letters start names, like Mia or Max.', 'Which name is written correctly?', ['Mia', 'mia', 'mIA'], 0, 'Names start with a capital letter.'), L('Some words name animals. A cow says moo!', 'Which word is an animal?', ['Cow', 'Run', 'Blue'], 0, 'A cow is an animal.'), L('Words are made of letters. CAT has 3 letters.', 'How many letters are in “DOG”?', ['3', '2', '5'], 0, 'D-O-G has 3 letters.'), L('Opposites mean very different things, like hot and cold.', 'What is the opposite of “up”?', ['Down', 'Over', 'Fast'], 0, 'Up and down are opposites.')],
+    middle: [L('Adjectives describe nouns, like a “fluffy” cat.', 'Which word is an adjective?', ['Shiny', 'Jump', 'Table'], 0, 'Shiny describes how something looks.'), L('A compound word joins two words: sun + flower = sunflower.', 'Which is a compound word?', ['Rainbow', 'Happy', 'Running'], 0, 'Rain + bow = rainbow.'), L('Plural means more than one. Box becomes boxes.', 'What is the plural of “bus”?', ['Buses', 'Buss', 'Busies'], 0, 'Add -es after s: buses.'), L('A question ends with a question mark.', 'Which sentence needs a question mark?', ['Where is my hat', 'I like pizza', 'The sun is hot'], 0, 'It asks something.')],
+    big: [L('A simile compares using “like” or “as”: fast as a cheetah.', 'Which is a simile?', ['She ran like the wind', 'She ran fast', 'She is the wind'], 0, 'It uses “like”.'), L('Homophones sound the same but mean different things: there, their, they’re.', 'Which fits? “___ going to the park.”', ['They’re', 'There', 'Their'], 0, 'They’re means they are.'), L('The main idea is what a story is mostly about.', 'A story tells how Max trains hard and wins a race. What is the main idea?', ['Hard work helps Max win', 'Max has a blue shirt', 'The race is on Tuesday'], 0, 'The main idea is the big message.'), L('Suffixes go at the end. “-ful” means full of: joyful means full of joy.', 'What does “careful” mean?', ['Full of care', 'Without care', 'Care again'], 0, '-ful means full of.')]
+  },
+  kindy: {
+    little: [L('Feelings can be big or small. It is okay to feel sad sometimes.', 'Your friend is crying. What could you say?', ['Are you okay?', 'Stop crying!', 'Go away'], 0, 'Asking shows you care.'), L('Taking turns means everyone gets a chance.', 'You and a friend want the same swing. What is fair?', ['Take turns', 'Push them off', 'Cry loudly'], 0, 'Taking turns is fair.'), L('Saying please and thank you makes people feel good.', 'Someone gives you a snack. What do you say?', ['Thank you!', 'More!', 'Nothing'], 0, '“Thank you” is kind.'), L('When you feel scared, tell a grown-up you trust.', 'You had a bad dream. Who can help?', ['A grown-up you trust', 'Nobody', 'The TV'], 0, 'Trusted grown-ups help.'), L('A smile can make someone’s day brighter.', 'A new kid joins your class. What can you do?', ['Smile and say hi', 'Ignore them', 'Laugh at them'], 0, 'Saying hi helps new friends.'), L('Helping at home shows you care about your family.', 'Which one is helpful?', ['Put away your toys', 'Throw toys around', 'Hide the shoes'], 0, 'Putting toys away helps everyone.')],
+    middle: [L('Good listeners look at the person and wait their turn to talk.', 'Your friend is telling a story. What shows good listening?', ['Look at them and wait your turn', 'Talk over them', 'Play a game instead'], 0, 'Good listeners wait their turn.'), L('Frustrated means upset because something is hard. A break can help.', 'Your puzzle is too hard. What can help?', ['Take a short break, then try again', 'Throw the puzzle', 'Quit forever'], 0, 'A break helps your brain reset.'), L('Including others means inviting them to join in.', 'A kid is sitting alone at recess. What could you do?', ['Ask them to play', 'Point and laugh', 'Walk past fast'], 0, 'Inviting them in is kind.'), L('Honesty means telling the truth, even when it is hard.', 'You broke a cup by accident. What is the honest choice?', ['Tell a grown-up what happened', 'Hide the pieces', 'Blame the dog'], 0, 'The truth builds trust.'), L('Teamwork means everyone helps toward the same goal.', 'Your team is building a fort. What is good teamwork?', ['Share ideas and jobs', 'Boss everyone around', 'Do nothing'], 0, 'Sharing jobs gets it done.'), L('Gratitude means noticing the good things you have.', 'Which one is a grateful thought?', ['I’m glad I have a cozy bed', 'I never get anything', 'Everything is boring'], 0, 'Noticing good things is gratitude.')],
+    big: [L('Peer pressure is when friends push you to do something you don’t want to do.', 'Friends dare you to do something unsafe. What is a strong choice?', ['Say no and suggest something else', 'Do it so they like you', 'Keep it secret'], 0, 'Saying no takes courage.'), L('Kind words online matter as much as in person.', 'Someone posts a mean comment about a classmate. What should you do?', ['Don’t join in and tell a trusted adult', 'Add another mean comment', 'Share it with everyone'], 0, 'Don’t join, and tell an adult.'), L('Big goals get easier when you break them into small steps.', 'You want to read 10 books this month. What is a good first step?', ['Read a few pages every day', 'Wait until the last day', 'Give up now'], 0, 'Small daily steps add up.'), L('Empathy means understanding feelings from someone else’s view.', 'Your friend lost their game and looks upset. What shows empathy?', ['That’s tough. Want to talk?', 'Ha, you lost!', 'Whatever.'], 0, 'Naming their feeling shows you understand.'), L('Conflicts get solved by calmly sharing what you need and listening back.', 'You and your sibling both want the TV. What is a good solution?', ['Make a plan to take turns', 'Grab the remote', 'Yell louder'], 0, 'A turn-taking plan is fair.'), L('Owning a mistake and fixing it is being responsible.', 'You forgot to feed the fish. What is responsible?', ['Feed it now and set a reminder', 'Pretend it didn’t happen', 'Blame your sister'], 0, 'Fix it and plan ahead.')]
+  },
+  sprout: {
+    little: [L('Bees make honey from flower nectar.', 'What do bees make?', ['Honey', 'Milk', 'Juice'], 0, 'Bees turn nectar into honey!'), L('Frogs start as tadpoles that swim with tails.', 'What is a baby frog called?', ['A tadpole', 'A puppy', 'A chick'], 0, 'Tadpoles grow legs and become frogs.'), L('An oak tree grows from a tiny acorn.', 'What does an oak tree grow from?', ['An acorn', 'A rock', 'A shell'], 0, 'Acorns are oak seeds.'), L('Birds build nests to keep their eggs safe.', 'Where do birds lay eggs?', ['In a nest', 'In a shoe', 'In a cup'], 0, 'Nests keep eggs cozy.'), L('Roots drink water from the soil.', 'Which part of a plant drinks water from the soil?', ['Roots', 'Petals', 'Flowers'], 0, 'Roots soak up water.'), L('In fall, many leaves change color and drop.', 'What happens to many leaves in fall?', ['They change color and fall', 'They turn into birds', 'They grow bigger'], 0, 'They turn red, orange and yellow.')],
+    middle: [L('Some animals hibernate, sleeping through winter.', 'Which animal hibernates?', ['Bear', 'Dog', 'Goldfish'], 0, 'Bears sleep through cold months.'), L('A habitat is the home where an animal lives and finds food.', 'What is a camel’s habitat?', ['The desert', 'The ocean', 'The arctic'], 0, 'Camels are built for deserts.'), L('Insects have 6 legs. Spiders have 8, so spiders are not insects.', 'How many legs does an insect have?', ['6', '8', '4'], 0, 'All insects have 6 legs.'), L('Composting turns food scraps into rich soil.', 'What can go in a compost bin?', ['Banana peels', 'Plastic bottles', 'Batteries'], 0, 'Fruit scraps make compost.'), L('Seeds travel by wind, water and animals.', 'How do dandelion seeds travel?', ['By wind', 'By car', 'By rolling'], 0, 'Fluffy tops catch the wind.'), L('Recycling saves trees and reduces trash.', 'Which item can usually be recycled?', ['A cardboard box', 'A banana peel', 'A dirty tissue'], 0, 'Cardboard becomes new paper.')],
+    big: [L('Pollinators like bees, butterflies and bats help plants make fruit.', 'Which animal is also a pollinator?', ['Bat', 'Shark', 'Snail'], 0, 'Some bats pollinate at night.'), L('An ecosystem is living and nonliving things working together.', 'Which is a nonliving part of an ecosystem?', ['Sunlight', 'A deer', 'Grass'], 0, 'Sunlight, water and rocks are nonliving.'), L('Decomposers break dead things into nutrients.', 'Which one is a decomposer?', ['Earthworm', 'Eagle', 'Rabbit'], 0, 'Worms recycle nutrients.'), L('Camouflage helps animals blend in.', 'Why is a polar bear white?', ['To blend in with snow', 'To stay warm by color', 'To scare fish'], 0, 'White fur hides it on ice.'), L('Deforestation means cutting down forests.', 'What is one effect of cutting down forests?', ['Animals lose their homes', 'More forests grow', 'Air gets cleaner'], 0, 'Forest animals lose habitat.'), L('Photosynthesis uses sunlight, water and CO₂ to make sugar and oxygen.', 'What does photosynthesis make?', ['Sugar and oxygen', 'Salt and smoke', 'Milk and honey'], 0, 'Plants make food and oxygen.')]
+  },
+  cosmo: {
+    little: [L('The Moon shines because sunlight bounces off it.', 'Why does the Moon look bright?', ['Sunlight bounces off it', 'It has lamps', 'It is on fire'], 0, 'It reflects the Sun’s light.'), L('Astronauts are people who travel to space.', 'What do we call people who go to space?', ['Astronauts', 'Farmers', 'Sailors'], 0, 'Astronauts explore space!'), L('The Sun is the star we see in the day.', 'Which star do we see in the daytime?', ['The Sun', 'The North Star', 'No star'], 0, 'The Sun is our daytime star.'), L('Rockets blast off to carry astronauts into space.', 'What carries astronauts into space?', ['A rocket', 'A bike', 'A balloon'], 0, 'Rockets are super powerful!'), L('Mars is called the Red Planet because of its red dust.', 'Which planet is red?', ['Mars', 'Earth', 'Neptune'], 0, 'Red dust covers Mars.'), L('The Moon seems to change shape. A thin Moon is called a crescent.', 'Can the Moon look like a banana shape?', ['Yes, a crescent', 'No, never', 'Only on Mars'], 0, 'That is a crescent Moon.')],
+    middle: [L('Saturn has beautiful rings of ice and rock.', 'Which planet is famous for its rings?', ['Saturn', 'Mercury', 'Earth'], 0, 'Saturn’s rings are ice and rock.'), L('Gravity is the pull that keeps us on the ground.', 'What keeps us from floating away?', ['Gravity', 'Wind', 'Glue'], 0, 'Earth’s gravity pulls us down.'), L('Mercury is the closest planet to the Sun.', 'Which planet is closest to the Sun?', ['Mercury', 'Venus', 'Mars'], 0, 'Mercury is first.'), L('A constellation is a star picture, like the Big Dipper.', 'What is a constellation?', ['A star picture', 'A planet', 'A comet'], 0, 'People connect stars into shapes.'), L('The Moon orbits Earth about once a month.', 'How long does the Moon take to orbit Earth?', ['About a month', 'One day', 'One year'], 0, 'About 27 days.'), L('Space has no air, so astronauts wear space suits.', 'Why do astronauts wear space suits?', ['There is no air to breathe', 'To look cool', 'It is too hot to walk'], 0, 'Suits give them air.')],
+    big: [L('Venus is the hottest planet because thick clouds trap heat.', 'Which planet is the hottest?', ['Venus', 'Mercury', 'Mars'], 0, 'Clouds trap heat on Venus.'), L('A light-year is how far light travels in a year.', 'What does a light-year measure?', ['Distance', 'Time', 'Weight'], 0, 'It measures distance.'), L('Our galaxy, the Milky Way, has billions of stars.', 'What is our galaxy called?', ['The Milky Way', 'Andromeda Road', 'The Star Ring'], 0, 'We live in the Milky Way.'), L('Earth’s tilt causes the seasons.', 'What causes the seasons?', ['Earth’s tilt', 'The Moon’s color', 'Wind from space'], 0, 'The tilt changes how sunlight hits us.'), L('A solar eclipse happens when the Moon passes in front of the Sun.', 'What blocks the Sun in a solar eclipse?', ['The Moon', 'A cloud', 'Mars'], 0, 'The Moon covers the Sun.'), L('Jupiter’s Great Red Spot is a storm bigger than Earth.', 'What is the Great Red Spot?', ['A giant storm on Jupiter', 'A volcano on Mars', 'A red star'], 0, 'A storm lasting hundreds of years.')]
+  },
+  wave: {
+    little: [L('Octopuses have 8 arms.', 'How many arms does an octopus have?', ['8', '4', '10'], 0, 'Octo means eight!'), L('Ocean water is salty. We drink fresh water.', 'Is ocean water salty?', ['Yes', 'No', 'Only on Sundays'], 0, 'The ocean is full of salt.'), L('Crabs walk sideways.', 'Which way do crabs walk?', ['Sideways', 'Backwards only', 'Upside down'], 0, 'Crabs scuttle sideways!'), L('Rain falls from clouds.', 'Where does rain come from?', ['Clouds', 'Trees', 'The ground'], 0, 'Drops fall from clouds.'), L('Turtles carry their shells everywhere.', 'What does a turtle carry on its back?', ['A shell', 'A backpack', 'A pillow'], 0, 'The shell is part of the turtle.'), L('Fish live in oceans, rivers and lakes.', 'Where can fish live?', ['Oceans, rivers and lakes', 'Only in bathtubs', 'In the sky'], 0, 'Fish live in all kinds of water.')],
+    middle: [L('The blue whale is the biggest animal that ever lived.', 'What is the largest animal on Earth?', ['Blue whale', 'Elephant', 'Giraffe'], 0, 'Up to 30 meters long!'), L('Coral reefs are built by tiny animals called corals.', 'What builds coral reefs?', ['Tiny animals called corals', 'Rocks rolling', 'Fish glue'], 0, 'Corals are living animals.'), L('There are five oceans. The Pacific is the biggest.', 'Which ocean is the largest?', ['Pacific', 'Atlantic', 'Arctic'], 0, 'The Pacific is biggest.'), L('Water freezes at 0 °C (32 °F).', 'At what temperature does water freeze in Celsius?', ['0 °C', '50 °C', '100 °C'], 0, 'Water turns to ice at 0 °C.'), L('Dolphins find food with clicks and echoes: echolocation.', 'How do dolphins find food in murky water?', ['Echolocation', 'Smelling the air', 'Using lights'], 0, 'They listen to echoes.'), L('Turning off the tap while brushing saves lots of water.', 'Which one saves water?', ['Turn off the tap while brushing', 'Leave the hose on', 'Take very long showers'], 0, 'Every drop counts!')],
+    big: [L('Water boils at 100 °C at sea level.', 'At what temperature does water boil in Celsius?', ['100 °C', '0 °C', '50 °C'], 0, '100 °C at sea level.'), L('The Mariana Trench is the deepest place in the ocean, almost 11 km down.', 'What is the deepest place in the ocean?', ['Mariana Trench', 'Great Barrier Reef', 'Dead Sea'], 0, 'Deeper than Everest is tall.'), L('About 97% of Earth’s water is salty ocean water.', 'Most of Earth’s water is…', ['Salty ocean water', 'Fresh lake water', 'Ice cubes'], 0, 'About 97% is salt water.'), L('Plastic harms sea animals that mistake it for food.', 'Why is plastic bad for sea turtles?', ['They can mistake it for food', 'It makes them faster', 'It cleans the water'], 0, 'Bags look like jellyfish.'), L('Erosion is water or wind slowly wearing away rock.', 'What carved the Grand Canyon?', ['A river, over millions of years', 'One earthquake', 'Giant shovels'], 0, 'The Colorado River wore it away.'), L('Ocean currents are rivers in the sea that move warm and cold water.', 'What do ocean currents do?', ['Move water around the world', 'Stop the tides', 'Make the sea fresh'], 0, 'They carry heat and nutrients.')]
+  }
+};
+Object.entries(MORE).forEach(([r, bands]) => Object.entries(bands).forEach(([b, arr]) => LESSONS[r][b].push(...arr)));
+function makeLesson(kid, id, band){
+  let les;
+  if (GEN[id] && (id !== 'lexi' || Math.random() < .5)) les = GEN[id][band]();
+  else { kid.qi = kid.qi || {}; const key = id + band, list = LESSONS[id][band], i = kid.qi[key] || Math.floor(Math.random() * list.length); les = list[i % list.length]; kid.qi[key] = (i + 1) % list.length; }
+  const order = shuffle([0, 1, 2]);
+  return { t: les.t, q: les.q, a: order.map(k => les.a[k]), ok: order.indexOf(les.ok), why: les.why };
+}
+function robotSheet(id){
+  const kid = K(), r = ROBOTS[id];
+  const st = ui.lesson && ui.lesson.id === id ? ui.lesson : (ui.lesson = { id, picked: [], right: false, band: robotBand(kid, id) });
+  if (!st.cur){ st.cur = makeLesson(kid, id, st.band); save(); }
+  const les = st.cur, done = learnedToday(kid)[id], rl = robotLv(kid, id), top = st.band === 'big' && robotBand(kid, id) === 'big';
+  const count = GEN[id] && id !== 'lexi' ? 'never-ending' : (LESSONS[id][st.band].length + (GEN[id] ? '+' : ''));
+  return `<div class="grab"></div>
+  <div class="robohead"><div class="rbig">${robotBox(id, { wave: !st.right, happy: st.right })}</div><div><h3>Hi, I'm ${r.name}!</h3><p class="sub">${r.topic} · ${BANDS[st.band]} · ${count} questions</p></div></div>
+  <div class="rlv"><b>Level ${rl.lvl}</b><span class="evbar"><i style="width:${rl.into / 4 * 100}%"></i></span><small>${top ? 'Top level questions!' : `${4 - rl.into} more right → harder questions`}</small></div>
+  <div class="lesson"><p>${esc(les.t)}</p><button class="btn small ghost" data-act="speak" data-v="${esc(les.t + ' ' + les.q + ' ' + les.a.join(', '))}">🔊 Read it to me</button></div>
+  <h3 style="font-size:19px">${esc(les.q)}</h3>
+  <div class="answers">${les.a.map((a, k) => `<button data-act="answer" data-k="${k}" ${st.right ? 'disabled' : ''} class="${st.right && k === les.ok ? 'right' : st.picked.includes(k) ? 'wrong' : ''}">${esc(a)}</button>`).join('')}</div>
+  ${st.right ? `<p class="feedback ok">Yes! ${esc(les.why)}${st.lvup ? ` <b>Level up! ${r.name} has harder questions for you now.</b>` : ''}</p>` : st.picked.length ? `<p class="feedback">Not quite. Try another one!</p>` : ''}
+  <p class="note-s">${done ? `You already earned ${r.name}'s coins today. Keep answering to level up!` : 'Get it right for +3 coins (+1 if it takes a few tries).'}</p>
+  <div class="actions">${st.right ? `<button class="btn sea" data-act="robotNext" data-v="${id}">Next question →</button>` : ''}<button class="btn ghost" data-act="closeSheet">Bye, ${r.name}!</button></div>`;
+}
+A.answer = function(el){
+  const kid = K(), st = ui.lesson, id = st.id, les = st.cur, k = +el.dataset.k;
+  if (st.right || !les) return;
+  if (k === les.ok){
+    st.right = true; sfx('pop'); kid.rlv = kid.rlv || {}; const before = robotLv(kid, id).lvl; kid.rlv[id] = (kid.rlv[id] || 0) + 1;
+    st.lvup = robotLv(kid, id).lvl > before && BAND_ORDER.indexOf(robotBand(kid, id)) > BAND_ORDER.indexOf(st.band);
+    addXP(kid, st.picked.length ? 5 : 10);
+    const lt = (kid.learned[dayKey()] = kid.learned[dayKey()] || {});
+    if (!lt[id]){ const amt = st.picked.length ? 1 : 3; lt[id] = 1; kid.coins += amt; addHist(kid.id, 'earn', amt, `Learned ${ROBOTS[id].topic.toLowerCase()} with ${ROBOTS[id].name}`); evTrack(kid, 'robots'); save(); openSheet(robotSheet(id)); render(); celebrate({ amount: amt, label: `${ROBOTS[id].name} says: great thinking!`, sub: ROBOTS[id].topic + ' lesson', robot: id }); return; }
+    save();
+  } else if (!st.picked.includes(k)){ st.picked.push(k); sfx('boop'); }
+  openSheet(robotSheet(id));
+};
+A.robotNext = function(el){ const st = ui.lesson; st.cur = null; st.right = false; st.picked = []; st.lvup = false; st.band = robotBand(K(), el.dataset.v); openSheet(robotSheet(el.dataset.v)); };
+
+// ---------- 2. CHARACTERS ACTIVELY WORKING IN THE WORLD ----------
+const WA = { restaurant: ['-16;10;-16', '.45'], school: ['0;-10;0', '1.3'], boutique: ['-28;22;-28', '.8'], greenhouse: ['0;26;26;0', '1.6'], hotel: ['-32;26;-32', '.55'], home: ['-24;14;-24', '.6'], fish: ['0;-6;0', '2.2'] };
+function workAnim(w){ const a = WA[w]; if (!a) return ''; return `<animateTransform attributeName="transform" type="rotate" values="${a[0].split(';').map(v => v + ' 18 -34').join(';')}" dur="${a[1]}s" repeatCount="indefinite"/>`; }
+const WORKN = { restaurant: 'plates sparkling', school: 'pages read', boutique: 'poses struck', greenhouse: 'plants watered', hotel: 'rooms dusted', home: 'spots swept' };
+const workCount = w => Math.min(99, 1 + Math.floor((Date.now() - (w.doneAt || Date.now())) / 5000));
+function workFx(act){
+  const d = k => ['', 'd2', 'd3'][k % 3];
+  switch (act){
+    case 'restaurant': return [0, 1, 2, 3].map(k => `<circle class="rise ${d(k)}" cx="${16 + k * 4}" cy="${30 - k * 3}" r="${2.4 + k % 2}" fill="#fff" stroke="#9FDCF5" stroke-width="1"/>`).join('');
+    case 'school': return ['A', 'B', 'C', '+'].map((l, k) => TX(10 + k * 7, 32, l, 9, ['#34B2F0', '#FF5A8C', '#3EC46B', '#FFB800'][k], `class="rise ${d(k)}"`)).join('');
+    case 'boutique': return [0, 1, 2, 3, 4].map(k => `<path class="twinkle ${d(k)}" d="${starPath(-18 + k * 9, 10 + (k % 2) * 14, 4, 1.4, 4)}" fill="${['#FFE36B', '#fff', '#FF8FB8'][k % 3]}"/>`).join('') + `<circle class="glowb" cx="-20" cy="6" r="6" fill="#fff" opacity=".7"/>`;
+    case 'greenhouse': return [0, 1, 2].map(k => `<path class="rise ${d(k)}" style="animation-direction:reverse" d="M${22 + k * 4},${18 + k * 3} q2.4,3 2.4,4.4 a2.4,2.4 0 0 1 -4.8,0 q0,-1.4 2.4,-4.4z" fill="#5FB6EE"/>`).join('') + `<g transform="translate(28,46)"><circle class="twinkle" r="3" fill="#FF8FB8"/></g>`;
+    case 'hotel': return [0, 1, 2, 3].map(k => `<path class="twinkle ${d(k)}" d="${starPath(14 + k * 6, 14 + (k % 2) * 12, 3.4, 1.2, 4)}" fill="#fff"/>`).join('');
+    case 'home': return [0, 1, 2].map(k => `<circle class="smoke s${k + 1}" cx="${14 + k * 5}" cy="46" r="4" fill="#E9D5B5"/>`).join('');
+  }
+  return '';
+}
+function workSpots(act){
+  const b = K().world.find(o => o.t === ACT[act].b); if (!b) return [];
+  const cur = [Math.round(sim.fi), Math.round(sim.fj)], out = [];
+  for (let di = -2; di <= 2; di++) for (let dj = -2; dj <= 2; dj++){ const dd = Math.abs(di) + Math.abs(dj); if (dd < 1 || dd > 2) continue; const t = [b.i + di, b.j + dj]; if (sim.walk(...t) && (t[0] === cur[0] && t[1] === cur[1] || sim.bfs(cur, t))) out.push([...t, dd]); }
+  const front = out.filter(t => t[0] + t[1] > b.i + b.j), pool = front.length >= 2 ? front : out;
+  const n1 = pool.filter(t => t[2] === 1); return (n1.length >= 2 ? n1 : pool).map(t => [t[0], t[1]]);
+}
+function workBubble(w){
+  const n = workCount(w), label = WORKN[w.act] || 'jobs done';
+  return `<g>${workFx(w.act)}</g><g class="bubble-pop">${rr(-34, -32, 68, 26, 13, '#fff', 'stroke="#E2E8F7"')}<path d="M-5,-6 l5,7 l5,-7z" fill="#fff"/><g transform="translate(-21,-19) scale(.5)"><svg x="-17" y="-17" width="34" height="34" viewBox="0 0 34 34">${ICONS[w.icon]?.svg || ''}</svg></g>${TX(8, -14.5, '×' + n, 13, '#5A3FD6')}</g>`;
+}
+function updateWorkCounters(w){
+  const txt = `${workCount(w)} ${WORKN[w.act] || 'jobs done'}!`;
+  ['workCount', 'workCount2'].forEach(id => { const e = document.getElementById(id); if (e && e.textContent !== txt) e.textContent = txt; });
+}
+
+// ---------- 3. A SONG FOR EVERY PLACE (live Web Audio synth) ----------
+const MUS = { on: true, sfx: true, ctx: null, master: null, tracks: [], cur: undefined, timer: 0, started: false, noise: null };
+try { const v = JSON.parse(localStorage.getItem('cb.sound') || '{}'); MUS.on = v.on !== false; MUS.sfx = v.sfx !== false; } catch (e) {}
+const saveSound = () => { try { localStorage.setItem('cb.sound', JSON.stringify({ on: MUS.on, sfx: MUS.sfx })); } catch (e) {} };
+const NI = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
+const mf = m => 440 * Math.pow(2, (m - 69) / 12);
+function nf(n){ const m = /^([A-G][#b]?)(-?\d)$/.exec(n); return mf((+m[2] + 1) * 12 + NI[m[1]]); }
+function chordOf(c){ const m = /^([A-G][#b]?)(.*)$/.exec(c), q = m[2]; return { root: NI[m[1]], iv: q === 'm' ? [0, 3, 7] : q === '7' ? [0, 4, 7, 10] : q === 'maj7' ? [0, 4, 7, 11] : q === 'm7' ? [0, 3, 7, 10] : q === 'dim' ? [0, 3, 6] : [0, 4, 7] }; }
+const INST = {
+  bell: { w: [['sine', 1, 1], ['sine', 2, .35], ['sine', 3, .1]], a: .005, d: .55, s: 0, r: .1, vol: .3 },
+  xylo: { w: [['sine', 1, 1], ['sine', 4, .2]], a: .003, d: .32, s: 0, r: .05, vol: .34 },
+  musicbox: { w: [['sine', 1, 1], ['sine', 3, .22], ['sine', 5.4, .06]], a: .002, d: 1.1, s: 0, r: .1, vol: .25 },
+  celesta: { w: [['sine', 1, 1], ['sine', 2, .22]], a: .004, d: 1.4, s: 0, r: .2, vol: .22 },
+  pluck: { w: [['triangle', 1, 1], ['square', 1, .1]], a: .004, d: .35, s: 0, r: .05, vol: .22, lp: 2600 },
+  mando: { w: [['triangle', 1, 1], ['sawtooth', 1, .16]], a: .003, d: .16, s: 0, r: .03, vol: .22, lp: 3200 },
+  harp: { w: [['triangle', 1, 1], ['sine', 2, .2]], a: .003, d: .9, s: 0, r: .1, vol: .18 },
+  toy: { w: [['sine', 1, 1], ['square', 2, .07]], a: .002, d: .28, s: 0, r: .04, vol: .26 },
+  steel: { w: [['sine', 1, 1], ['sine', 2, .4], ['sine', 3.01, .16]], a: .004, d: .55, s: 0, r: .08, vol: .28, bend: -.015 },
+  flute: { w: [['sine', 1, 1], ['triangle', 1, .15]], a: .06, d: .1, s: .8, r: .12, vol: .18, vib: 5, vibD: 5 },
+  whistle: { w: [['sine', 1, 1]], a: .04, d: .1, s: .85, r: .1, vol: .16, vib: 6, vibD: 9 },
+  accordion: { w: [['sawtooth', 1, .5], ['sawtooth', 1.004, .5], ['square', .5, .18]], a: .02, d: .08, s: .7, r: .06, vol: .07, lp: 1800, vib: 5.5, vibD: 4 },
+  organ: { w: [['sine', 1, 1], ['sine', 2, .5], ['sine', 3, .25], ['sine', 4, .12]], a: .01, d: .05, s: .8, r: .06, vol: .1 },
+  lead: { w: [['sawtooth', 1, 1], ['square', 1.005, .4]], a: .008, d: .12, s: .55, r: .05, vol: .075, lp: 3400 },
+  square: { w: [['square', 1, 1]], a: .005, d: .1, s: .5, r: .04, vol: .07, lp: 2800 },
+  stab: { w: [['square', 1, 1], ['sawtooth', 1.006, .5]], a: .004, d: .12, s: 0, r: .03, vol: .05, lp: 2400 },
+  pad: { w: [['sawtooth', 1, .5], ['sawtooth', 1.007, .5]], a: .25, d: .3, s: .7, r: .4, vol: .045, lp: 1000 },
+  bass: { w: [['triangle', 1, 1], ['sine', .5, .6]], a: .01, d: .25, s: .55, r: .06, vol: .3, lp: 900 },
+  softbass: { w: [['sine', 1, 1], ['triangle', 1, .3]], a: .02, d: .3, s: .5, r: .1, vol: .26 }
+};
+function voice(name, f, t, dur, vel, dest){
+  const I = INST[name], c = MUS.ctx; if (!I || !c) return;
+  const pk = I.vol * vel, g = c.createGain(), hold = I.s > .01, end = t + Math.max(dur, I.a + .02);
+  g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(pk, t + I.a);
+  const sv = Math.max(.0002, pk * (hold ? I.s : .001));
+  g.gain.exponentialRampToValueAtTime(sv, t + I.a + I.d);
+  let stopAt = t + I.a + I.d + .05;
+  if (hold){ g.gain.setValueAtTime(sv, end); g.gain.exponentialRampToValueAtTime(.0001, end + I.r); stopAt = end + I.r + .05; }
+  if (I.lp){ const fl = c.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = I.lp; g.connect(fl); fl.connect(dest); } else g.connect(dest);
+  I.w.forEach(([type, mult, amp]) => {
+    const o = c.createOscillator(), og = c.createGain(); o.type = type; o.frequency.setValueAtTime(f * mult, t);
+    if (I.bend) o.frequency.exponentialRampToValueAtTime(f * mult * (1 + I.bend), t + .18);
+    og.gain.value = amp; o.connect(og); og.connect(g);
+    if (I.vib){ const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = I.vib; lg.gain.value = f * mult * (I.vibD || 4) * .000578; l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(stopAt); }
+    o.start(t); o.stop(stopAt);
+  });
+}
+function drum(k, t, vel, dest){
+  const c = MUS.ctx;
+  if (k === 'k'){ const o = c.createOscillator(), g = c.createGain(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + .14); g.gain.setValueAtTime(.5 * vel, t); g.gain.exponentialRampToValueAtTime(.001, t + .28); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .3); return; }
+  if (k === 'w'){ const o = c.createOscillator(), g = c.createGain(); o.frequency.value = 950; g.gain.setValueAtTime(.18 * vel, t); g.gain.exponentialRampToValueAtTime(.001, t + .06); o.connect(g); g.connect(dest); o.start(t); o.stop(t + .08); return; }
+  const P = { s: ['highpass', 1400, .14, .26], c: ['bandpass', 1600, .12, .3], h: ['highpass', 7500, .035, .1], o: ['highpass', 7000, .2, .08], sh: ['bandpass', 5500, .05, .09], j: ['bandpass', 8500, .14, .14], t: ['bandpass', 9000, .09, .12] }[k];
+  if (!P) return;
+  const src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  src.buffer = MUS.noise; f.type = P[0]; f.frequency.value = P[1]; if (P[0] === 'bandpass') f.Q.value = 1.4;
+  g.gain.setValueAtTime(P[3] * vel, t); g.gain.exponentialRampToValueAtTime(.001, t + P[2]);
+  src.connect(f); f.connect(g); g.connect(dest); src.start(t, Math.random() * .5); src.stop(t + P[2] + .05);
+  if (k === 's'){ const o = c.createOscillator(), og = c.createGain(); o.type = 'triangle'; o.frequency.value = 190; og.gain.setValueAtTime(.12 * vel, t); og.gain.exponentialRampToValueAtTime(.001, t + .08); o.connect(og); og.connect(dest); o.start(t); o.stop(t + .1); }
+}
+const BASSP = {
+  root4: s => [[0, 0, s / 2 - 1], [s / 2, 0, s / 2 - 1]], oompah: s => [[0, 0, 3], [s / 2, 7, 3]], soft: s => [[0, 0, s - 1]],
+  disco: s => [...Array(s / 2)].map((_, k) => [k * 2, k % 2 ? 12 : 0, 1.4]), calypso: () => [[0, 0, 3], [3, 0, 2], [6, 7, 2], [8, 0, 3], [11, 7, 2], [14, 0, 2]],
+  tarantella: () => [[0, 0, 4], [6, 7, 4]], waltz: () => [[0, 0, 4]], bounce: s => [...Array(s / 2)].map((_, k) => [k * 2, [0, 0, 7, 0, 0, 0, 7, 12][k % 8], 1])
+};
+const COMPP = {
+  arp8: s => [...Array(s / 2)].map((_, k) => [k * 2, [0, 1, 2, 1][k % 4], 2]), arp16: s => [...Array(s)].map((_, k) => [k, [0, 1, 2, 3][k % 4], 1]), arp6: () => [0, 2, 4, 6, 8, 10].map((st, k) => [st, [0, 1, 2, 3, 2, 1][k], 2]),
+  strum24: () => [[4, 'c', 3], [12, 'c', 3]], stab: () => [[2, 'c', 1], [6, 'c', 1], [10, 'c', 1], [14, 'c', 1]], oom: () => [[4, 'c', 2], [12, 'c', 2]],
+  tarantella: () => [[2, 'c', 1], [4, 'c', 1], [8, 'c', 1], [10, 'c', 1]], waltz: () => [[4, 'c', 2], [8, 'c', 2]], pad: s => [[0, 'c', s]]
+};
+function buildSong(S){
+  const spb = S.spb, bars = S.chords.length, total = spb * bars, ev = Array.from({ length: total }, () => []), st = S.step;
+  let pos = 0;
+  S.mel.trim().split(/\s+/).forEach(tok => { const [n, l] = tok.split('/'), len = +l; if (n !== '-'){ const f = nf(n); if (S.trem && len >= 4) for (let k = 0; k < len; k++) ev[(pos + k) % total].push(['v', S.lead, f, st * .9, k % 2 ? .6 : .9]); else ev[pos % total].push(['v', S.lead, f, len * st * .92, 1]); } pos += len; });
+  S.chords.forEach((cs, b) => {
+    const ch = chordOf(cs), base = b * spb; let r = 36 + ch.root; if (r < 40) r += 12;
+    (BASSP[S.bass] || BASSP.root4)(spb).forEach(([s0, iv, ln]) => ev[base + s0].push(['v', S.bassI || 'bass', mf(r + iv), ln * st, .9]));
+    const tones = ch.iv.map(i => { let n = 60 + ((ch.root + i) % 12); if (n > 69) n -= 12; return n; }).sort((a, b) => a - b);
+    (COMPP[S.comp] || COMPP.oom)(spb).forEach(([s0, ti, ln]) => { if (ti === 'c') tones.forEach(n => ev[base + s0].push(['v', S.compI, mf(n), ln * st, .55])); else { const n = ti < tones.length ? tones[ti] : tones[0] + 12; ev[base + s0].push(['v', S.compI, mf(n), ln * st, .6]); } });
+  });
+  Object.entries(S.drums || {}).forEach(([k, pat]) => { for (let b = 0; b < bars; b++) for (let i = 0; i < spb; i++){ const c = pat[i % pat.length]; if (c === 'x' || c === 'o') ev[b * spb + i].push(['d', k, c === 'x' ? 1 : .5]); } });
+  return { total, step: st, ev };
+}
+const SONGS = {
+  world: { step: .134, spb: 16, chords: ['C', 'G', 'Am', 'F', 'C', 'G', 'F', 'C'], lead: 'bell', bass: 'root4', bassI: 'softbass', comp: 'arp8', compI: 'pluck', drums: { k: 'x.......x.......', sh: 'o.o.o.o.o.o.o.o.' },
+    mel: 'E5/4 G5/2 E5/2 C5/4 D5/4 D5/4 B4/2 D5/2 G5/8 C5/4 E5/2 A5/2 G5/4 E5/4 F5/4 E5/2 D5/2 C5/8 E5/2 E5/2 G5/4 A5/2 G5/2 E5/4 D5/2 D5/2 G5/4 B5/4 A5/4 A5/4 G5/2 F5/2 E5/4 D5/4 C5/8 -/8' },
+  italian: { step: .095, spb: 12, chords: ['Am', 'Am', 'E7', 'E7', 'Am', 'Am', 'Dm', 'E7'], lead: 'mando', trem: 1, bass: 'tarantella', bassI: 'bass', comp: 'tarantella', compI: 'accordion', drums: { t: 'x.o.o.x.o.o.', k: 'x.....x.....' },
+    mel: 'E5/2 A5/2 B5/2 C6/2 B5/2 A5/2 E5/2 A5/2 B5/2 C6/4 B5/2 B5/2 G#5/2 A5/2 B5/2 A5/2 G#5/2 E5/2 G#5/2 B5/2 E6/6 C6/2 B5/2 A5/2 E5/2 A5/2 C6/2 B5/2 A5/2 G#5/2 A5/6 F5/2 A5/2 D6/2 C6/2 B5/2 A5/2 B5/2 G#5/2 E5/2 E5/6' },
+  disco: { step: .125, spb: 16, chords: ['Dm7', 'G7', 'Cmaj7', 'A7'], lead: 'lead', bass: 'disco', bassI: 'bass', comp: 'stab', compI: 'stab', drums: { k: 'x...x...x...x...', c: '....x.......x...', o: '..x...x...x...x.', h: 'xoxoxoxoxoxoxoxo' },
+    mel: '-/2 A5/2 -/2 A5/2 C6/2 A5/2 G5/2 F5/2 -/2 G5/2 -/2 G5/2 B5/2 G5/2 F5/2 D5/2 E5/4 G5/2 B5/2 C6/4 B5/2 G5/2 C#6/4 A5/2 E5/2 G5/8' },
+  march: { step: .125, spb: 16, chords: ['G', 'C', 'D', 'G'], lead: 'xylo', bass: 'oompah', bassI: 'bass', comp: 'oom', compI: 'pluck', drums: { k: 'x.......x.......', s: '....x.......x.o.' },
+    mel: 'G5/2 G5/2 B5/2 D6/2 B5/4 G5/4 E5/2 E5/2 G5/2 C6/2 B5/4 A5/4 F#5/2 A5/2 D6/2 A5/2 F#5/2 E5/2 D5/4 G5/4 B5/2 A5/2 G5/8' },
+  pastoral: { step: .13, spb: 12, chords: ['D', 'G', 'A', 'D', 'Bm', 'G', 'A', 'D'], lead: 'flute', bass: 'waltz', bassI: 'softbass', comp: 'arp6', compI: 'harp',
+    mel: 'F#5/8 A5/4 B5/4 A5/4 G5/4 E5/8 C#5/4 D5/12 F#5/4 D5/4 F#5/4 G5/4 B5/4 D6/4 C#6/4 B5/4 A5/4 D6/12' },
+  calypso: { step: .12, spb: 16, chords: ['C', 'F', 'G', 'C'], lead: 'steel', bass: 'calypso', bassI: 'bass', comp: 'stab', compI: 'pluck', drums: { k: 'x.......x.......', sh: 'xoxoxoxoxoxoxoxo', w: '...x..x....x..x.' },
+    mel: 'E5/3 G5/3 C6/2 -/2 G5/2 E5/4 F5/3 A5/3 C6/2 -/2 A5/2 F5/4 G5/3 B5/3 D6/2 C6/2 B5/2 A5/2 G5/2 C6/6 G5/2 E5/2 C5/6' },
+  cozy: { step: .15, spb: 16, chords: ['F', 'Dm', 'Bb', 'C'], lead: 'bell', bass: 'root4', bassI: 'softbass', comp: 'arp8', compI: 'pluck', drums: { sh: 'o...o...o...o...' }, vol: .85,
+    mel: 'A5/4 C6/4 A5/4 G5/4 F5/8 D5/8 D5/4 F5/4 Bb5/4 A5/4 G5/12 -/4' },
+  musicbox: { step: .11, spb: 12, chords: ['Bb', 'Eb', 'F', 'Bb', 'Gm', 'Eb', 'F', 'Bb'], lead: 'musicbox', bass: 'waltz', bassI: 'softbass', comp: 'waltz', compI: 'celesta',
+    mel: 'D6/4 F6/4 D6/4 Eb6/4 G6/4 Eb6/4 C6/4 F6/4 A5/4 Bb5/12 D6/2 C6/2 Bb5/4 G5/4 G5/2 Bb5/2 Eb6/8 F6/4 Eb6/4 C6/4 Bb5/8 -/4' },
+  jingle: { step: .115, spb: 16, chords: ['C', 'C', 'F', 'G'], lead: 'bell', bass: 'oompah', bassI: 'softbass', comp: 'oom', compI: 'toy', drums: { k: 'x.......x.......', w: '....x.......x...' },
+    mel: 'C6/2 E6/2 G6/2 E6/2 C6/2 E6/2 G6/4 A6/2 G6/2 E6/2 C6/2 D6/4 E6/4 F6/2 A6/2 F6/2 C6/2 D6/2 F6/2 A6/4 G6/4 F6/2 D6/2 B5/8' },
+  lullaby: { step: .17, spb: 12, chords: ['C', 'Am', 'F', 'G'], lead: 'celesta', bass: 'waltz', bassI: 'softbass', comp: 'pad', compI: 'pad', vol: .9,
+    mel: 'E6/4 G6/4 E6/4 C6/8 A5/4 A5/4 C6/4 F6/4 D6/12' },
+  toy: { step: .115, spb: 16, chords: ['D', 'Bm', 'G', 'A'], lead: 'toy', bass: 'oompah', bassI: 'softbass', comp: 'oom', compI: 'musicbox', drums: { w: 'x...x...x...x...', k: 'x.......x.......' },
+    mel: 'F#5/3 A5/1 D6/3 F#6/1 E6/4 D6/4 D6/3 B5/1 F#5/3 D5/1 F#5/8 G5/3 B5/1 D6/3 G6/1 F#6/4 E6/4 E6/3 D6/1 C#6/4 A5/8' },
+  holiday: { step: .12, spb: 16, chords: ['G', 'C', 'D', 'G', 'Em', 'C', 'D', 'G'], lead: 'bell', bass: 'oompah', bassI: 'softbass', comp: 'oom', compI: 'pluck', drums: { j: 'x.x.x.x.x.x.x.x.', k: 'x.......x.......' },
+    mel: 'B5/4 B5/4 D6/8 C6/4 E6/4 C6/8 A5/4 D6/4 F#6/4 E6/4 D6/12 -/4 E6/4 D6/4 B5/4 G5/4 E6/4 D6/4 C6/8 A5/2 B5/2 C6/2 D6/2 F#6/4 A6/4 G6/12 -/4' },
+  park: { step: .14, spb: 16, chords: ['F', 'C', 'Bb', 'C'], lead: 'flute', bass: 'root4', bassI: 'softbass', comp: 'arp16', compI: 'harp',
+    mel: 'C6/4 A5/4 F5/4 A5/4 G5/8 E5/8 F5/4 D6/4 C6/4 Bb5/4 C6/16' },
+  whistle: { step: .16, spb: 16, chords: ['G', 'D', 'C', 'G'], lead: 'whistle', bass: 'root4', bassI: 'softbass', comp: 'strum24', compI: 'pluck',
+    mel: 'D5/6 G5/2 B5/8 A5/6 F#5/2 D5/8 E5/4 G5/4 C6/4 B5/4 G5/16' },
+  bounce: { step: .11, spb: 16, chords: ['C', 'F', 'G', 'C'], lead: 'square', bass: 'bounce', bassI: 'bass', comp: 'stab', compI: 'pluck', drums: { k: 'x...x...x...x...', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.' },
+    mel: 'G5/2 -/2 G5/2 E5/2 C6/4 G5/4 A5/2 -/2 A5/2 F5/2 C6/4 A5/4 B5/2 -/2 B5/2 G5/2 D6/2 C6/2 B5/4 C6/4 G5/4 C6/8' },
+  spooky: { step: .13, spb: 16, chords: ['Dm', 'A', 'Dm', 'A', 'Gm', 'Dm', 'A', 'Dm'], lead: 'organ', bass: 'bounce', bassI: 'bass', comp: 'oom', compI: 'xylo', drums: { k: 'x.......x.......', s: '....x.......x...', w: '..x...x...x...x.' },
+    mel: 'D5/2 -/2 F5/2 -/2 A5/2 G#5/2 A5/4 C#6/2 -/2 E5/2 -/2 A5/2 G5/2 E5/4 D5/2 F5/2 A5/2 D6/2 C#6/2 A5/2 F5/4 E5/2 G5/2 C#6/2 E6/2 D6/8 Bb5/4 A5/2 G5/2 D5/8 F5/4 E5/2 D5/2 A4/8 C#5/2 E5/2 A5/2 C#6/2 E6/4 C#6/4 D6/8 -/8' },
+  jig: { step: .09, spb: 12, chords: ['D', 'D', 'G', 'A', 'D', 'G', 'A', 'D'], lead: 'whistle', bass: 'tarantella', bassI: 'bass', comp: 'tarantella', compI: 'pluck', drums: { k: 'x.....x.....', t: '..o.o...o.o.' },
+    mel: 'D5/2 F#5/2 A5/2 D6/2 A5/2 F#5/2 E5/2 F#5/2 G5/2 A5/4 F#5/2 G5/2 B5/2 D6/2 B5/2 A5/2 G5/2 E5/2 A5/2 C#6/2 E6/6 F#6/2 E6/2 D6/2 A5/2 F#5/2 A5/2 B5/2 A5/2 G5/2 B5/2 D6/4 C#6/2 B5/2 A5/2 E5/2 G5/2 C#6/2 D6/6 D5/6' }
+};
+const ROOMSONG = { restaurant: 'italian', boutique: 'disco', school: 'march', greenhouse: 'pastoral', hotel: 'calypso', home: 'cozy', bakery: 'musicbox', icecream: 'jingle', library: 'lullaby', toyshop: 'toy', gingerbread: 'holiday', fountain: 'park', pond: 'whistle', playground: 'bounce' };
+const EVSONG = { halloween: 'spooky', stpatrick: 'jig', harvest: 'jig', winter: 'holiday', newyear: 'disco', summer: 'calypso', easter: 'pastoral', valentine: 'musicbox' };
+const SONGNAME = { world: 'Island Theme', italian: 'Tarantella di Pizza', disco: 'Runway Disco', march: 'Class Is in Session', pastoral: 'Sunny Sprouts', calypso: 'Poolside Calypso', cozy: 'Cozy Corner', musicbox: 'Sugar Music Box', jingle: 'Scoop Jingle', lullaby: 'Story Time', toy: 'Wind-Up Parade', holiday: 'Snowy Sleigh Bells', park: 'Fountain Waltz', whistle: 'Lazy Pond', bounce: 'Playground Hop', spooky: 'Skeleton Boogie', jig: 'Acorn Jig' };
+function audioStart(){
+  if (!MUS.ctx){ const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; MUS.ctx = new AC();
+    MUS.master = MUS.ctx.createGain(); MUS.master.gain.value = .5; const comp = MUS.ctx.createDynamicsCompressor(); MUS.master.connect(comp); comp.connect(MUS.ctx.destination);
+    const b = MUS.ctx.createBuffer(1, MUS.ctx.sampleRate, MUS.ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; MUS.noise = b;
+    MUS.timer = setInterval(musTick, 25); }
+  if (MUS.ctx.state === 'suspended') MUS.ctx.resume();
+}
+function musTick(){
+  const c = MUS.ctx; if (!c || c.state !== 'running') return; const now = c.currentTime;
+  MUS.tracks = MUS.tracks.filter(tr => { if (tr.dead && now > tr.deadAt){ try { tr.g.disconnect(); } catch (e) {} return false; } return true; });
+  MUS.tracks.forEach(tr => { if (tr.dead) return; if (tr.next < now - .3) tr.next = now + .05; while (tr.next < now + .15){ tr.song.ev[tr.i % tr.song.total].forEach(x => x[0] === 'v' ? voice(x[1], x[2], tr.next, x[3], x[4], tr.g) : drum(x[1], tr.next, x[2], tr.g)); tr.i++; tr.next += tr.song.step; } });
+}
+function musicPlay(key){
+  if (!MUS.ctx || MUS.cur === key) return; const c = MUS.ctx, now = c.currentTime;
+  MUS.tracks.forEach(tr => { if (!tr.dead){ tr.dead = true; tr.deadAt = now + .9; tr.g.gain.cancelScheduledValues(now); tr.g.gain.setValueAtTime(Math.max(.0001, tr.g.gain.value), now); tr.g.gain.linearRampToValueAtTime(.0001, now + .7); } });
+  MUS.cur = key; if (!key || !SONGS[key]) return;
+  const S0 = SONGS[key]; S0.built = S0.built || buildSong(S0);
+  const g = c.createGain(); g.gain.setValueAtTime(.0001, now); g.gain.linearRampToValueAtTime(S0.vol || 1, now + .9); g.connect(MUS.master);
+  MUS.tracks.push({ song: S0.built, g, i: 0, next: now + .08 });
+  const nowP = $('#nowPlaying'); if (nowP) nowP.textContent = SONGNAME[key] || '';
+}
+function musicFor(){
+  if (!S || !role()) return 'world';
+  if (ui.room){ if (ui.room.t === 'event'){ const ev = activeEvent(); return ev ? EVSONG[ev.id] : 'world'; } return ROOMSONG[ui.room.t] || 'world'; }
+  if (ui.sheetSong) return ROOMSONG[ui.sheetSong] || 'world';
+  if (role() === 'parent') return 'lullaby';
+  const ev = activeEvent(); return ev ? EVSONG[ev.id] : 'world';
+}
+const musicAllowed = () => MUS.on && !(S && S.settings.musicOff);
+function musicUpdate(){ updateMusicBtn(); if (!MUS.ctx) return; musicPlay(musicAllowed() ? musicFor() : null); }
+function sfx(kind){
+  if (!MUS.ctx || !MUS.sfx || MUS.ctx.state !== 'running') return; const t = MUS.ctx.currentTime + .01, d = MUS.master;
+  ({ coin: [['bell', 'E6', 0, .12], ['bell', 'B6', .08, .3]], win: [['bell', 'C6', 0, .15], ['bell', 'E6', .1, .15], ['bell', 'G6', .2, .15], ['bell', 'C7', .3, .5]], lose: [['softbass', 'E4', 0, .2], ['softbass', 'C4', .2, .4]], pop: [['xylo', 'A6', 0, .1], ['xylo', 'E7', .06, .15]], boop: [['softbass', 'G4', 0, .15]] }[kind] || []).forEach(([i, n, dt, dur]) => voice(i, nf(n), t + dt, dur, .9, d));
+}
+const NOTE_ON = `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M9,18 V6 L19,4 V15" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="3" fill="currentColor"/><circle cx="16.5" cy="15.5" r="3" fill="currentColor"/></svg>`;
+const NOTE_OFF = `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M9,18 V6 L19,4 V15" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linejoin="round" opacity=".45"/><circle cx="6.5" cy="18" r="3" fill="currentColor" opacity=".45"/><circle cx="16.5" cy="15.5" r="3" fill="currentColor" opacity=".45"/><path d="M4,4 L20,20" stroke="#EF4E4B" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+function updateMusicBtn(){ const b = $('#musicBtn'); if (!b) return; const on = musicAllowed(); b.innerHTML = on ? NOTE_ON : NOTE_OFF; b.setAttribute('aria-pressed', on); b.setAttribute('aria-label', on ? 'Music on. Tap to mute.' : 'Music off. Tap to play.'); b.hidden = !!(S && S.settings.musicOff); }
+A.musicToggle = () => { MUS.on = !MUS.on; saveSound(); audioStart(); musicUpdate(); if (MUS.on) toast(`Now playing: <b>${SONGNAME[musicFor()] || 'Island Theme'}</b>`, { title: 'Music', icon: `<svg viewBox="0 0 24 24">${NOTE_ON.replace(/<\/?svg[^>]*>/g, '').replace(/currentColor/g, '#7B5CFA')}</svg>`, ms: 2200 }); };
+A.sfxToggle = () => { MUS.sfx = !MUS.sfx; saveSound(); render(); };
+A.musicFamily = () => { S.settings.musicOff = !S.settings.musicOff; save(); render(); musicUpdate(); };
+function soundControls(){
+  return `<div class="card"><div class="setrow"><div><b>Music</b><small>An original song plays in every place: a tarantella in Pasta Palace, disco on the runway, calypso at the pool, and more.</small></div><button class="tog" data-act="musicFamily" aria-pressed="${!S.settings.musicOff}" aria-label="Music for the family"></button></div>
+  <div class="setrow"><div><b>Sound effects on this device</b><small>Little dings for coins, stars and catches</small></div><button class="tog" data-act="sfxToggle" aria-pressed="${MUS.sfx}" aria-label="Sound effects"></button></div></div>`;
+}
+document.addEventListener('pointerdown', () => { if (!MUS.started){ MUS.started = true; audioStart(); musicUpdate(); } }, { capture: true });
+document.addEventListener('visibilitychange', () => { if (!MUS.ctx) return; if (document.hidden) MUS.ctx.suspend(); else MUS.ctx.resume(); });
+
+// hooks: every screen change picks the right song, wins and coins make a sound
+const _renderMus = render; render = function(){ _renderMus(); musicUpdate(); };
+const _drawRoomMus = drawRoom; drawRoom = function(){ _drawRoomMus(); musicUpdate(); const t = document.querySelector('.rm-title small'); if (t && ui.room){ const k = musicFor(); if (SONGNAME[k]) t.innerHTML = `${esc(t.textContent)} · <span class="np">♪ ${SONGNAME[k]}</span>`; } };
+const _roomCloseMus = roomClose; roomClose = function(){ _roomCloseMus(); musicUpdate(); };
+const _waitSheetMus = waitSheet; waitSheet = function(t){ ui.sheetSong = ACT[t.act].b; setTimeout(musicUpdate, 0); return _waitSheetMus(t); };
+const _closeSheetMus = closeSheet; closeSheet = function(){ const had = ui.sheetSong; ui.sheetSong = null; _closeSheetMus(); if (had) musicUpdate(); };
+const _floatCoinMus = floatCoin; floatCoin = function(t){ sfx('coin'); return _floatCoinMus(t); };
+const _celebrateMus = celebrate; celebrate = function(c){ sfx('win'); return _celebrateMus(c); };
+const _levelEndMus = levelEnd; levelEnd = function(game, win, stars, host, msg){ sfx(win ? 'win' : 'lose'); return _levelEndMus(game, win, stars, host, msg); };
+const _huntMus = huntCollect; huntCollect = function(h){ sfx('pop'); return _huntMus(h); };
 
 injectDefs();
 injectDefs2();
