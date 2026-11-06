@@ -684,6 +684,25 @@ input[type=time].num{width:104px}
 .np{color:var(--grape);font-weight:900}
 .workcount{text-align:center;font-family:var(--display);font-weight:800;font-size:18px;color:var(--grape);margin-top:-4px}
 
+
+/* ---------- v7: read to me ---------- */
+.hearbtn{width:34px;height:34px;border-radius:50%;background:#E3F4FF;color:var(--sea-d);display:inline-grid;place-items:center;flex:none;box-shadow:0 2px 0 #B9DDF5;vertical-align:middle;padding:0}
+.hearbtn:active{transform:scale(.9)}
+h2 .hearbtn,h3 .hearbtn{width:28px;height:28px}
+.item > .hearbtn,.furbtn > .hearbtn,.robo > .hearbtn,.evrw-i > .hearbtn{position:absolute;top:8px;right:8px;z-index:2}
+.robo,.furbtn{position:relative}
+.lvbar > .hearbtn,.evcard > .hearbtn,.evhunt > .hearbtn{flex:none;align-self:flex-start}
+.lvbar.has-hear{position:relative}
+.lvbar > .hearbtn{position:absolute;right:8px;top:6px}
+.evcard > .hearbtn{position:absolute;right:10px;bottom:10px;z-index:2}
+.ansrow{display:flex;gap:8px;align-items:center}
+.ansrow > button:last-child{flex:1}
+.thread .mb > .hearbtn{width:26px;height:26px}
+.hearagain{position:fixed;z-index:75;right:max(14px,calc(50% - 226px));bottom:calc(78px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:4px;background:var(--sea);color:#fff;border-radius:999px;padding:5px 14px 5px 5px;font-family:var(--display);font-weight:800;font-size:15px;box-shadow:0 4px 0 var(--sea-d),0 10px 22px -8px rgba(26,140,203,.7)}
+.hearagain .ha-bud{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden}
+.hearagain .ha-bud svg{width:34px;height:34px}
+.hearagain:active{transform:translateY(3px);box-shadow:0 1px 0 var(--sea-d)}
+
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -2027,7 +2046,7 @@ function vFamily(){
     const days = [...Array(7)].map((_, k) => { const d = new Date(now); d.setDate(now.getDate() - 6 + k); const key = dayKey(d); return { d, sum: h.filter(x => x.kind === 'earn' && dayKey(new Date(x.ts)) === key).reduce((a, x) => a + x.amt, 0), today: k === 6 }; });
     const lt = Object.keys(learnedToday(kid));
     return `<div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}</h3><small>${BUDDIES[kid.buddy].name} · energy ${kid.strength}% · lessons for ${BANDS[bandOf(kid.age)]}</small></div><button class="btn small ghost" data-act="editKid" data-v="${id}">Edit</button></div>
+      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}${raBadge(kid)}</h3><small>${BUDDIES[kid.buddy].name} · energy ${kid.strength}% · lessons for ${BANDS[bandOf(kid.age)]}</small></div><button class="btn small ghost" data-act="editKid" data-v="${id}">Edit</button></div>
       <div class="stats"><div class="stat"><b>${kid.coins}</b><small>Coins now</small></div><div class="stat"><b>+${earned}</b><small>Earned 7d</small></div><div class="stat"><b>−${spent}</b><small>Spent 7d</small></div></div>
       <div><div class="flabel" style="margin-bottom:6px">Coins earned each day · streak ${kid.streak} days</div><div class="week">${days.map(x => `<div class="${x.sum ? 'has' : ''} ${x.today ? 'today' : ''}"><small>${DAYN[x.d.getDay()]}</small>${x.sum || '–'}</div>`).join('')}</div></div>
       <div><div class="flabel" style="margin-bottom:6px">Learned with robots today</div>${lt.length ? `<div class="chips">${lt.map(r => `<span class="chip">${ROBOTS[r].name} · ${ROBOTS[r].topic}</span>`).join('')}</div>` : `<p class="note-s">No lessons yet today.</p>`}</div>
@@ -2045,6 +2064,7 @@ function kidSheet(){
   <div class="field"><span class="flabel">Age</span><div class="chips">${[4, 5, 6, 7, 8, 9, 10, 11, 12].map(a => `<button class="chip" data-act="kdAge" data-v="${a}" aria-pressed="${d.age === a}">${a}</button>`).join('')}</div><p class="note-s">Lessons for ${BANDS[bandOf(d.age)]}</p></div>
   <div class="field"><span class="flabel">Character</span><div class="looks">${LOOKS.map((l, k) => `<button data-act="kdLook" data-v="${k}" aria-pressed="${d.look === k}" aria-label="Character ${k + 1}">${headBox(l)}</button>`).join('')}</div>${d.isNew ? '' : '<p class="note-s">Kids can fine-tune hair, skin and clothes in Buddies.</p>'}</div>
   ${d.isNew ? `<div class="field"><span class="flabel">First buddy</span><div class="looks bud">${STARTERS.map(b => `<button data-act="kdBud" data-v="${b}" aria-pressed="${d.buddy === b}" aria-label="${BUDDIES[b].name}">${budBox(b)}<small>${BUDDIES[b].name}</small></button>`).join('')}</div></div>` : ''}
+  <div class="field"><span class="flabel">Read everything out loud</span><div class="chips">${[['auto', 'Auto (under 6)'], ['on', 'Always'], ['off', 'Off']].map(([k, l]) => `<button class="chip" data-act="kdRA" data-v="${k}" aria-pressed="${(d.ra || 'auto') === k}">${l}</button>`).join('')}</div><p class="note-s">For kids who can't read yet: their buddy reads every screen, instruction, message and question out loud, and a speaker button sits next to every piece of text so they can hear it again.</p></div>
   <div class="field"><label for="kdPin">Kid PIN (optional, 4 digits)</label><input class="text" id="kdPin" data-kd="pin" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="${esc(d.pin)}" placeholder="Leave empty for no PIN"></div>
   ${ui.err ? `<p class="err" role="alert">${esc(ui.err)}</p>` : ''}
   <button class="btn big grape" data-act="saveKid">${d.isNew ? 'Add kid' : 'Save'}</button>
@@ -4833,11 +4853,161 @@ const _celebrateMus = celebrate; celebrate = function(c){ sfx('win'); return _ce
 const _levelEndMus = levelEnd; levelEnd = function(game, win, stars, host, msg){ sfx(win ? 'win' : 'lose'); return _levelEndMus(game, win, stars, host, msg); };
 const _huntMus = huntCollect; huntCollect = function(h){ sfx('pop'); return _huntMus(h); };
 
+// =====================================================================
+//  v7 — READ TO ME: everything spoken out loud for kids who can't read yet
+// =====================================================================
+const SAY = { last: '', key: '', voice: null, whoSaid: false };
+function raFor(kid){ return !!kid && (kid.readAloud === 'on' || (kid.readAloud !== 'off' && kid.age < 6)); }
+const RA = () => !!S && isKid() && raFor(K());
+function pickVoice(){ try { const vs = speechSynthesis.getVoices(); SAY.voice = vs.find(v => /^en[-_]US/i.test(v.lang) && /Samantha|Google US English|Aria|Jenny|Ava|Allison|Zira|Female/i.test(v.name)) || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null; } catch (e) {} }
+try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {}
+function cleanSpeech(t){
+  const d = document.createElement('div'); d.innerHTML = String(t); let s = d.textContent || '';
+  return s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2190}-\u{21FF}♪]/gu, ' ').replace(/★/g, ' star ').replace(/×(\d+)/g, '$1').replace(/−/g, ' minus ').replace(/\s*·\s*/g, '. ').replace(/\s+/g, ' ').trim();
+}
+function duck(on){ if (!MUS.master || !MUS.ctx) return; MUS.master.gain.setTargetAtTime(on ? .12 : .5, MUS.ctx.currentTime, .15); }
+function say(text, o = {}){
+  const t = cleanSpeech(text); if (!t) return;
+  if (!o.noRepeat) SAY.last = t;
+  try {
+    const ss = window.speechSynthesis; if (!ss) return;
+    if (!o.queue) ss.cancel();
+    const u = new SpeechSynthesisUtterance(t); if (!SAY.voice) pickVoice(); if (SAY.voice) u.voice = SAY.voice;
+    u.rate = .9; u.pitch = 1.15; u.onstart = () => duck(true); u.onend = () => duck(false); u.onerror = () => duck(false);
+    ss.speak(u);
+  } catch (e) {}
+}
+function narrate(key, text){ if (!RA() || key === SAY.key) return; SAY.key = key; setTimeout(() => say(text), 180); }
+const txt = sel => { const e = typeof sel === 'string' ? document.querySelector(sel) : sel; if (!e) return ''; const c = e.cloneNode(true); c.querySelectorAll('button, .say > small').forEach(b => b.remove()); document.body.appendChild(c); c.style.cssText = 'position:absolute;left:-9999px'; const t = c.innerText.replace(/\n+/g, '. '); c.remove(); return t; };
+
+// ---------- what each screen says ----------
+function screenNarration(){
+  const kid = K(), nm = kid.name;
+  switch (S.tab){
+    case 'home': {
+      const todo = todays(kid.id).filter(t => t.status === 'todo').length, buddyLine = txt('.talk .say').replace(/^[^.]*says\.\s*/i, '');
+      return `Hi ${nm}! ${buddyLine} You have ${todo} ${todo === 1 ? 'chore' : 'chores'} to do today. Tap a speaker to hear a chore. When you finish one, tap the green Done button.`;
+    }
+    case 'explore': return 'Explore your island! Tap anywhere to walk there. Tap a robot to learn something new.';
+    case 'build': return 'Build mode! Tap something in your bag. Then tap a glowing square to put it on your island.';
+    case 'market': return `This is the Market. You have ${kid.coins} coins. Tap a speaker to hear what each thing is.`;
+    case 'buddies': return 'Dress up time! Tap clothes to put them on. Tap a buddy to walk with them.';
+  }
+  return '';
+}
+
+// ---------- speaker buttons next to text ----------
+const SPK = `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4,9 h4 l5,-4 v14 l-5,-4 h-4z" fill="currentColor"/><path d="M16,8.5 q2.4,3.5 0,7 M18.6,6 q4.2,6 0,12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const hearBtn = text => `<button class="hearbtn" data-act="hear" data-v="${esc(cleanSpeech(text))}" aria-label="Hear it">${SPK}</button>`;
+function questSpeech(q){
+  const h = q.querySelector('h3'), title = h ? h.textContent : '', coins = (q.querySelector('.coinchip') || {}).textContent || '';
+  const st = q.querySelector('.pill.wait') ? 'Waiting for your grown-up to check it.' : q.querySelector('.pill.ok') ? 'All done. Great job!' : q.querySelector('.pill.miss') ? 'This one was missed.' : 'When you finish, tap the green Done button.';
+  return `${title}. You earn ${coins.trim()} coins. ${st}`;
+}
+function addHears(){
+  if (!RA()) return;
+  const put = (el, text, where = 'afterbegin') => { if (!el || el.querySelector(':scope > .hearbtn') || !text) return; el.insertAdjacentHTML(where, hearBtn(text)); el.classList.add('has-hear'); };
+  document.querySelectorAll('.quest').forEach(q => put(q, questSpeech(q)));
+  document.querySelectorAll('.talk').forEach(t => put(t, txt(t.querySelector('.say')).replace(/^[^.]*says\.\s*/i, ''), 'beforeend'));
+  document.querySelectorAll('.rmsay-wrap').forEach(w => put(w, txt(w.querySelector('.rmsay')), 'beforeend'));
+  document.querySelectorAll('#view .item, .evrw-i, .furbtn').forEach(it => put(it, txt(it)));
+  document.querySelectorAll('.evch, .lvbar, .evcard, .evhunt').forEach(it => put(it, txt(it)));
+  document.querySelectorAll('.robo').forEach(r => put(r, txt(r) + '. Tap to visit.'));
+  document.querySelectorAll('.thread .mb').forEach(m => put(m, txt(m.querySelector('.bt')) || 'A sticker!'));
+  document.querySelectorAll('.lesson').forEach(l => { const b = l.querySelector('[data-act="speak"]'); if (b) b.remove(); put(l, txt(l.querySelector('p')), 'beforeend'); });
+  document.querySelectorAll('.answers').forEach(a => { if (a.classList.contains('ra')) return; a.classList.add('ra'); [...a.children].forEach(b => { if (b.tagName !== 'BUTTON') return; const row = document.createElement('div'); row.className = 'ansrow'; b.replaceWith(row); row.innerHTML = hearBtn(b.textContent); row.appendChild(b); }); });
+  document.querySelectorAll('.sheet h3, .rm-title h2, .sec-h h2').forEach(h => { if (h.querySelector('.hearbtn') || h.closest('.has-hear')) return; h.insertAdjacentHTML('beforeend', ' ' + hearBtn(h.textContent + '. ' + txt(h.parentElement.querySelector('.sub')))); });
+  let ha = $('#hearAgain'); if (!ha){ document.body.insertAdjacentHTML('beforeend', `<button id="hearAgain" class="hearagain" data-act="hearAgain" aria-label="Hear it again"><span class="ha-bud"></span>${SPK}<b>Again</b></button>`); ha = $('#hearAgain'); }
+  const bud = ha.querySelector('.ha-bud'); if (bud && bud.dataset.b !== K().buddy){ bud.dataset.b = K().buddy; bud.innerHTML = budBox(K().buddy, { cheer: 1 }); }
+  ha.hidden = false;
+}
+function hideHearAgain(){ const ha = $('#hearAgain'); if (ha) ha.hidden = true; }
+let hearQueued = false;
+new MutationObserver(muts => {
+  if (hearQueued || !S) return;
+  if (muts.every(m => m.target.closest && m.target.closest('svg'))) return;
+  hearQueued = true; requestAnimationFrame(() => { hearQueued = false; if (RA()) addHears(); else hideHearAgain(); });
+}).observe(document.body, { childList: true, subtree: true });
+
+Object.assign(A, {
+  hear(el, e){ e && e.stopPropagation(); say(el.dataset.v); },
+  hearAgain(){ say(SAY.last || 'Tap a speaker to hear things.', { noRepeat: true }); },
+  kdRA(el){ ui.kd.ra = el.dataset.v; openSheet(kidSheet()); }
+});
+
+// ---------- hooks: speak every new screen, sheet, room, message and win ----------
+const _renderRA = render;
+render = function(){
+  _renderRA();
+  if (!S) return;
+  if (!role()){ if (!SAY.whoSaid && S.order.some(id => raFor(kidOf(id)))){ SAY.whoSaid = true; setTimeout(() => say("Who's playing? Tap your picture!"), 300); } return; }
+  SAY.whoSaid = false;
+  if (!RA()){ hideHearAgain(); return; }
+  if (!ui.room && !ui.sheet) narrate('tab:' + K().id + ':' + S.tab, screenNarration());
+};
+const _openSheetRA = openSheet;
+openSheet = function(html){
+  _openSheetRA(html); if (!RA()) return;
+  const sh = $('#sheet .sheet'); if (!sh) return;
+  if (sh.querySelector('.robohead')){
+    const q = [...sh.querySelectorAll('h3')].pop(), key = 'robot:' + (q ? q.textContent : ''), fb = sh.querySelector('.feedback');
+    if (key === SAY.key){ if (fb) say(fb.textContent); return; }
+    const answers = [...sh.querySelectorAll('.answers button')].map(b => b.textContent.trim());
+    narrate(key, `${txt(sh.querySelector('.lesson p'))} Here is the question. ${q ? q.textContent : ''} Is it ${answers.slice(0, -1).join(', ')}, or ${answers.slice(-1)}? Tap the speaker next to an answer to hear it again.`);
+    return;
+  }
+  const h = sh.querySelector('h3'), sub = sh.querySelector('.sub');
+  let extra = '';
+  if (sh.querySelector('[data-act="sendDone"]')) extra = `Tap a picture of where you want to work. Then tap the big green button to tell ${pname()}.`;
+  else if (sh.querySelector('#catch')) extra = 'While you wait, tap the falling stars to catch them!';
+  else if (sh.querySelector('#kThread')){ const pm = S.msgs.filter(m => m.kid === K().id && m.from === 'parent').slice(-1)[0]; extra = pm ? `${pname()} said: ${pm.text || 'a sticker'}. Tap a picture or a word to answer.` : ''; }
+  else if (sh.querySelector('.pinpad')) extra = 'Tap your secret numbers.';
+  narrate('sheet:' + (h ? h.textContent : '') + (sub ? sub.textContent : ''), `${h ? h.textContent : ''}. ${sub ? sub.textContent : ''} ${extra}`);
+};
+const _closeSheetRA = closeSheet;
+closeSheet = function(){ _closeSheetRA(); };
+const _drawRoomRA = drawRoom;
+drawRoom = function(){
+  _drawRoomRA(); if (!RA() || !ui.room) return;
+  const title = txt('.rm-title h2'), lv = document.querySelector('.lvbar .lv-head');
+  narrate('room:' + ui.room.t + ':' + ui.room.tab, `${title}. ${lv ? lv.innerText.replace(/\n/g, '. ') + '.' : ''} ${txt('#rmSay')}`);
+};
+const _roomCloseRA = roomClose; roomClose = function(){ SAY.key = ''; _roomCloseRA(); };
+const _rmSayRA = rmSay; rmSay = function(t){ _rmSayRA(t); if (RA()) say(t); };
+const _toastRA = toast; toast = function(html, o = {}){ const el = _toastRA(html, o); if (RA() && !o.quiet) say(html, { queue: !!(window.speechSynthesis && speechSynthesis.speaking) }); return el; };
+const _celebrateRA = celebrate; celebrate = function(c){ _celebrateRA(c); if (RA()) say(`${c.title || 'Plus ' + c.amount + ' coins'}! ${c.label || ''} ${c.sub || ''}`); };
+const _levelEndRA = levelEnd; levelEnd = function(...a){ _levelEndRA(...a); if (RA()){ const card = [...document.querySelectorAll('.lvcard')].pop(); if (card) setTimeout(() => say(card.innerText.replace(/\n+/g, '. ').replace(/★/g, '') + (a[1] ? ` You got ${a[2]} ${a[2] === 1 ? 'star' : 'stars'}!` : '')), 450); } };
+const _pinKeyRA = A.pinKey; A.pinKey = function(el, e){ const k = kidOf(ui.pinKid); _pinKeyRA(el, e); if (raFor(k)) say(el.dataset.v === '⌫' ? 'Oops, undo' : el.dataset.v); };
+const _pickKidRA = A.pickKid; A.pickKid = function(el, e){ const k = kidOf(el.dataset.v); if (raFor(k)) say('Hi ' + k.name + '!'); _pickKidRA(el, e); };
+const _kidSayRA = A.kidSay; A.kidSay = function(el, e){ _kidSayRA(el, e); if (RA()) say('Sent! ' + el.dataset.v); };
+const _kidStickerRA = A.kidSticker; A.kidSticker = function(el, e){ _kidStickerRA(el, e); if (RA()) say('You sent a ' + el.dataset.v + ' sticker!'); };
+const _wearRA = A.wear; A.wear = function(el, e){ _wearRA(el, e); if (RA()) say('You are wearing the ' + itemName(el.dataset.v).replace(/^Nothing$/, 'nothing')); };
+const _pickActRA = A.pickAct; A.pickAct = function(el, e){ _pickActRA(el, e); if (RA()) say(ACT[el.dataset.v].name); };
+const _sendDoneRA = A.sendDone; A.sendDone = function(el, e){ _sendDoneRA(el, e); if (RA()) say(`Yay! I told ${pname()}. ${K().name} is ${ACT[S.tasks.find(t => t.id === ui.done.id).act].verb} now. Catch the stars while you wait!`); };
+
+// ---------- parent setting per kid ----------
+const _editKidRA = A.editKid; A.editKid = function(el, e){ _editKidRA(el, e); ui.kd.ra = kidOf(el.dataset.v).readAloud || 'auto'; openSheet(kidSheet()); };
+const _saveKidRA = A.saveKid; A.saveKid = function(el, e){ const d = ui.kd, before = new Set(S.order); _saveKidRA(el, e); const id = d.isNew ? S.order.find(x => !before.has(x)) : d.id; if (id && kidOf(id)){ kidOf(id).readAloud = d.ra || 'auto'; save(); render(); } };
+function raBadge(kid){ return raFor(kid) ? `<span class="pill req" style="margin-left:4px">🔊 Reads aloud</span>` : ''; }
+
+// ---------- demo: a pre-reader to try it with ----------
+function addRosie(F){
+  if (F.kids.rosie) return;
+  const r = makeKid({ name: 'Rosie', age: 4, look: 2, buddy: 'bao' }); r.id = 'rosie'; r.coins = 18; r.xp = 60; r.readAloud = 'auto'; r.v3 = r.v5 = true; ensureCloset(r);
+  r.world = r.world.map(o => ({ ...o }));
+  addKidTo(F, r);
+  F.tasks.push(...[['Put toys in the box', 'toy', 5, '18:00', 'home'], ['Brush teeth', 'tooth', 3, '20:00', 'home'], ['Feed the pet', 'paw', 4, '17:30', 'home']].map(([title, icon, coins, due, act]) => ({ id: uid(), kid: 'rosie', title, icon, coins, penalty: 1, due, repeat: 'daily', days: [], act, status: 'todo' })));
+  F.msgs.push({ id: uid(), kid: 'rosie', from: 'parent', text: 'Good morning Rosie! I love you!', sticker: undefined, ts: Date.now() - 20 * 6e4, read: false });
+}
+const _seedRA = seedDemo; seedDemo = function(){ const F = _seedRA(); addRosie(F); return F; };
+function migrateV7(){ Object.values(DB.accounts).forEach(acc => { if (acc.demo && acc.fam && acc.fam.kids) addRosie(acc.fam); }); save(); }
+
 injectDefs();
 injectDefs2();
 injectDefs3();
 migrateV3();
 migrateV5();
+migrateV7();
 render();
 </script>
 
