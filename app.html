@@ -765,6 +765,33 @@ body.worldfull nav#tabs{visibility:hidden}
 .vol{width:100%;accent-color:var(--grape);margin-top:6px}
 .verify .hero-art svg{width:120px;height:auto;margin:0 auto;display:block}
 
+.dragghost{position:fixed;left:0;top:0;width:68px;height:68px;margin:-34px 0 0 -34px;z-index:200;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(43,37,80,.35))}
+.dragghost svg{width:100%;height:100%;display:block}
+[data-drag]{touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+.rm-scene.interactive,.rm-scene.interactive svg{touch-action:none;-webkit-user-select:none;user-select:none}
+.tray2{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 10px;scrollbar-width:none}
+.tray2::-webkit-scrollbar{display:none}
+.tray2 .tool{flex:0 0 auto;width:72px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px 5px;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line),0 3px 0 var(--line);font-weight:800;font-size:11px;color:var(--ink-2)}
+.tray2 .tool svg{width:48px;height:48px}
+.tray2 .tool:active{transform:translateY(2px);box-shadow:inset 0 0 0 1.5px var(--line)}
+.tray2 .tool small{font-size:11px;line-height:1.1;text-align:center}
+.tray2.small .tool{width:60px}
+.tray2.small .tool svg{width:38px;height:38px}
+.steps{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0 6px}
+.steps span{padding:3px 9px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);font-size:11.5px;font-weight:800;color:var(--ink-2)}
+.steps span.on{background:var(--sun,#FFC63A);color:var(--ink);box-shadow:none;animation:stepPulse 1.2s ease-in-out infinite}
+.steps span.done{background:#DDF6E4;color:#1E7A3E;box-shadow:none}
+@keyframes stepPulse{50%{transform:scale(1.06)}}
+.hintbob{animation:hintBob 1.1s ease-in-out infinite}
+@keyframes hintBob{50%{transform:translateY(-7px)}}
+.wiggle{transform-box:fill-box;transform-origin:50% 100%;animation:wig 1.6s ease-in-out infinite}
+@keyframes wig{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.flutter{transform-box:fill-box;transform-origin:center;animation:flut 4s ease-in-out infinite}
+@keyframes flut{25%{transform:translate(-30px,14px) scaleX(.6)}50%{transform:translate(-60px,-4px)}75%{transform:translate(-26px,-16px) scaleX(.6)}}
+.flickhint{text-align:center;font-weight:800;font-size:13px;color:var(--ink-2);margin:4px 0}
+.grabme{cursor:grab}
+.tapme{cursor:pointer;animation:tapGlow 1.3s ease-in-out infinite}
+@keyframes tapGlow{50%{opacity:.75}}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -5644,6 +5671,383 @@ let tapGuardUntil = 0;
 const _worldTapGuard = worldTap;
 worldTap = function(e){ tapGuardUntil = Date.now() + 500; return _worldTapGuard(e); };
 window.addEventListener('click', e => { if (Date.now() < tapGuardUntil && !(e.target.closest && e.target.closest('svg.world'))){ e.stopPropagation(); e.preventDefault(); } }, true);
+
+// =====================================================================
+//  v11 — hands-on games: drag, rub, flick, trace and pour right inside each place
+// =====================================================================
+const DRAG = {};
+let drg = null;
+const scenePt = (sel, x, y) => { const svg = document.querySelector(sel + ' svg'); if (!svg || !svg.getScreenCTM()) return null; return new DOMPoint(x, y).matrixTransform(svg.getScreenCTM().inverse()); };
+document.addEventListener('pointerdown', e => {
+  const el = e.target.closest && e.target.closest('[data-drag]'); if (!el) return;
+  const [g, key] = el.dataset.drag.split(':'); const H = DRAG[g]; if (!H) return;
+  e.preventDefault(); e.stopPropagation();
+  drg = { g, key, H, x0: e.clientX, y0: e.clientY, moved: false, el: null, lastMove: 0 };
+}, true);
+document.addEventListener('pointermove', e => {
+  if (!drg) return;
+  if (!drg.moved && Math.hypot(e.clientX - drg.x0, e.clientY - drg.y0) > 6){ drg.moved = true; const gh = document.createElement('div'); gh.className = 'dragghost'; gh.innerHTML = drg.H.ghost(drg.key); document.body.appendChild(gh); drg.el = gh; }
+  if (drg.moved){ drg.el.style.transform = `translate(${e.clientX - 34}px,${e.clientY - 60}px)`; const now = performance.now(); if (drg.H.move && now - drg.lastMove > 40){ drg.lastMove = now; drg.H.move(drg.key, e.clientX, e.clientY - 26); } }
+}, true);
+document.addEventListener('pointerup', e => { if (!drg) return; const d = drg; drg = null; if (d.el) d.el.remove(); tapGuardUntil = Date.now() + 350; if (d.moved){ d.H.drop && d.H.drop(d.key, e.clientX, e.clientY - 26); } else d.H.tap && d.H.tap(d.key); }, true);
+document.addEventListener('pointercancel', () => { if (drg && drg.el) drg.el.remove(); drg = null; }, true);
+const ghostSVG = (inner, vb = '-24 -24 48 48') => `<svg viewBox="${vb}" width="68" height="68">${inner}</svg>`;
+const sceneRedraw = (id, fn) => { const sc = document.getElementById(id); if (sc) sc.innerHTML = fn(); };
+function stepsBar(steps, cur){ return `<div class="steps">${steps.map((s, i) => `<span class="${i < cur ? 'done' : i === cur ? 'on' : ''}">${i < cur ? '✓' : i + 1}. ${s}</span>`).join('')}</div>`; }
+
+// ---------- 1. PASTA PALACE: sauce → toppings → oven → serve ----------
+const COOK_STEPS = ['Sauce', 'Toppings', 'Bake', 'Serve'];
+const cookStepIdx = c => ({ sauce: 0, top: 1, bake: 2, baked: 3 })[c.stage] ?? 0;
+function cookNew(keep){
+  const cf = gcfg('cook'), prev = G.cook || {};
+  G.cook = { lv: glv('cook').cur, order: shuffle(Object.keys(TOPS)).slice(0, cf.tops), pizza: [], sauce: 0, stage: 'sauce', bakeP: 0, cust: pick(Object.keys(BUDDIES)), mood: 'wait', good: keep ? prev.good || 0 : 0, miss: keep ? prev.miss || 0 : 0, t0: Date.now(), limit: cf.time * 1000, over: false, sauceDots: [] };
+}
+function pizzaSVG(c, x, y, s = 1){
+  const baked = c.stage === 'baked', burnt = c.burnt;
+  let g = `<ellipse cx="0" cy="0" rx="64" ry="19" fill="${burnt ? '#6A4026' : baked ? '#E3A256' : '#F3D3A0'}"/><ellipse cx="0" cy="-1" rx="56" ry="15.5" fill="${burnt ? '#5B3424' : baked ? '#F0B866' : '#F7E0B8'}"/>`;
+  if (c.sauce > 0) g += `<ellipse cx="0" cy="-1" rx="${f1(52 * Math.min(1, .35 + c.sauce * .65))}" ry="${f1(14 * Math.min(1, .35 + c.sauce * .65))}" fill="#E8574A" opacity="${Math.min(1, c.sauce * 1.2).toFixed(2)}"/>` + c.sauceDots.map(([dx, dy]) => `<circle cx="${f1(dx)}" cy="${f1(dy)}" r="6" fill="#E8574A" opacity=".9"/>`).join('');
+  g += c.pizza.map(p => grp(p.x, p.y, .9, TOPS[p.k].d(0, 0))).join('');
+  if (baked && !burnt) g += [[-30, -4], [22, 6], [40, -6], [-10, 8]].map(([a, b]) => `<circle cx="${a}" cy="${b}" r="2.4" fill="#C9702A" opacity=".6"/>`).join('');
+  return `<g transform="translate(${x},${y}) scale(${s})">${g}</g>`;
+}
+function cookScene(){
+  const c = G.cook, kid = K();
+  let s = roomShell({ wall: '#FFE9D6', wp: 'tiles', floor: '#E9C9A6', fp: 'check' }) + IP.bunting(40, 320, 6);
+  s += IP.chalk(120, 18, 120, 48, [{ t: 'Pizza Party!', s: 17 }, { t: COOK_STEPS[cookStepIdx(c)] + ' time!', s: 12, c: '#FFE36B' }]);
+  s += IP.pendant(96, 22, '#FF5A8C');
+  // oven (tap to take the pizza out)
+  s += `<g data-act="cookOven" class="tapme"><path d="M232,172 v-64 a46,46 0 0 1 92,0 v64z" fill="#C9654B"/><path d="M232,172 v-64 a46,46 0 0 1 92,0 v64z" fill="url(#brick)"/><path d="M232,172 v-64 a46,46 0 0 1 92,0 v64z" fill="url(#fsR)"/><path d="M252,172 v-32 a26,26 0 0 1 52,0 v32z" fill="#3B2B40"/><ellipse cx="278" cy="160" rx="22" ry="14" fill="url(#fireG)" class="glowb"/>${rr(268, 52, 20, 18, 3, '#9A4E3A')}`;
+  if (c.stage === 'bake'){
+    const p = Math.min(1.3, c.bakeP), ring = 2 * Math.PI * 38, col = p < .7 ? '#FFC63A' : p <= 1 ? '#3EC46B' : '#EF4E4B';
+    s += `<ellipse cx="278" cy="165" rx="20" ry="5" fill="${p > 1 ? '#6A4026' : '#F0B866'}"/><circle cx="278" cy="128" r="38" fill="none" stroke="#fff" stroke-width="7" opacity=".7"/><circle cx="278" cy="128" r="38" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${f1(ring * Math.min(1, p))} ${f1(ring)}" transform="rotate(-90 278 128)"/>`;
+    s += rr(240, 76, 76, 20, 10, col) + TX(278, 90, p < .7 ? 'Baking…' : p <= 1 ? 'Tap me now!' : 'Burning!', 11, '#fff');
+  }
+  s += `</g>`;
+  // customer + order
+  const happy = c.mood === 'yay', sad = c.mood === 'hmm';
+  s += `<g data-drop="customer">${grp(70, 214, 1.15, buddySVG(c.cust, { cheer: happy }), happy ? 'class="jump"' : '')}</g>`;
+  const bw = 22 + c.order.length * 26;
+  s += `<g transform="translate(${f1(70 - bw / 2 + 30)},86)">${rr(0, -30, bw, 36, 14, '#fff', 'stroke="#E2E8F7"')}<path d="M14,6 l-6,10 l14,-10z" fill="#fff"/>${sad ? TX(bw / 2, -6, c.slowMsg || 'Hmm… not quite!', 11, '#B42B2B') : happy ? TX(bw / 2, -6, 'Yummy! Thank you!', 11, '#1D7A3E') : c.order.map((k, i) => grp(20 + i * 26, -12, 1.1, TOPS[k].d(0, 0))).join('')}</g>`;
+  if (c.limit && c.mood === 'wait'){ const fr = clamp(1 - (Date.now() - c.t0) / c.limit, 0, 1); s += rr(24, 40, 92, 9, 4.5, '#fff', 'stroke="#E2E8F7"') + rr(26, 42, 88 * fr, 5, 2.5, fr > .4 ? '#3EC46B' : fr > .2 ? '#FFC63A' : '#FF5A6E'); }
+  s += grp(330, 214, .85, charSVG(kid.char, { work: 'restaurant', mood: happy ? 'cheer' : 'happy' }));
+  // counter, board and pizza
+  s += `<polygon points="0,190 360,190 360,248 0,248" fill="#F7EFE6"/><polygon points="0,190 360,190 360,248 0,248" fill="url(#fl-tile)" opacity=".6"/><rect y="188" width="360" height="5" fill="#fff"/>`;
+  s += `<ellipse cx="180" cy="224" rx="74" ry="22" fill="#C98A55"/>`;
+  if (c.stage !== 'bake') s += `<g ${c.stage !== 'sauce' && c.pizza.length || c.stage === 'baked' ? 'data-drag="cook:pizza" class="grabme"' : 'id="dough"'}>${pizzaSVG(c, 180, 220)}</g>`;
+  if (c.stage === 'sauce') s += `<g class="hintbob" style="pointer-events:none">${TX(180, 186, 'Rub the dough!', 12, '#E8414F')}<path d="M196,206 q10,-8 18,0" stroke="#E8414F" stroke-width="2" fill="none" marker-end=""/></g>`;
+  // topping bowls rail
+  s += `<rect y="248" width="360" height="22" fill="#E8414F"/><rect y="248" width="360" height="4" fill="#fff" opacity=".7"/>`;
+  Object.keys(TOPS).forEach((k, i) => { const x = 36 + i * 58; s += `<g data-drag="cook:${k}" class="grabme" transform="translate(${x},258)"><ellipse cx="0" cy="2" rx="24" ry="10" fill="#fff"/><ellipse cx="0" cy="-1" rx="20" ry="7" fill="#F3EDE4"/>${[-8, 0, 8].map(dx => grp(dx, -3, .55, TOPS[k].d(0, 0))).join('')}</g>`; });
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function cookHTML(){
+  if (!G.cook || G.cook.lv !== glv('cook').cur) cookNew();
+  const c = G.cook, cf = gcfg('cook');
+  return `${levelBar('cook')}<div id="cookSteps">${stepsBar(COOK_STEPS, cookStepIdx(c))}</div><div class="rm-scene interactive" id="cookScene">${cookScene()}</div>
+  ${sayBox(c.stage === 'sauce' ? 'Rub your finger on the dough to spread the tomato sauce!' : `The customer wants <b>${c.order.map(k => TOPS[k].name).join(', ')}</b>. Drag toppings from the bowls onto the pizza!`)}
+  <div class="actions"><button class="btn ghost" data-act="cookClear">Start over</button></div>
+  <p class="note-s center">Perfect pizzas <b>${c.good}</b> / ${cf.goal} · Oops <b>${c.miss}</b> / 3</p>`;
+}
+const cookRedraw2 = () => { sceneRedraw('cookScene', cookScene); const st = $('#cookSteps'); if (st && G.cook) st.innerHTML = stepsBar(COOK_STEPS, cookStepIdx(G.cook)); };
+function cookAfter(){
+  const c = G.cook, cf = gcfg('cook');
+  if (c.miss >= 3){ c.over = true; levelEnd('cook', false, 0, $('#cookScene'), 'Three oops! Follow the steps: sauce, toppings, bake until the ring is green, then serve.'); return; }
+  if (c.good >= cf.goal){ c.over = true; levelEnd('cook', true, c.miss === 0 ? 3 : c.miss === 1 ? 2 : 1, $('#cookScene')); return; }
+  G.after(() => { cookNew(true); reBody(cookHTML()); }, 1700);
+}
+function cookInit(){
+  const body = $('#rmBody');
+  if (body && !body.dataset.rub){
+    body.dataset.rub = 1; let down = false;
+    const rub = e => { const c = G.cook; if (!down || !c || c.stage !== 'sauce' || drg) return; const p = scenePt('#cookScene', e.clientX, e.clientY); if (!p) return; const dx = p.x - 180, dy = p.y - 220; if ((dx * dx) / (56 * 56) + (dy * dy) / (16 * 16) > 1.1) return; c.sauce = Math.min(1, c.sauce + .035); if (c.sauceDots.length < 40) c.sauceDots.push([dx, dy]); if (c.sauce >= 1){ c.stage = 'top'; sfx('pop'); rmSay(`Saucy! Now drag <b>${c.order.map(k => TOPS[k].name).join(', ')}</b> onto the pizza.`); } cookRedraw2(); };
+    body.addEventListener('pointerdown', e => { if (e.target.closest('#cookScene')){ down = true; try { body.setPointerCapture(e.pointerId); } catch (er) {} rub(e); } });
+    body.addEventListener('pointermove', rub);
+    window.addEventListener('pointerup', () => { down = false; });
+  }
+  G.every(() => {
+    const c = G.cook; if (!c || c.over) return;
+    if (c.stage === 'bake'){ c.bakeP += .1 / 2.6; if (c.bakeP > 1.3){ c.burnt = true; c.stage = 'baked'; c.miss++; c.mood = 'hmm'; c.slowMsg = 'It burned!'; rmSay('Oh no, it burned! Take it out when the ring turns green.'); cookRedraw2(); cookAfter(); return; } cookRedraw2(); return; }
+    if (c.limit && c.mood === 'wait'){ if (Date.now() - c.t0 > c.limit){ c.mood = 'hmm'; c.slowMsg = 'Too slow!'; c.miss++; cookRedraw2(); rmSay('Too slow! The customer got hungry and left.'); cookAfter(); c.over = c.over || false; c.limit = 0; } else if (Math.random() < .3) cookRedraw2(); }
+  }, 100);
+}
+ROOMS.restaurant.tabs[0][3] = cookInit;
+DRAG.cook = {
+  ghost: k => k === 'pizza' ? ghostSVG(pizzaSVG(G.cook, 0, 0, .34)) : ghostSVG([[-8, -4], [6, -6], [0, 6]].map(([x, y]) => grp(x, y, .9, TOPS[k].d(0, 0))).join('')),
+  tap(k){ const c = G.cook; if (k === 'pizza') return rmSay(c.stage === 'baked' ? 'Drag the pizza to the customer!' : 'Drag the pizza into the oven!'); if (c.stage === 'sauce') return rmSay('Rub the sauce on first!'); if (c.stage !== 'top') return; for (let n = 0; n < 3; n++){ const a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * .8; c.pizza.push({ k, x: Math.cos(a) * 46 * r, y: Math.sin(a) * 11 * r }); } cookRedraw2(); },
+  drop(k, x, y){
+    const c = G.cook, p = scenePt('#cookScene', x, y); if (!p || c.over) return;
+    if (k === 'pizza'){
+      if (c.stage === 'top' && p.x > 220 && p.y < 185){ c.stage = 'bake'; c.bakeP = 0; sfx('pop'); rmSay('Into the oven! Tap the oven when the ring turns green.'); return cookRedraw2(); }
+      if (c.stage === 'baked' && p.x < 140){
+        const have = [...new Set(c.pizza.map(q => q.k))].sort().join(), want = c.order.slice().sort().join();
+        if (!c.burnt && have === want){ c.good++; c.mood = 'yay'; sfx('win'); rmSay(pick(['Perfect pizza! The customer is so happy!', 'Just right! You are a pizza star!', 'Delicious! Five stars for the chef!'])); }
+        else { c.miss++; c.mood = 'hmm'; c.slowMsg = 'Not my order!'; rmSay(`Oops! They wanted ${c.order.map(q => TOPS[q].name.toLowerCase()).join(' and ')}.`); }
+        cookRedraw2(); return cookAfter();
+      }
+      return rmSay(c.stage === 'baked' ? 'Drop it on the customer!' : 'Drop it on the oven!');
+    }
+    if (c.stage === 'sauce') return rmSay('Rub the sauce on first!');
+    if (c.stage !== 'top') return;
+    const dx = p.x - 180, dy = p.y - 220;
+    if ((dx * dx) / (60 * 60) + (dy * dy) / (18 * 18) > 1.3) return rmSay('Drop it on the pizza!');
+    [[0, 0], [-9, 3], [8, -3]].forEach(([a, b]) => c.pizza.push({ k, x: clamp(dx + a, -48, 48), y: clamp(dy + b, -12, 12) })); sfx('pop'); cookRedraw2();
+  }
+};
+A.cookOven = function(){ const c = G.cook; if (!c || c.stage !== 'bake') return rmSay(c && c.stage === 'top' ? 'Drag the pizza into the oven first!' : 'The oven is nice and hot!'); if (c.bakeP < .7) return rmSay('Not ready yet! Wait for the green ring.'); c.stage = 'baked'; sfx('pop'); rmSay('Golden and bubbly! Now drag it to the customer.'); cookRedraw2(); };
+A.cookClear = function(){ const c = G.cook; if (!c || c.over) return; c.pizza = []; c.sauce = 0; c.sauceDots = []; c.stage = 'sauce'; c.burnt = false; cookRedraw2(); rmSay('Fresh dough! Rub on the sauce.'); };
+
+// ---------- 2. GREENHOUSE: drag seeds, pour water, pull weeds ----------
+const CAN_SVG = `<g transform="rotate(-20)"><path d="M-14,-6 h22 l-3,20 h-16z" fill="#3EC46B"/><path d="M-14,-6 h22 l-3,20 h-16z" fill="url(#fsR)"/><path d="M8,0 l14,-10" stroke="#3EC46B" stroke-width="4" stroke-linecap="round"/><path d="M-14,-4 q-9,-3 -6,10" stroke="#2E9D50" stroke-width="2.6" fill="none"/></g>`;
+const packetSVG = k => `<rect x="-14" y="-18" width="28" height="36" rx="4" fill="#fff" stroke="${SEEDS[k].col}" stroke-width="2.5"/><g transform="translate(0,10) scale(.42)">${plantSVG(k, 3)}</g>${rr(-14, -18, 28, 7, 3, SEEDS[k].col)}`;
+const WEED = `<g class="wiggle"><path d="M-4,0 l-6,-14 l7,6 l1,-12 l4,11 l6,-9 l-2,14z" fill="#5E8A36"/><circle cx="-2" cy="-6" r="1.4" fill="#fff"/><circle cx="3" cy="-6" r="1.4" fill="#fff"/><circle cx="-2" cy="-6" r=".6" fill="#2B2550"/><circle cx="3" cy="-6" r=".6" fill="#2B2550"/></g>`;
+const _gardenGrowW = gardenGrow;
+gardenGrow = function(){ const g = gardenData(); g.pots.forEach(p => { if (!p || p.st >= 3) return; if (p.weed){ if (p.readyAt) p.readyAt += 1000; } else if (!p.thirsty && Math.random() < .025) p.weed = true; }); return _gardenGrowW(); };
+const _gardenSceneW = gardenScene;
+gardenScene = function(){
+  let s = _gardenSceneW(); const g = gardenData();
+  const extra = POTS.map(([x, y, sc], i) => { const p = g.pots[i]; let h = ''; if (p && p.weed) h += `<g data-down="pot" data-i="${i}" transform="translate(${x + 14 * sc},${y - 30})">${WEED}<rect x="-12" y="-20" width="24" height="24" fill="transparent"/></g>`; if (ui.gHover === i) h += `<ellipse cx="${x}" cy="${y - 30}" rx="${30 * sc}" ry="${12 * sc}" fill="none" stroke="#FFC63A" stroke-width="3" stroke-dasharray="5 4"/>`; return h; }).join('');
+  return s.replace('</svg>', extra + `<path class="flutter" d="M300,60 q-6,-8 -10,0 q4,6 10,0 q6,-8 10,0 q-4,6 -10,0z" fill="#FF8FB8"/></svg>`);
+};
+function gardenPotAt(x, y){ const p = scenePt('#gardenScene', x, y); if (!p) return -1; let best = -1, bd = 46; POTS.forEach(([px, py], i) => { const d = Math.hypot(p.x - px, p.y - (py - 30)); if (d < bd){ bd = d; best = i; } }); return best; }
+function gardenWater(i){ const g = gardenData(), p = g.pots[i]; if (!p || !p.thirsty) return false; p.thirsty = false; p.readyAt = Date.now() + GROW_MS; G.water = i; G.after(() => { G.water = null; }, 1200); save(); sfx('pop'); rmSay(pick(['Glug glug! Grow, little plant!', 'Splish splash! Thank you!', 'Mmm, fresh water!'])); return true; }
+function gardenHTML(){
+  gardenGrow(); const g = gardenData();
+  return `<div class="rm-scene interactive" id="gardenScene">${gardenScene()}</div>${sayBox('Drag a seed packet into an empty pot. Drag the watering can over thirsty plants. Tap weeds to pull them!', budBox('bloop', { cheer: 1 }))}
+  <div class="tray2"><button class="tool can" data-drag="garden:can" aria-label="Watering can"><svg viewBox="-26 -26 52 52">${CAN_SVG}</svg><small>Water</small></button>${Object.keys(SEEDS).map(k => `<button class="tool" data-drag="garden:${k}" aria-label="${SEEDS[k].name} seeds"><svg viewBox="-20 -22 40 44">${packetSVG(k)}</svg><small>${SEEDS[k].name}</small></button>`).join('')}</div>
+  <div class="field"><span class="flabel">Harvest basket</span><div class="chips">${Object.keys(SEEDS).filter(k => g.basket[k]).map(k => `<span class="chip"><svg viewBox="-24 -56 48 60" width="22" height="26">${plantSVG(k, 3)}</svg>${SEEDS[k].name} ×${g.basket[k]}</span>`).join('') || '<span class="note-s">Nothing picked yet. Tap a flower when it says Pick!</span>'}</div></div>`;
+}
+DRAG.garden = {
+  ghost: k => k === 'can' ? ghostSVG(CAN_SVG, '-26 -26 52 52') : ghostSVG(packetSVG(k), '-20 -22 40 44'),
+  tap: k => k === 'can' ? rmSay('Drag the can over a thirsty plant to water it!') : rmSay(`Drag the ${SEEDS[k].name.toLowerCase()} seeds into an empty pot!`),
+  move(k, x, y){ const i = gardenPotAt(x, y); if (ui.gHover !== i){ ui.gHover = i; sceneRedraw('gardenScene', gardenScene); } if (k === 'can' && i >= 0 && gardenWater(i)){ G.canW = true; sceneRedraw('gardenScene', gardenScene); } },
+  drop(k, x, y){ const i = gardenPotAt(x, y); ui.gHover = -1; const g = gardenData();
+    if (k !== 'can'){ if (i < 0) rmSay('Drop the seeds right on a pot!'); else if (g.pots[i]) rmSay('That pot already has a plant. Find an empty one!'); else { g.pots[i] = { seed: k, st: 0, thirsty: true, readyAt: 0 }; save(); sfx('pop'); rmSay(`Planted a ${SEEDS[k].name.toLowerCase()}! Now give it some water.`); } }
+    else if (i >= 0 && !G.canW && !gardenWater(i)) rmSay(g.pots[i] ? 'That plant isn’t thirsty right now.' : 'Plant a seed there first!');
+    G.canW = false; sceneRedraw('gardenScene', gardenScene); }
+};
+const _potW = A.pot; A.pot = function(el, e){ const g = gardenData(), p = g.pots[+el.dataset.i]; if (p && p.weed){ p.weed = false; save(); sfx('pop'); rmSay('Yank! You pulled out a sneaky weed!'); sceneRedraw('gardenScene', gardenScene); return; } if (!p) return rmSay('Drag a seed packet onto this pot!'); _potW(el, e); };
+
+// ---------- 3. BAKERY: pipe the frosting, shake sprinkles, drop a topper ----------
+function cupcakeSVG(c){
+  const fp = c.frostP == null ? 1 : c.frostP;
+  let s = `<ellipse cx="0" cy="0" rx="28" ry="6" fill="#2a1a40" opacity=".15" filter="url(#blur2)"/><path d="M-24,0 L-30,-34 H30 L24,0Z" fill="${c.liner}"/>${[...Array(7)].map((_, k) => `<path d="M${-22 + k * 7.4},0 L${-27 + k * 9},-34" stroke="${shade(c.liner, -.18)}" stroke-width="1.6"/>`).join('')}<path d="M-24,0 L-30,-34 H30 L24,0Z" fill="url(#fsR)"/><ellipse cx="0" cy="-34" rx="31" ry="7" fill="#E9C38E"/>`;
+  const f = c.frost;
+  if (fp > 0){ const a = Math.min(1, fp * 3); s += `<ellipse cx="0" cy="-42" rx="${f1(33 * a)}" ry="${f1(13 * a)}" fill="${f}"/>`; }
+  if (fp > .34){ const a = Math.min(1, (fp - .34) * 3); s += `<ellipse cx="0" cy="-56" rx="${f1(25 * a)}" ry="${f1(11 * a)}" fill="${shade(f, .06)}"/>`; }
+  if (fp > .67){ const a = Math.min(1, (fp - .67) * 3); s += `<ellipse cx="0" cy="-68" rx="${f1(15 * a)}" ry="${f1(9 * a)}" fill="${f}"/>`; }
+  if (fp >= 1) s += `<path d="M0,-84 q8,6 0,10 q-6,-4 0,-10z" fill="${f}"/>`;
+  if (fp > 0) s += `<ellipse cx="0" cy="-56" rx="33" ry="30" fill="url(#sph)" opacity="${f1(.9 * Math.min(1, fp * 1.5))}"/>`;
+  const cols = ['#FF5A8C', '#FFC63A', '#3EC46B', '#34B2F0', '#B58CFF'];
+  const pts = c.sprPts || (c.spr && c.spr !== 'none' ? [[-18, -44], [-6, -40], [10, -42], [22, -46], [-14, -58], [2, -54], [14, -60], [-4, -68], [8, -70], [-24, -50], [20, -54]] : []);
+  const kind = c.spr === 'none' ? 'rainbow' : c.spr;
+  pts.forEach(([x, y], k) => { s += kind === 'stars' ? `<path d="${starPath(x, y, 3, 1.3)}" fill="${k % 2 ? '#FFC63A' : '#fff'}"/>` : kind === 'hearts' ? `<path d="M${x},${y + 2} c-3,-2 -3,-5 -1,-5 c1,0 1,1 1,1 c0,0 0,-1 1,-1 c2,0 2,3 -1,5z" fill="${k % 2 ? '#FF5A8C' : '#E8414F'}"/>` : kind === 'pearls' ? `<circle cx="${x}" cy="${y}" r="1.8" fill="#fff"/>` : `<rect x="${x}" y="${y}" width="6" height="2.2" rx="1.1" fill="${cols[k % 5]}" transform="rotate(${k * 37} ${x + 3} ${y + 1})"/>`; });
+  const t = c.top;
+  if (t === 'cherry') s += `<path d="M0,-86 q2,-10 8,-14" stroke="#3C8A3F" stroke-width="2" fill="none"/>${sph(0, -84, 7, '#E8414F')}`;
+  if (t === 'strawberry') s += `<path d="M-8,-88 q8,-6 16,0 q0,14 -8,18 q-8,-4 -8,-18z" fill="#E8414F"/><path d="M-7,-89 l4,-5 l3,4 l3,-4 l4,5z" fill="#3EC46B"/>`;
+  if (t === 'star') s += `<path d="${starPath(0, -90, 11, 5)}" fill="#FFC63A" stroke="#E39A00" stroke-width="1.2" stroke-linejoin="round"/>`;
+  if (t === 'candle') s += `${rr(-3, -104, 6, 22, 2, '#fff')}<path d="M-3,-100 l6,-3 M-3,-94 l6,-3 M-3,-88 l6,-3" stroke="#FF5A8C" stroke-width="2"/><path class="glowb" d="M0,-116 q5,6 0,10 q-5,-4 0,-10z" fill="#FFB13D"/>`;
+  if (t === 'bunny') s += `<ellipse cx="-8" cy="-94" rx="5" ry="13" fill="#fff" transform="rotate(-12 -8 -94)"/><ellipse cx="8" cy="-94" rx="5" ry="13" fill="#fff" transform="rotate(12 8 -94)"/><ellipse cx="-8" cy="-94" rx="2.4" ry="9" fill="#FFB3C7" transform="rotate(-12 -8 -94)"/><ellipse cx="8" cy="-94" rx="2.4" ry="9" fill="#FFB3C7" transform="rotate(12 8 -94)"/>`;
+  if (t === 'heart') s += `<path d="M0,-78 C-12,-86 -10,-98 -4,-98 C-1,-98 0,-95 0,-94 C0,-95 1,-98 4,-98 C10,-98 12,-86 0,-78Z" fill="#FF5A8C"/>`;
+  return s;
+}
+const BAG_SVG = f => `<g transform="rotate(30)"><path d="M-12,-20 h24 l-9,30 h-6z" fill="#fff" stroke="#E3E8F2" stroke-width="2"/><path d="M-10,-18 h20 l-8,26 h-4z" fill="${f}" opacity=".85"/><path d="M-3,10 l3,8 l3,-8z" fill="#C9D3E6"/></g>`;
+const SHAKER_SVG = `<g transform="rotate(150)">${rr(-10, -16, 20, 28, 6, '#FFC63A')}${rr(-11, -20, 22, 8, 4, '#E8414F')}<circle cx="-4" cy="-16" r="1.4" fill="#fff"/><circle cx="4" cy="-16" r="1.4" fill="#fff"/></g>`;
+const BAKE_STEPS = ['Liner', 'Frosting', 'Sprinkles', 'Topper'];
+const bakeStep = c => !c.linerSet ? 0 : (c.frostP || 0) < 1 ? 1 : !(c.sprPts && c.sprPts.length) ? 2 : c.top === 'none' ? 3 : 4;
+function bakeryHTML(){
+  if (!G.cup || G.cup.frostP == null) G.cup = { liner: '#FF8FB8', frost: '#FFF4F7', spr: 'rainbow', top: 'none', frostP: 0, sprPts: [], linerSet: false };
+  const c = G.cup, st = bakeStep(c);
+  const sw = (f, arr) => arr.map(v => `<button class="sw" style="background:${v}" data-act="cupPick" data-f="${f}" data-v="${v}" aria-pressed="${c[f] === v}" aria-label="${f}"></button>`).join('');
+  return `<div id="bakeSteps">${stepsBar(BAKE_STEPS, st)}</div><div class="rm-scene interactive" id="cupScene">${bakeryScene()}</div>
+  ${sayBox(['Tap a color for the cupcake liner.', 'Pick a frosting color, then drag the piping bag around the cupcake to pipe it on!', 'Pick a sprinkle, then drag the shaker over the frosting and shake!', 'Drag a topper onto the very top!', 'It looks so yummy! Put it in the display case.'][st])}
+  <div class="field"><span class="flabel">1. Liner</span><div class="swatches">${sw('liner', LINERS)}</div></div>
+  <div class="field"><span class="flabel">2. Frosting</span><div class="tray2 small"><button class="tool" data-drag="bake:bag" aria-label="Piping bag"><svg viewBox="-24 -26 48 52">${BAG_SVG(c.frost)}</svg><small>Pipe it!</small></button><div class="swatches">${sw('frost', FROSTS)}</div></div></div>
+  <div class="field"><span class="flabel">3. Sprinkles</span><div class="tray2 small"><button class="tool" data-drag="bake:shaker" aria-label="Sprinkle shaker"><svg viewBox="-24 -26 48 52">${SHAKER_SVG}</svg><small>Shake!</small></button><div class="chips">${['rainbow', 'stars', 'hearts', 'pearls'].map(v => `<button class="chip" data-act="cupPick" data-f="spr" data-v="${v}" aria-pressed="${c.spr === v}">${v}</button>`).join('')}</div></div></div>
+  <div class="field"><span class="flabel">4. Topper</span><div class="tray2">${TOPPERS.filter(t => t !== 'none').map(t => `<button class="tool" data-drag="bake:top-${t}" aria-label="${t}"><svg viewBox="-24 -122 48 48">${cupcakeSVG({ liner: 'transparent', frost: 'transparent', frostP: 0, sprPts: [], top: t }).replace(/<ellipse cx="0" cy="0"[^>]*\/>|<path d="M-24,0[^>]*\/>|<path d="M-2\d[^"]*" stroke[^>]*\/>|<ellipse cx="0" cy="-34"[^>]*\/>/g, '')}</svg><small>${t}</small></button>`).join('')}</div></div>
+  <div class="actions"><button class="btn ghost" data-act="cupNew">New cupcake</button><button class="btn berry" style="flex:2" data-act="cupSave">Put it in the case!</button></div>`;
+}
+const cupRefresh = () => { sceneRedraw('cupScene', bakeryScene); const s = $('#bakeSteps'); if (s) s.innerHTML = stepsBar(BAKE_STEPS, bakeStep(G.cup)); };
+const overCup = (x, y) => { const p = scenePt('#cupScene', x, y); if (!p) return null; const lx = (p.x - 180) / 1.18, ly = (p.y - 200) / 1.18; return lx > -40 && lx < 40 && ly > -110 && ly < -20 ? [lx, ly] : null; };
+DRAG.bake = {
+  ghost: k => k === 'bag' ? ghostSVG(BAG_SVG(G.cup.frost), '-24 -26 48 52') : k === 'shaker' ? ghostSVG(SHAKER_SVG, '-24 -26 48 52') : ghostSVG(cupcakeSVG({ liner: 'transparent', frost: 'transparent', frostP: 0, sprPts: [], top: k.slice(4) }).replace(/<ellipse cx="0" cy="0"[^>]*\/>|<path d="M-24,0[^>]*\/>|<path d="M-2\d[^"]*" stroke[^>]*\/>|<ellipse cx="0" cy="-34"[^>]*\/>/g, ''), '-24 -122 48 48'),
+  tap: k => rmSay(k === 'bag' ? 'Drag the piping bag around the cupcake!' : k === 'shaker' ? 'Drag the shaker over the frosting!' : 'Drag the topper onto the cupcake!'),
+  move(k, x, y){ const c = G.cup, o = overCup(x, y); if (!o) return;
+    if (k === 'bag' && c.frostP < 1){ c.linerSet = true; c.frostP = Math.min(1, c.frostP + .045); if (c.frostP >= 1){ sfx('pop'); rmSay('Swirly! Now add some sprinkles.'); } cupRefresh(); }
+    if (k === 'shaker'){ if (c.frostP < .6) return rmSay('Pipe the frosting first!'); if (c.sprPts.length < 46){ for (let n = 0; n < 2; n++) c.sprPts.push([clamp(o[0] + (Math.random() - .5) * 16, -26, 26), clamp(o[1] + (Math.random() - .5) * 10, -76, -38)]); cupRefresh(); } } },
+  drop(k, x, y){ const c = G.cup; if (!k.startsWith('top-')) return cupRefresh(); if (!overCup(x, y)) return rmSay('Drop it on the cupcake!'); if (c.frostP < .6) return rmSay('Pipe the frosting first!'); c.top = k.slice(4); sfx('pop'); rmSay('Ta-da! What a cupcake!'); cupRefresh(); }
+};
+A.cupPick = el => { const c = G.cup; c[el.dataset.f] = el.dataset.v; if (el.dataset.f === 'liner') c.linerSet = true; document.querySelectorAll(`[data-act="cupPick"][data-f="${el.dataset.f}"]`).forEach(b => b.setAttribute('aria-pressed', b.dataset.v === el.dataset.v)); if (el.dataset.f === 'frost') reBody(bakeryHTML()); else cupRefresh(); };
+A.cupNew = () => { G.cup = null; reBody(bakeryHTML()); };
+const _cupSaveI = A.cupSave; A.cupSave = function(el, e){ const c = G.cup; if ((c.frostP || 0) < 1) return rmSay('Pipe all the frosting on first!'); _cupSaveI(el, e); G.cup = null; G.after(() => reBody(bakeryHTML()), 1200); };
+
+// ---------- 4. SALON: real tools on real hair ----------
+const SALON_TOOLS = { cut: { n: 'Scissors', svg: `<g transform="rotate(-30)"><circle cx="-6" cy="10" r="5" fill="none" stroke="#FF5A8C" stroke-width="3"/><circle cx="6" cy="10" r="5" fill="none" stroke="#FF5A8C" stroke-width="3"/><path d="M-3,6 L6,-16 M3,6 L-6,-16" stroke="#9AA3B8" stroke-width="3" stroke-linecap="round"/></g>` }, dry: { n: 'Blow-dryer', svg: `${rr(-16, -10, 24, 14, 7, '#7B5CFA')}${rr(-6, 2, 8, 16, 3, '#5A3FD6')}<circle cx="10" cy="-3" r="5" fill="#B49CFF"/><path d="M16,-8 q6,5 0,10 M20,-11 q8,8 0,16" stroke="#9FDCF5" stroke-width="2" fill="none"/>` }, comb: { n: 'Comb', svg: `<g transform="rotate(-20)">${rr(-18, -6, 36, 8, 3, '#FFC63A')}${[...Array(8)].map((_, k) => rr(-16 + k * 4.4, 0, 2, 9, 1, '#FFC63A')).join('')}</g>` } };
+const sprayBottle = col => `${rr(-8, -6, 16, 24, 5, col)}${rr(-8, -6, 16, 24, 5, 'url(#fsR)')}${rr(-4, -14, 8, 9, 2, '#fff')}<path d="M4,-12 h8" stroke="#fff" stroke-width="3"/>`;
+const SALON_COLS = ['#2B1B14', '#E3B55A', '#E8604C', '#5FE0C0', '#6EC6FF', '#C9A0FF', '#FF8FB8', '#FFFFFF'];
+function salonHTML(){
+  return `<div class="rm-scene interactive" id="salonScene">${salonScene()}</div>${sayBox('Pick a tool and rub it on your hair! Scissors make it shorter, the dryer makes it fluffy, the comb makes it long, and sprays change the color.')}
+  <div class="tray2">${Object.entries(SALON_TOOLS).map(([k, t]) => `<button class="tool" data-drag="salon:${k}" aria-label="${t.n}"><svg viewBox="-24 -24 48 48">${t.svg}</svg><small>${t.n}</small></button>`).join('')}</div>
+  <div class="tray2">${SALON_COLS.map(c => `<button class="tool" data-drag="salon:spray-${c}" aria-label="Color spray"><svg viewBox="-20 -20 40 44">${sprayBottle(c)}</svg></button>`).join('')}</div>`;
+}
+const overHair = (x, y) => { const p = scenePt('#salonScene', x, y); return p && Math.abs(p.x - 180) < 52 && p.y > 92 && p.y < 200; };
+DRAG.salon = {
+  ghost: k => ghostSVG(k.startsWith('spray-') ? sprayBottle(k.slice(6)) : SALON_TOOLS[k].svg, k.startsWith('spray-') ? '-20 -20 40 44' : '-24 -24 48 48'),
+  tap: k => rmSay('Drag it onto your hair and rub back and forth!'),
+  move(k, x, y){
+    if (!overHair(x, y)) return; G.rub = G.rub || {}; G.rub[k] = (G.rub[k] || 0) + 1;
+    if (G.rub[k] % 3 === 0) sceneRedraw('salonScene', () => salonScene(true));
+    if (G.rub[k] < 9) return; G.rub[k] = 0; const c = K().char;
+    if (k === 'cut'){ c.hairStyle = ({ long: 'bob', bob: 'spiky', puffs: 'bob', curly: 'spiky', spiky: 'spiky' })[c.hairStyle] || 'bob'; rmSay(c.hairStyle === 'spiky' ? 'Snip snip! A short and spiky cut!' : 'Snip snip! A cute bob!'); }
+    if (k === 'dry'){ c.hairStyle = c.hairStyle === 'curly' ? 'puffs' : 'curly'; rmSay('Whoosh! Big fluffy hair!'); }
+    if (k === 'comb'){ c.hairStyle = 'long'; rmSay('Brush brush! Long and silky!'); }
+    if (k.startsWith('spray-')){ c.hair = k.slice(6); rmSay('Pssshhh! A brand new color!'); }
+    save(); sfx('pop'); sceneRedraw('salonScene', () => salonScene(true));
+  },
+  drop(){ G.after(() => sceneRedraw('salonScene', salonScene), 700); }
+};
+
+// ---------- 5. FOUNTAIN: flick the coin in ----------
+function fountainHTML2(){ return `<div class="rm-scene interactive" id="fountScene">${fountainScene()}<div class="flickhint" id="flickHint">Swipe the coin up!</div></div>${sayBox('Put your finger on the coin and swipe it up into the fountain. Aim for the water!')}<p class="note-s center">The fountain gives back one lucky coin each day.</p>`; }
+const _fountSceneF = fountainScene;
+fountainScene = function(){ const w = G.wish || {}; let s = _fountSceneF(); if (!w.coin && !w.busy) s = s.replace('</svg>', `<g class="hover">${grp(180, 252, .8, '<use href="#coin" x="-20" y="-20" width="40" height="40"/>')}</g></svg>`); return s; };
+function fountainInit(){
+  const sc = $('#fountScene'); if (!sc) return; let start = null, last = null;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#fountScene', e.clientX, e.clientY); const w = G.wish || {}; if (!p || w.busy || Math.hypot(p.x - 180, p.y - 252) > 40) return; e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} start = { x: p.x, y: p.y, t: performance.now() }; last = start; });
+  sc.addEventListener('pointermove', e => { if (!start) return; const p = scenePt('#fountScene', e.clientX, e.clientY); if (p) last = { x: p.x, y: p.y, t: performance.now() }; });
+  const end = () => {
+    if (!start) return; const s0 = start, l = last; start = null; tapGuardUntil = Date.now() + 350;
+    const dx = l.x - s0.x, dy = l.y - s0.y; if (dy > -20) return rmSay('Swipe up toward the fountain!');
+    const tx = clamp(s0.x + dx * 2.4, 10, 350), ty = clamp(s0.y + dy * 1.7, 30, 250);
+    G.wish = G.wish || {}; const w = G.wish; w.busy = true; w.splash = false; const h = $('#flickHint'); if (h) h.hidden = true;
+    tween(750, p => { const x = s0.x + (tx - s0.x) * p, y = s0.y + (ty - s0.y) * p - Math.sin(p * Math.PI) * 70; w.coin = { x: x - 180, y: y - 222 }; sceneRedraw('fountScene', () => fountainScene() + `<div class="flickhint" id="flickHint" hidden>Swipe the coin up!</div>`); }, () => {
+      w.coin = null; const inside = ((tx - 180) ** 2) / (84 * 84) + ((ty - 206) ** 2) / (22 * 22) <= 1.15;
+      if (inside){ w.splash = true; const kid = K(); kid.wishCoins = [...(kid.wishCoins || []), 1].slice(-8); rmSay(`Splash! ${BUDDIES[kid.buddy].name}: “${pick(WISHES)}”`); sfx('pop'); if (kid.wishDay !== dayKey()){ kid.wishDay = dayKey(); playReward(1, 'Lucky coin from the wishing fountain'); } save(); }
+      else rmSay(ty < 190 ? 'Whoa, too far! Try a softer swipe.' : 'Plop! Not quite. Swipe a little harder!');
+      sceneRedraw('fountScene', fountainScene);
+      G.after(() => { w.splash = false; w.busy = false; sceneRedraw('fountScene', fountainScene); }, 1500);
+    });
+  };
+  sc.addEventListener('pointerup', end); sc.addEventListener('pointercancel', () => { start = null; });
+}
+ROOMS.fountain.tabs[0][2] = fountainHTML2; ROOMS.fountain.tabs[0][3] = fountainInit;
+
+// ---------- 6. POND: pull back to cast, hook it, tap fast to reel ----------
+function pondScene(){
+  const kid = K(), f = G.fish || { st: 'idle' };
+  let s = outdoorShell({ hz: 120 }) + R.pine(30, 150) + R.tree(80, 140) + R.pine(320, 146);
+  s += `<ellipse cx="160" cy="214" rx="160" ry="50" fill="#7FB86E"/><ellipse cx="160" cy="212" rx="150" ry="44" fill="url(#water)"/><ellipse cx="110" cy="198" rx="40" ry="6" fill="#fff" opacity=".35"/>`;
+  [[60, 228], [230, 236], [96, 194]].forEach(([x, y]) => s += `<path d="M${x},${y} a12,6 0 1 0 9,-4 l-9,4z" fill="#4CBF58"/>`);
+  s += `${rr(270, 196, 90, 12, 3, '#C98A55')}${[280, 300, 320, 340].map(x => rr(x, 206, 5, 30, 2, '#9A6340')).join('')}`;
+  s += grp(308, 198, .8, charSVG(kid.char, { mood: f.st === 'caught' ? 'cheer' : 'happy', work: 'fish' })) + grp(344, 198, .55, buddySVG(kid.buddy, { cheer: f.st === 'caught' }));
+  const tip = f.st === 'pull' ? [338 + f.pull * 10, 150 + f.pull * 30] : [326, 148];
+  s += `<path d="M300,190 L${tip[0]},${tip[1]}" stroke="#8A5634" stroke-width="3.4" stroke-linecap="round"/>`;
+  if (f.st === 'pull'){ const d = f.pull; s += `<path d="M${tip[0]},${tip[1]} Q${tip[0] - 40},${tip[1] + 40} ${tip[0] - 10},${tip[1] + 60}" stroke="#fff" stroke-width="1.2" fill="none"/>` + rr(110, 40, 140, 16, 8, '#fff', 'opacity=".92"') + rr(112, 42, 136 * d, 12, 6, d > .45 && d < .95 ? '#3EC46B' : '#FFC63A') + TX(180, 34, 'Let go to cast!', 12, '#2B2550'); }
+  if (['wait', 'bite', 'reel'].includes(f.st)){
+    const bx = f.bx, by = f.st === 'bite' ? f.by + 5 : f.by;
+    s += `<path d="M${tip[0]},${tip[1]} Q${(tip[0] + bx) / 2},${Math.min(tip[1], by) - 20} ${bx},${by - 6}" stroke="#fff" stroke-width="1.2" fill="none" opacity=".9"/>`;
+    s += `<g class="${f.st === 'wait' ? 'bobw' : ''}"><ellipse cx="${bx}" cy="${by + 2}" rx="12" ry="3" fill="#fff" opacity=".4"/><circle cx="${bx}" cy="${by - 4}" r="6" fill="#fff"/><path d="M${bx - 6},${by - 4} a6,6 0 0 0 12,0z" fill="#E8414F"/></g>`;
+    if (f.st === 'bite') s += `<g class="bubble-pop">${rr(bx - 12, by - 40, 24, 24, 12, '#FFC63A')}${TX(bx, by - 22, '!', 18, '#fff')}</g><ellipse class="tapring" cx="${bx}" cy="${by}" rx="16" ry="5" fill="none" stroke="#fff" stroke-width="2"/>`;
+    if (f.st === 'reel') s += `<g transform="translate(${bx},${by + 6})" class="wiggle">${grp(0, 0, .8, fishSVG(f.hooked))}</g>` + rr(110, 40, 140, 16, 8, '#fff', 'opacity=".92"') + rr(112, 42, 136 * f.reel, 12, 6, '#34B2F0') + TX(180, 34, 'Tap fast to reel it in!', 12, '#2B2550');
+  }
+  if (f.st === 'caught' && f.got) s += grp(150, 150, 1.6, fishSVG(f.got), 'class="jump"');
+  if (f.st === 'idle' || f.st === 'miss' || f.st === 'caught') s += `<g class="hintbob" style="pointer-events:none">${TX(200, 120, 'Pull back from the fisher to cast!', 12, '#2B2550')}</g>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function pondHTML(){
+  if (!G.fish || G.fish.lv !== glv('fish').cur) G.fish = { lv: glv('fish').cur, st: 'idle', caught: 0, miss: 0, over: false, pull: 0 };
+  const kid = K(), book = kid.fishbook || {}, cf = gcfg('fish'), f = G.fish;
+  return `${levelBar('fish')}<div class="rm-scene interactive" id="pondScene">${pondScene()}</div>${sayBox('Touch near the fisher, pull back toward the dock and let go to cast. When you see <b>!</b> tap Hook it, then tap Reel as fast as you can!')}
+  <p class="note-s center">Caught <b>${f.caught}</b> / ${cf.goal} · Got away <b>${f.miss}</b> / 3</p>
+  <button class="btn sea big" id="fishBtn" data-act="fishBtn">${f.st === 'bite' ? 'Hook it!' : f.st === 'reel' ? 'Reel! Reel! Reel!' : 'Pull back on the water to cast'}</button>
+  <div class="field"><span class="flabel">Fish book · ${Object.keys(book).length} of ${FISH.length}</span><div class="plushrow">${FISH.map(x => `<span class="plush ${book[x.id] ? '' : 'locked'}"><svg viewBox="-30 -24 60 48">${fishSVG(x)}</svg><b>${book[x.id] ? '×' + book[x.id] : '?'}</b></span>`).join('')}</div></div>`;
+}
+const pondUI = () => { sceneRedraw('pondScene', pondScene); const b = $('#fishBtn'); const f = G.fish; if (b) b.textContent = f.st === 'bite' ? 'Hook it!' : f.st === 'reel' ? 'Reel! Reel! Reel!' : 'Pull back on the water to cast'; };
+function fishMiss(msg){ const f = G.fish; f.miss++; f.st = 'miss'; reBody(pondHTML()); pondInit(); rmSay(msg); if (f.miss >= 3){ f.over = true; levelEnd('fish', false, 0, $('#pondScene'), 'Three fish got away! Cast into the water, hook fast, and tap reel quickly.'); } }
+function pondInit(){
+  const sc = $('#pondScene'); if (!sc || sc.dataset.on) return; sc.dataset.on = 1; let start = null;
+  sc.addEventListener('pointerdown', e => { const f = G.fish; if (f.over) return; if (f.st === 'bite' || f.st === 'reel') return A.fishBtn(); if (!['idle', 'miss', 'caught'].includes(f.st)) return; const p = scenePt('#pondScene', e.clientX, e.clientY); if (!p) return; e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} start = p; f.st = 'pull'; f.pull = 0; pondUI(); });
+  sc.addEventListener('pointermove', e => { if (!start) return; const p = scenePt('#pondScene', e.clientX, e.clientY); if (!p) return; G.fish.pull = clamp(Math.hypot(p.x - start.x, p.y - start.y) / 120, 0, 1); pondUI(); });
+  const rel = () => { if (!start) return; start = null; tapGuardUntil = Date.now() + 350; const f = G.fish, cf = gcfg('fish'), d = f.pull;
+    if (d < .12){ f.st = 'idle'; pondUI(); return rmSay('Pull back farther, then let go!'); }
+    f.bx = 300 - d * 250; f.by = 214 - d * 10; const inWater = ((f.bx - 160) ** 2) / (150 * 150) + ((f.by - 212) ** 2) / (44 * 44) <= 1;
+    if (!inWater){ f.st = 'idle'; pondUI(); return rmSay('Splat! That landed on the grass. Not so hard!'); }
+    f.st = 'wait'; pondUI(); rmSay('Plop! Shhh… waiting for a nibble…'); sfx('pop');
+    G.after(() => { if (f.st !== 'wait') return; f.st = 'bite'; pondUI(); rmSay('<b>Something is biting! Hook it!</b>'); G.after(() => { if (f.st === 'bite') fishMiss('Too slow, it swam away! Tap Hook it faster.'); }, cf.window); }, 1500 + Math.random() * 2600);
+  };
+  sc.addEventListener('pointerup', rel); sc.addEventListener('pointercancel', () => { start = null; });
+}
+ROOMS.pond.tabs[0][3] = pondInit;
+A.fishBtn = function(){
+  const f = G.fish; if (f.over) return;
+  if (f.st === 'wait') return fishMiss('Too early! The fish swam off. Wait for the !');
+  if (f.st === 'bite'){ const tot = FISH.reduce((a, x) => a + x.w, 0); let r = Math.random() * tot; f.hooked = FISH.find(x => (r -= x.w) < 0) || FISH[0]; f.st = 'reel'; f.reel = .3; pondUI(); rmSay('Hooked! Now tap Reel as fast as you can!');
+    const lv = glv('fish').cur; G.every(() => { if (f.st !== 'reel') return; f.reel -= .03 * (1 + lv * .1); if (f.reel <= 0){ f.st = 'miss'; fishMiss('The fish wiggled free! Tap faster next time.'); return; } pondUI(); }, 100); return; }
+  if (f.st === 'reel'){ f.reel = Math.min(1, f.reel + .12); sfx('pop');
+    if (f.reel >= 1){ const got = f.hooked, kid = K(), cf = gcfg('fish'); f.st = 'caught'; f.got = got; f.caught++; kid.fishbook = kid.fishbook || {}; const isNew = !kid.fishbook[got.id]; kid.fishbook[got.id] = (kid.fishbook[got.id] || 0) + 1; save(); evTrack(kid, 'fish'); reBody(pondHTML()); pondInit(); rmSay(`You caught a <b>${got.name}</b>!${isNew ? ' New in your fish book! 📖' : ''}`); sfx('win');
+      if (f.caught >= cf.goal){ f.over = true; G.after(() => levelEnd('fish', true, f.miss === 0 ? 3 : f.miss === 1 ? 2 : 1, $('#pondScene')), 900); } return; }
+    pondUI(); return; }
+  rmSay('Touch the water near the dock and pull back to cast!');
+};
+GRESTART.fish = () => { G.fish = null; reBody(pondHTML()); pondInit(); };
+
+// ---------- 7. SCHOOL: trace letters and numbers ----------
+const TRACE = {
+  A: 'M20,110 L50,10 L80,110 M32,72 L68,72', O: 'M50,10 Q14,10 14,60 Q14,110 50,110 Q86,110 86,60 Q86,10 50,10', L: 'M30,10 V110 H80', T: 'M14,14 H86 M50,14 V110', C: 'M82,28 Q66,8 48,10 Q14,14 14,60 Q14,106 48,110 Q66,112 82,94', '1': 'M34,30 L54,10 V110',
+  B: 'M26,110 V10 H54 Q80,10 80,34 Q80,58 54,58 H26 M54,58 Q86,58 86,84 Q86,110 54,110 H26', '2': 'M20,36 Q22,10 50,10 Q80,12 78,38 Q75,60 20,110 H82', '3': 'M20,22 Q50,0 74,20 Q86,44 50,58 Q88,66 78,96 Q56,122 20,100', S: 'M78,24 Q60,6 40,12 Q18,20 25,42 Q32,58 55,62 Q82,68 78,92 Q72,114 45,110 Q28,108 18,95', D: 'M26,10 V110 H50 Q86,110 86,60 Q86,10 50,10 Z', '5': 'M76,12 H30 L26,54 Q58,42 74,64 Q84,90 62,106 Q40,116 22,100'
+};
+const traceList = () => ({ little: ['A', 'O', '1', 'L', 'T', 'C'], middle: ['B', '2', '3', 'S', 'D', '5'], big: ['S', '3', 'B', '5', 'D', '2'] })[bandOf(K().age)];
+function traceScene(){
+  const t = G.trace, d = TRACE[t.ch], ok = t.done;
+  let s = `<rect width="360" height="270" fill="#CDEBFF"/><rect width="360" height="270" fill="url(#wp-dots)"/>${rr(36, 16, 288, 236, 12, '#B07A4C')}${rr(46, 26, 268, 216, 6, '#2F5D50')}`;
+  s += `<g transform="translate(110,60) scale(1.4)"><path id="tracePath" d="${d}" fill="none" stroke="${ok ? '#FFE36B' : '#fff'}" stroke-width="${ok ? 9 : 3}" stroke-linecap="round" stroke-linejoin="round" ${ok ? '' : 'stroke-dasharray="1 9" opacity=".8"'}/></g>`;
+  s += (t.pts || []).filter(p => p.hit).map(p => `<circle cx="${f1(p.x)}" cy="${f1(p.y)}" r="7" fill="#FFE36B" opacity=".9"/>`).join('');
+  const nxt = (t.pts || []).find(p => !p.hit); if (nxt && !ok) s += `<circle class="glowb" cx="${f1(nxt.x)}" cy="${f1(nxt.y)}" r="9" fill="none" stroke="#FF8FB8" stroke-width="3"/>`;
+  s += `<path d="${t.trail || ''}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".55"/>`;
+  s += TX(80, 60, t.ch, 34, '#FFE36B') + grp(300, 246, .55, robotSVG('lexi', { happy: ok }));
+  if (ok) s += [0, 1, 2, 3, 4].map(k => `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(120 + k * 30, 50 + (k % 2) * 30, 7, 2.6, 4)}" fill="#FFE36B"/>`).join('');
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function traceHTML(){ G.trace = G.trace && G.trace.list ? G.trace : { list: traceList(), i: 0, wins: 0 }; const t = G.trace; t.ch = t.list[t.i % t.list.length]; t.done = false; t.pts = null; t.trail = '';
+  return `<div class="rm-scene interactive" id="traceScene">${traceScene()}</div>${sayBox(`Trace the <b>${t.ch}</b> with your finger. Follow the pink circle!`, robotBox('lexi', { happy: 1 }))}<div class="actions"><button class="btn ghost" data-act="traceSkip">Next letter</button></div><p class="note-s center">Traced today: <b>${t.wins}</b></p>`; }
+function traceInit(){
+  const sc = $('#traceScene'); if (!sc) return; const t = G.trace;
+  const path = sc.querySelector('#tracePath'), L = path.getTotalLength(), N = Math.max(18, Math.round(L / 9));
+  t.pts = [...Array(N)].map((_, k) => { const q = path.getPointAtLength(k / (N - 1) * L); return { x: 110 + q.x * 1.4, y: 60 + q.y * 1.4, hit: false }; });
+  sceneRedraw('traceScene', traceScene);
+  let down = false;
+  const mv = e => { if (!down || t.done) return; const p = scenePt('#traceScene', e.clientX, e.clientY); if (!p) return; t.trail = (t.trail ? t.trail + ' L' : 'M') + f1(p.x) + ',' + f1(p.y); t.pts.forEach(q => { if (!q.hit && Math.hypot(q.x - p.x, q.y - p.y) < 18) q.hit = true; });
+    if (t.pts.filter(q => q.hit).length / t.pts.length >= .88){ t.done = true; t.wins++; sfx('win'); rmSay(`You traced ${t.ch}! Amazing!`); if (t.wins % 3 === 0) playReward(1, 'Traced letters at Bright School'); G.after(() => { t.i++; reBody(traceHTML()); traceInit(); }, 1600); }
+    sceneRedraw('traceScene', traceScene); };
+  sc.addEventListener('pointerdown', e => { down = true; e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} mv(e); }); sc.addEventListener('pointermove', mv); window.addEventListener('pointerup', () => { down = false; });
+}
+A.traceSkip = () => { G.trace.i++; reBody(traceHTML()); traceInit(); };
+ROOMS.school.tabs.push(['trace', 'Trace letters', traceHTML, traceInit]);
+
+// ---------- 8. LIBRARY: sort books onto the right shelf ----------
+const SHELFC = [['#FF5A8C', 'pink'], ['#34B2F0', 'blue'], ['#3EC46B', 'green']];
+function sortNew(){ const books = shuffle([0, 0, 0, 1, 1, 1, 2, 2, 2]).map((c, k) => ({ c, placed: false, x: 50 + k * 30 + Math.random() * 6, h: 26 + Math.random() * 10 })); G.lsort = { books, slots: [0, 0, 0] }; }
+function sortScene(){
+  const st = G.lsort;
+  let s = roomShell({ wall: '#E3EBFF', wp: 'wood', floor: '#C9A27A', fp: 'wood' });
+  s += rr(70, 20, 220, 162, 6, '#9A6340');
+  SHELFC.forEach(([col, n], r) => { const y = 66 + r * 52; s += rr(78, y - 40, 204, 40, 2, '#7A4A28') + rr(74, y, 212, 6, 2, '#C98A55') + `<g>${rr(20, y - 26, 44, 20, 8, col)}${TX(42, y - 12, n, 11, '#fff')}</g>`; });
+  st.books.forEach((b, k) => { if (!b.placed) return; const y = 66 + b.c * 52; s += rr(84 + b.slot * 24, y - b.h, 18, b.h, 2, SHELFC[b.c][0]) + rr(86 + b.slot * 24, y - b.h + 4, 14, 3, 1, '#fff', 'opacity=".6"'); });
+  st.books.forEach((b, k) => { if (b.placed) return; s += `<g data-drag="lib:${k}" class="grabme" transform="translate(${f1(b.x)},258) rotate(${(k % 3 - 1) * 8})">${rr(-10, -b.h, 20, b.h, 3, SHELFC[b.c][0])}${rr(-8, -b.h + 5, 16, 3, 1, '#fff', 'opacity=".6"')}</g>`; });
+  s += grp(330, 262, .55, robotSVG('lexi', { happy: st.books.every(b => b.placed) }));
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function sortHTML(){ if (!G.lsort || G.lsort.books.every(b => b.placed) && G.lsort.reset) sortNew(); return `<div class="rm-scene interactive" id="sortScene">${sortScene()}</div>${sayBox('Uh oh, the books fell down! Drag each book onto the shelf with the same color.', robotBox('lexi', { happy: 1 }))}<div class="actions"><button class="btn ghost" data-act="sortAgain">Mix them up again</button></div>`; }
+DRAG.lib = {
+  ghost: k => { const b = G.lsort.books[+k]; return ghostSVG(rr(-10, -18, 20, 36, 3, SHELFC[b.c][0])); },
+  tap: () => rmSay('Drag the book up to its shelf!'),
+  drop(k, x, y){ const st = G.lsort, b = st.books[+k], p = scenePt('#sortScene', x, y); if (!p) return; const row = [0, 1, 2].find(r => p.y > 66 + r * 52 - 48 && p.y < 66 + r * 52 + 8 && p.x > 60 && p.x < 300);
+    if (row == null) return rmSay('Drop it on a shelf!');
+    if (row !== b.c) return rmSay(`That is the ${SHELFC[row][1]} shelf. This book is ${SHELFC[b.c][1]}!`);
+    b.placed = true; b.slot = st.slots[row]++; sfx('pop'); sceneRedraw('sortScene', sortScene);
+    if (st.books.every(q => q.placed)){ st.reset = true; rmSay('All sorted! The library is tidy. Thank you!'); sfx('win'); playReward(1, 'Sorted books at the Library'); } else rmSay(pick(['Great sorting!', 'Perfect spot!', 'Yes! Keep going!'])); }
+};
+A.sortAgain = () => { sortNew(); reBody(sortHTML()); };
+ROOMS.library.tabs.push(['sort', 'Sort books', sortHTML]);
 
 injectDefs();
 injectDefs2();
