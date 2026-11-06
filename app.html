@@ -1919,7 +1919,7 @@ function questCard(t){
 }
 function robotsCard(kid){
   const lt = learnedToday(kid), n = Object.keys(lt).length;
-  return `<div class="sec-h"><h2>Robot teachers</h2><small>${n} of 7 today</small></div>
+  return `<div class="sec-h"><h2>Teachers</h2><small>${n} of 7 today</small></div>
   <div class="robo-strip">${Object.entries(ROBOTS).map(([id, r]) => `<button class="robo ${lt[id] ? 'done' : ''}" data-act="goRobot" data-v="${id}"><span class="rb">${robotBox(id, { happy: !!lt[id] })}</span><b>${r.name}</b><small>${r.topic}</small><span class="pill ${lt[id] ? 'ok' : 'wait'}">${lt[id] ? 'Learned' : '+3 coins'}</span></button>`).join('')}</div>`;
 }
 const STR_ICON = `<svg viewBox="0 0 20 20"><path d="M11,1 L3,11 h6 l-1,8 l8,-10 h-6z" fill="#FFC63A" stroke="#E39A00" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
@@ -1934,7 +1934,7 @@ function vExplore(){
   <div class="chips">${PLACES.map(([n], k) => `<button class="chip" data-act="travel" data-v="${k}">${esc(n)}</button>`).join('')}</div>
   <div class="flabel">Go inside</div>
   <div class="chips">${activeEvent() ? `<button class="chip" data-act="openEvent">★ ${EVENTS[activeEvent().id].short} tent</button>` : ''}${kid.world.filter(o => ROOMS[o.t]).map(o => `<button class="chip" data-act="walkIn" data-id="${o.id}">${esc(NAMES[o.t])}</button>`).join('')}</div>
-  <div class="flabel">Find a robot</div>
+  <div class="flabel">Find a teacher</div>
   <div class="chips">${Object.entries(ROBOTS).map(([id, r]) => `<button class="chip" data-act="goRobot" data-v="${id}">${lt[id] ? '✓ ' : ''}${r.name} · ${r.topic}</button>`).join('')}</div>`;
 }
 
@@ -1944,7 +1944,8 @@ function vBuild(){
   kid.inv.forEach(o => (groups[o.t] = groups[o.t] || []).push(o));
   const sel = ui.buildSel;
   return `<div class="sec-h"><h2>Build mode</h2><small>${kid.inv.length} in your bag</small></div>
-  <p class="note-s" style="margin-top:-8px">${sel ? `Tap a glowing square to place your ${esc(NAMES[sel])}. Drag to find more space.` : 'Pick something from your bag, then tap an empty grass square. Tap your own building to put it back.'}</p>
+  <p class="note-s" style="margin-top:-8px">${sel ? `Tap a glowing square to place your ${esc(NAMES[sel])}. Drag to find more space.` : ui.buildRemove ? 'Tap one of your buildings to put it back in your bag.' : 'You can walk around and go inside like always. To build, pick something from your bag below.'}</p>
+  <div class="chips">${sel ? `<button class="chip" data-act="pickInv" data-t="${sel}" aria-pressed="true">✕ Stop placing</button>` : ''}<button class="chip" data-act="buildRemove" aria-pressed="${!!ui.buildRemove}">✋ Put things away</button></div>
   ${worldBlock(kid, { build: 1, armed: !!sel, tall: 1 })}
   <div class="flabel">Your bag</div>
   ${kid.inv.length ? `<div class="tray">${Object.entries(groups).map(([t, arr]) => `<button data-act="pickInv" data-t="${t}" aria-pressed="${sel === t}"><div class="thumb">${thumbBox(t)}</div>${esc(NAMES[t])}${arr.length > 1 ? ' ×' + arr.length : ''}</button>`).join('')}</div>`
@@ -2405,7 +2406,7 @@ const sim = {
 function worldTap(e){
   const svg = sim.svg, m = svg.getScreenCTM(); if (!m) return;
   const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
-  const kid = K(), build = svg.classList.contains('building');
+  const kid = K(), build = buildArmed(svg);
   if (!build) for (const [id, r] of Object.entries(ROBOTS)){ const [rx, ry] = P(...r.tile); if (Math.abs(p.x - rx) < 22 && p.y > ry - 64 && p.y < ry + 10){ const cur = [Math.round(sim.fi), Math.round(sim.fj)]; if (Math.abs(cur[0] - r.tile[0]) + Math.abs(cur[1] - r.tile[1]) <= 1) openRobot(id); else { sim.goTo(r.tile, id); travelHud(`Walking to ${r.name}…`); } return; } }
   const a = (p.x - OX) / (TW / 2), b = (p.y - OY) / (TH / 2), i = Math.round((a + b) / 2), j = Math.round((b - a) / 2);
   const t = TER(i, j); if (!t) return;
@@ -3865,7 +3866,7 @@ function evHuntCheck(cur){ if (!activeEvent() || !isKid()) return; const h = evH
 const _worldTapBase = worldTap;
 worldTap = function(e){
   const svg = sim.svg, m = svg && svg.getScreenCTM(), ev = activeEvent();
-  if (m && ev && !svg.classList.contains('building')){
+  if (m && ev && !buildArmed(svg)){
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse()), kid = K(), cur = [Math.round(sim.fi), Math.round(sim.fj)];
     for (const h of evHunt(kid)) if (!h.got){ const [x, y] = P(h.i, h.j); if (Math.abs(p.x - x) < 20 && p.y > y - 38 && p.y < y + 10){ if (cur[0] === h.i && cur[1] === h.j) huntCollect(h); else if (sim.goTo([h.i, h.j])) travelHud(`Going to the ${EVENTS[ev.id].huntOne}…`); return; } }
     const tp = tentTile(kid);
@@ -5339,7 +5340,7 @@ sim.tick = function(ts){
 const _worldTapNPC = worldTap;
 worldTap = function(e){
   const svg = sim.svg, m = svg && svg.getScreenCTM();
-  if (m && sim.npcs && !svg.classList.contains('building')){
+  if (m && sim.npcs && !buildArmed(svg)){
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
     const n = sim.npcs.find(n => { const [x, y] = P(n.fi, n.fj); return Math.abs(p.x - x) < 18 && p.y > y - 34 && p.y < y + 8; });
     if (n){ n.line = pick(NPC_LINES); n.sayUntil = performance.now() + 3200; sfx('pop'); if (RA()) say(`${BUDDIES[n.t].name} says: ${n.line}`); const f = svg.querySelector('#fxLayer'); if (f){ const [x, y] = P(n.fi, n.fj); f.innerHTML = [0, 1, 2].map(k => `<path class="rise ${['', 'd2', 'd3'][k]}" d="M${x - 8 + k * 8},${y - 26} c-4,-3 -4,-7 -1,-7 c1,0 1,1 1,1.5 c0,-.5 0,-1.5 1,-1.5 c3,0 3,4 -1,7z" fill="#FF5A8C"/>`).join(''); setTimeout(() => { if (f.isConnected) f.innerHTML = ''; }, 2200); } return; }
@@ -5609,6 +5610,40 @@ function voiceCatalog(){
   for (let i = 0; i <= 200; i++) add(String(i));
   return [...out];
 }
+
+
+// ---------- v10: build mode never blocks walking; teachers are little people ----------
+function buildArmed(svg){ return !!(svg && svg.classList.contains('building') && (ui.buildSel || ui.buildRemove)); }
+A.buildRemove = () => { ui.buildRemove = !ui.buildRemove; ui.buildSel = null; render(); };
+const _pickInvB = A.pickInv; A.pickInv = function(el, e){ ui.buildRemove = false; _pickInvB(el, e); };
+const _tabB = A.tab; A.tab = function(el, e){ ui.buildRemove = false; _tabB(el, e); };
+const _tileAtB = A.tileAt;
+A.tileAt = function(i, j){
+  const ob = K().world.find(o => o.i === i && o.j === j);
+  if (ob && !ui.buildRemove) return toast('That spot is taken! Pick an empty glowing square.');
+  if (!ob && ui.buildRemove) return toast('Tap one of your buildings to put it away.');
+  return _tileAtB(i, j);
+};
+const _storeB = A.storeObj; A.storeObj = function(el, e){ ui.buildRemove = false; _storeB(el, e); };
+const TEACH = {
+  bolt: { skin: '#E3A77F', hair: '#2B1B14', hairStyle: 'spiky', shirt: '#FFC63A', pants: '#3D3352', acc: 'glasses', top: 'jersey', shoes: 'sneakers', shoeCol: '#34B2F0' },
+  lexi: { skin: '#FBDCC4', hair: '#9A5B2E', hairStyle: 'long', shirt: '#B58CFF', pants: '#5A4BB8', acc: 'flower', top: 'sweater', shoes: 'boots', shoeCol: '#7B5CFA' },
+  kindy: { skin: '#C68458', hair: '#2B1B14', hairStyle: 'puffs', shirt: '#FF7FA8', pants: '#4F6BD8', acc: 'bow', top: 'dress', shoes: 'sandals' },
+  penny: { skin: '#F6C9A8', hair: '#E3B55A', hairStyle: 'bob', shirt: '#FF9F3D', pants: '#2E6FD8', acc: 'cap', top: 'overalls', shoes: 'sneakers', shoeCol: '#FFC63A' },
+  sprout: { skin: '#9A5E3A', hair: '#2B1B14', hairStyle: 'curly', shirt: '#5CCB6E', pants: '#8A5634', acc: 'sunhat', top: 'overalls', shoes: 'rainboots', shoeCol: '#FFD84A' },
+  cosmo: { skin: '#E3A77F', hair: '#5B3A29', hairStyle: 'bob', shirt: '#5A6FD8', pants: '#3D3352', acc: 'helmet', top: 'tee', shoes: 'boots', shoeCol: '#E6ECF7' },
+  wave: { skin: '#FBDCC4', hair: '#E8604C', hairStyle: 'spiky', shirt: '#3EC7E8', pants: '#2E6FD8', acc: 'bucket', top: 'stripes', shoes: 'sandals' }
+};
+function robotSVG(id, o = {}){ const L = TEACH[id] || TEACH.bolt; return `<g transform="scale(.8)">${charSVG(L, { mood: o.happy ? 'cheer' : 'happy', work: o.wave ? 'school' : '' })}</g>`; }
+const _robotBoxT = robotBox;
+
+
+// A world tap can open a popup or room right under the finger; swallow the phone's follow-up click so it
+// doesn't instantly close that popup or press something inside the room.
+let tapGuardUntil = 0;
+const _worldTapGuard = worldTap;
+worldTap = function(e){ tapGuardUntil = Date.now() + 500; return _worldTapGuard(e); };
+window.addEventListener('click', e => { if (Date.now() < tapGuardUntil && !(e.target.closest && e.target.closest('svg.world'))){ e.stopPropagation(); e.preventDefault(); } }, true);
 
 injectDefs();
 injectDefs2();
