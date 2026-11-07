@@ -1923,6 +1923,7 @@ function authView(){
     <p>Kids finish real chores, earn coins and grow their own little island, with buddies and robot teachers along the way. Grown-ups stay in charge.</p>
     <button class="btn big grape" data-act="screen" data-v="signup">Create a family account</button>
     ${known.length ? `<button class="btn big ghost" data-act="screen" data-v="login">Sign in</button>` : `<button class="btn ghost" data-act="screen" data-v="login">I already have an account</button>`}
+    ${known.length ? `<button class="btn ghost small" data-act="accounts">Manage or delete accounts on this device</button>` : ''}
     <button class="btn big sun" data-act="demo">Try the demo family</button>
     <p class="note-s">Accounts are created by a parent or guardian. Kids get a profile and an optional PIN, never an email.</p></div>`;
 }
@@ -6388,6 +6389,109 @@ soundControls = function(){
 A.gateToggle = function(){ S.settings.gateOn = !S.settings.gateOn; if (!S.settings.gateN) S.settings.gateN = 2; save(); render(); };
 A.gateN = function(el){ S.settings.gateN = +el.dataset.v; save(); render(); };
 A.playMin = function(el){ S.settings.playMin = +el.dataset.v; save(); render(); };
+
+// =====================================================================
+//  v14 — accounts that stay saved inside the Claude app, and deleting accounts
+// =====================================================================
+
+// ---------- 1. PRIVATE BACKUP IN THE VIEWER'S CLAUDE ACCOUNT ----------
+// On an iPad the browser can throw away what a page inside the Claude app saves.
+// When the app runs inside Claude, the whole device's data is also kept in a private
+// per-person store (only that signed-in person can read it) and brought back on the next visit.
+const CBK = { col: null, n: 0, timer: 0, last: '', busy: false, again: false };
+const CHUNK = 60000;
+const _saveBK = save;
+save = function(){ DB.savedAt = Date.now(); _saveBK(); backupSoon(); };
+function backupSoon(){ if (!CBK.col) return; clearTimeout(CBK.timer); CBK.timer = setTimeout(backupNow, 2500); }
+async function backupNow(){
+  if (!CBK.col) return; if (CBK.busy){ CBK.again = true; return; }
+  const json = JSON.stringify(DB); if (json === CBK.last) return;
+  CBK.busy = true;
+  try {
+    const parts = []; for (let i = 0; i < json.length; i += CHUNK) parts.push(json.slice(i, i + CHUNK));
+    for (let i = 0; i < parts.length; i++) await CBK.col.doc('cb_' + i).set({ p: parts[i] });
+    await CBK.col.doc('cb_meta').set({ n: parts.length, ts: DB.savedAt || Date.now(), v: 1 });
+    for (let i = parts.length; i < CBK.n; i++) await CBK.col.doc('cb_' + i).delete().catch(() => {});
+    CBK.n = parts.length; CBK.last = json;
+  } catch (e) { /* offline or not allowed: the device copy still works */ }
+  CBK.busy = false; if (CBK.again){ CBK.again = false; backupSoon(); }
+}
+async function backupWipe(){
+  if (!CBK.col) return; clearTimeout(CBK.timer);
+  try { const m = await CBK.col.doc('cb_meta').get(); const n = m.exists ? (m.data().n || 0) : CBK.n; await CBK.col.doc('cb_meta').delete(); for (let i = 0; i < n; i++) await CBK.col.doc('cb_' + i).delete().catch(() => {}); } catch (e) {}
+  CBK.n = 0; CBK.last = '';
+}
+(async () => {
+  try {
+    if (!(window.claude && typeof window.claude.use === 'function')) return;
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    if (!db || !user) return; const uid = await user.id(); if (!uid) return;
+    const col = db.collection('data/users/' + uid);
+    const meta = await col.doc('cb_meta').get();
+    if (meta.exists){
+      const m = meta.data(), n = m.n || 0; CBK.n = n;
+      const localReal = Object.values(DB.accounts || {}).some(a => !a.demo);
+      if (n && (!localReal || (m.ts || 0) > (DB.savedAt || 0))){
+        const snaps = await Promise.all([...Array(n)].map((_, i) => col.doc('cb_' + i).get()));
+        if (snaps.every(s => s.exists)){
+          const json = snaps.map(s => s.data().p).join('');
+          const got = JSON.parse(json);
+          if (got && got.accounts){
+            DB = got; S = DB.current && DB.accounts[DB.current] ? DB.accounts[DB.current].fam : null;
+            CBK.last = json; try { localStorage.setItem(DBKEY, json); } catch (e) {}
+            if (S){ newDay(); ui.screen = 'app'; } else ui.screen = 'welcome';
+            sim.kid = null; closeSheet(); render();
+            if (Object.values(DB.accounts).some(a => !a.demo)) toast('Welcome back! Your family was saved.', { title: 'Saved', ms: 2600 });
+          }
+        }
+      }
+    }
+    CBK.col = col; backupSoon();
+  } catch (e) { CBK.col = null; }
+})();
+
+// ---------- 2. DELETE ACCOUNTS ----------
+function confirmWipeSheet(o){
+  return `<div class="grab"></div><h3>${esc(o.title)}</h3><p class="sub">${o.sub}</p>
+  <div class="field"><label for="wipeTxt">Type <b>DELETE</b> to confirm</label><input class="text" id="wipeTxt" autocomplete="off" autocapitalize="characters" placeholder="DELETE"></div>
+  <div class="buyask-btns"><button class="buyno" data-act="${o.act}" data-v="${esc(o.v || '')}">🗑<span>Delete</span></button><button class="buyyes" data-act="closeSheet">↩<span>Keep it</span></button></div>`;
+}
+const wipeOK = () => (($('#wipeTxt') || {}).value || '').trim().toUpperCase() === 'DELETE';
+function accountsSheet(){
+  const list = Object.entries(DB.accounts).filter(([e, a]) => !a.demo);
+  return `<div class="grab"></div><h3>Accounts on this device</h3><p class="sub">Deleting removes the family, kids, coins and worlds from this device${CBK.col ? ' and from its Claude backup' : ''}. It can’t be undone.</p>
+  <div class="tlist">${list.map(([e, a]) => `<div class="trow"><div style="flex:1;min-width:0"><h4>${esc((a.fam && a.fam.parentName) || 'Family')}</h4><small class="note-s">${esc(e)}${a.cloud ? ' · cloud account' : ''}</small></div><button class="btn small red" data-act="wipeAsk" data-v="${esc(e)}">Delete</button></div>`).join('') || '<p class="note-s">No accounts saved here.</p>'}</div>
+  ${list.length > 1 ? `<button class="btn red" data-act="wipeAllAsk">Delete all ${list.length} accounts</button>` : ''}
+  <button class="btn ghost" data-act="closeSheet">Close</button>`;
+}
+Object.assign(A, {
+  accounts(){ openSheet(accountsSheet()); },
+  wipeAsk(el){ const e = el.dataset.v; openSheet(confirmWipeSheet({ title: 'Delete this account?', sub: `<b>${esc(e)}</b> and everything in it will be erased from this device.`, act: 'wipeOne', v: e })); },
+  wipeAllAsk(){ openSheet(confirmWipeSheet({ title: 'Delete all accounts?', sub: 'Every family on this device will be erased, with all kids, coins and worlds.', act: 'wipeAll' })); },
+  wipeMine(){ openSheet(confirmWipeSheet({ title: 'Delete this account?', sub: `This erases <b>${esc(DB.current || '')}</b>, its kids, coins and worlds from this device.${DB.accounts[DB.current] && DB.accounts[DB.current].cloud ? ' The cloud login itself stays in your Supabase project; remove it there under Authentication → Users.' : ''}`, act: 'wipeOne', v: DB.current })); },
+  wipeOne(el){ if (!wipeOK()) return toast('Type DELETE first.'); wipeAccount(el.dataset.v); },
+  wipeAll(){ if (!wipeOK()) return toast('Type DELETE first.'); Object.keys(DB.accounts).forEach(e => { if (!DB.accounts[e].demo) delete DB.accounts[e]; }); signOutAll(); toast('All accounts deleted.', { title: 'Done' }); }
+});
+function wipeAccount(email){
+  if (!email || !DB.accounts[email]) return closeSheet();
+  if (DB.accounts[email].cloud && typeof CL !== 'undefined' && CL.client){ try { CL.client.auth.signOut(); } catch (e) {} CL.famId = null; CL.user = null; }
+  delete DB.accounts[email];
+  if (DB.current === email){ signOutAll(); } else { save(); openSheet(accountsSheet()); }
+  toast('Account deleted.', { title: 'Done' });
+}
+function signOutAll(){
+  DB.current = null; DB.session = null; S = null; sim.kid = null; ui.screen = 'welcome';
+  if (ui.room) roomClose(); if (ui.worldFull) setFull(false);
+  closeSheet(); save();
+  if (!Object.values(DB.accounts).some(a => !a.demo)) backupWipe().then(() => { if (CBK.col) backupSoon(); });
+  render();
+}
+// a link on the welcome screen, and a card in Controls
+const _soundCtlAcc = soundControls;
+soundControls = function(){
+  const acc = DB.accounts[DB.current];
+  return _soundCtlAcc() + (acc && !acc.demo ? `<div class="card"><div class="setrow"><div><b>Delete this account</b><small>Erase ${esc(DB.current)} and its kids, coins and worlds. This can’t be undone.</small></div><button class="btn small red" data-act="wipeMine">Delete</button></div></div>` : '');
+};
 
 injectDefs();
 injectDefs2();
