@@ -843,6 +843,34 @@ body.worldfull nav#tabs{visibility:hidden}
 .gate-t{display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:6px 12px;box-shadow:inset 0 0 0 1.5px var(--line);text-align:left}
 .gate-t svg{width:34px;height:34px;flex:none}
 .playleft{display:block;font-size:11.5px;font-weight:800;color:#7B5CFA}
+/* ---------- v15: iPad and big screens ---------- */
+.world-wrap.full{max-width:none;height:auto!important;aspect-ratio:auto!important}
+@media (min-width:700px){
+  #app,#room,#chore,.sheet{max-width:900px}
+  body{font-size:16.5px}
+  nav#tabs button{font-size:13px}
+  nav#tabs button svg{width:32px;height:32px}
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .who-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .world-wrap:not(.full):not(.tall){aspect-ratio:auto;height:min(64vh,720px)}
+  .world-wrap.tall:not(.full){height:max(460px,calc(100dvh - 300px))}
+  .rm-body > *{width:100%;max-width:min(100%,calc(54vh * 4 / 3));margin-inline:auto}
+  .tray2 .tool{width:88px}
+  .tray2 .tool svg{width:58px;height:58px}
+  .buyask-card{max-width:420px}
+  .world-wrap.full .wfull-x{width:56px;height:56px;font-size:24px}
+  .world-wrap.full .wctl button{transform:scale(1.15)}
+  .world-wrap.full .wfull-bar .chip{font-size:15px;padding:9px 14px}
+}
+@media (min-width:1000px){
+  .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* drag games: the scene stays pinned at the top while the tool trays scroll under it, so every tool can reach it */
+.rm-body > .rm-scene.interactive{position:sticky;top:0;z-index:3}
+@media (orientation:landscape) and (min-width:700px){ .rm-body > *{max-width:min(100%,calc(50vh * 4 / 3))} }
+/* no accidental text highlighting while little fingers drag and tap */
+#app,#room,#chore,.sheet,.world-wrap,.buyask{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -6493,6 +6521,20 @@ const _soundCtlAcc = soundControls;
 soundControls = function(){
   const acc = DB.accounts[DB.current];
   return _soundCtlAcc() + (acc && !acc.demo ? `<div class="card"><div class="setrow"><div><b>Delete this account</b><small>Erase ${esc(DB.current)} and its kids, coins and worlds. This can’t be undone.</small></div><button class="btn small red" data-act="wipeMine">Delete</button></div></div>` : '');
+};
+
+// ---------- v15: iPad and big screens ----------
+// Keep the world sharp and the right shape when the iPad turns or the window changes size.
+let rzT = 0;
+const onResize = () => { clearTimeout(rzT); rzT = setTimeout(() => { try { applyCam(); } catch (e) {} }, 120); };
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(onResize, 300));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
+// Full screen on a big screen: zoom in so the characters are a comfy size, not tiny.
+const _setFullT = setFull;
+setFull = function(on){
+  const was = ui.worldFull; _setFullT(on);
+  if (on && !was){ const vw = window.innerWidth; if (vw >= 700){ cam.w = clamp(Math.round(vw * .62), 520, 900); requestAnimationFrame(applyCam); } }
 };
 
 injectDefs();
