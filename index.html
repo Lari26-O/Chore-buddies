@@ -871,6 +871,22 @@ body.worldfull nav#tabs{visibility:hidden}
 /* no accidental text highlighting while little fingers drag and tap */
 #app,#room,#chore,.sheet,.world-wrap,.buyask{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
+.rm-tabs{overflow-x:auto;scrollbar-width:none}
+.rm-tabs::-webkit-scrollbar{display:none}
+.rm-tabs button{flex:1 0 auto;white-space:nowrap;padding-inline:12px}
+.arc-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.72);backdrop-filter:blur(2px);text-align:center;padding:12px;animation:popIn .25s ease-out}
+.arc-card b{font-family:var(--display);font-size:26px;line-height:1.1;color:var(--ink)}
+.arc-card small{font-size:14px;font-weight:800;color:var(--ink-2)}
+.arc-card .btn{min-width:170px;margin-top:4px}
+.arc-best{font-size:13px;font-weight:900;color:#7B5CFA;background:#F3EEFF;border-radius:999px;padding:3px 12px}
+.arc-new{font-family:var(--display);font-size:18px;font-weight:900;color:#fff;background:linear-gradient(90deg,#FF5A8C,#FFC63A);border-radius:999px;padding:4px 14px;animation:stepPulse .9s ease-in-out infinite}
+#arcSvg.shake{animation:arcShake .3s}
+@keyframes arcShake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tracepick{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.tracepick::-webkit-scrollbar{display:none}
+.tracepick button{flex:none;min-width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--display);font-weight:900;font-size:19px;color:var(--ink)}
+.tracepick button.done{background:#DDF6E4;color:#1E7A3E;box-shadow:none}
+.tracepick button[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:none}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -4295,7 +4311,7 @@ const GAMES = {
   catch: { name: 'Catch game', cfg: n => ({ goal: 8 + n * 3, speed: n * .28, bad: .1 + n * .016 }), goal: c => `Catch ${c.goal} in 30 seconds` }
 };
 function glv(game){ const kid = K(); kid.glv = kid.glv || {}; return kid.glv[game] || (kid.glv[game] = { at: 1, cur: 1, stars: {} }); }
-const gcfg = game => GAMES[game].cfg(glv(game).cur);
+const gcfg = game => GAMES[game].cfg(glv(game).cur + (typeof ageBoost === 'function' ? ageBoost() : 0));
 function levelBar(game){
   const g = glv(game), c = gcfg(game);
   return `<div class="lvbar"><div class="lv-head"><b>Level ${g.cur}</b><span>${GAMES[game].goal(c)}</span></div><div class="lv-dots">${[...Array(MAXL)].map((_, k) => { const n = k + 1, st = g.stars[n] || 0, open = n <= g.at; return `<button class="lvd ${n === g.cur ? 'cur' : ''} ${open ? '' : 'lock'}" data-act="lvPick" data-g="${game}" data-v="${n}" ${open ? '' : 'disabled'} aria-label="Level ${n}${open ? '' : ' locked'}">${open ? n : '<svg viewBox="0 0 12 12" width="10"><rect x="2" y="5" width="8" height="6" rx="1.5" fill="currentColor"/><path d="M4,5 v-1.6 a2,2 0 0 1 4,0 v1.6" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>'}<i>${'★'.repeat(st)}</i></button>`; }).join('')}</div></div>`;
@@ -6536,6 +6552,485 @@ setFull = function(on){
   const was = ui.worldFull; _setFullT(on);
   if (on && !was){ const vw = window.innerWidth; if (vw >= 700){ cam.w = clamp(Math.round(vw * .62), 520, 900); requestAnimationFrame(applyCam); } }
 };
+
+// =====================================================================
+//  v16 — harder games for older kids, every letter and number to trace,
+//        and three games in every place (normal, exciting, super fun)
+// =====================================================================
+const AGE_D = () => { const a = (K() && K().age) || 6; return a <= 5 ? 0 : a <= 7 ? 1 : a <= 9 ? 2 : 3; };
+const AGE_TXT = ['ages 4–5', 'ages 6–7', 'ages 8–9', 'ages 10+'];
+
+// ---------- 1. TRACE: the whole alphabet, lowercase for bigger kids, numbers up to 30 ----------
+const GLY = {
+  A: 'M20,110 L50,10 L80,110 M32,72 L68,72', B: 'M26,110 V10 H54 Q80,10 80,34 Q80,58 54,58 H26 M54,58 Q86,58 86,84 Q86,110 54,110 H26',
+  C: 'M82,28 Q66,8 48,10 Q14,14 14,60 Q14,106 48,110 Q66,112 82,94', D: 'M26,10 V110 H50 Q86,110 86,60 Q86,10 50,10 H26',
+  E: 'M78,10 H24 V110 H78 M24,60 H70', F: 'M78,10 H24 V110 M24,58 H68', G: 'M82,28 Q66,8 48,10 Q14,14 14,60 Q14,106 48,110 Q80,110 84,80 V62 H56',
+  H: 'M22,10 V110 M78,10 V110 M22,60 H78', I: 'M50,10 V110 M30,10 H70 M30,110 H70', J: 'M70,10 V84 Q70,110 46,110 Q26,110 22,90',
+  K: 'M24,10 V110 M78,10 L24,66 M42,48 L80,110', L: 'M30,10 V110 H80', M: 'M16,110 V10 L50,70 L84,10 V110', N: 'M22,110 V10 L78,110 V10',
+  O: 'M50,10 Q14,10 14,60 Q14,110 50,110 Q86,110 86,60 Q86,10 50,10', P: 'M26,110 V10 H56 Q82,10 82,36 Q82,62 56,62 H26',
+  Q: 'M50,10 Q14,10 14,60 Q14,110 50,110 Q86,110 86,60 Q86,10 50,10 M60,88 L86,116', R: 'M26,110 V10 H56 Q82,10 82,36 Q82,62 56,62 H26 M50,62 L82,110',
+  S: 'M78,24 Q60,6 40,12 Q18,20 25,42 Q32,58 55,62 Q82,68 78,92 Q72,114 45,110 Q28,108 18,95', T: 'M14,14 H86 M50,14 V110',
+  U: 'M22,10 V78 Q22,110 50,110 Q78,110 78,78 V10', V: 'M18,10 L50,110 L82,10', W: 'M10,10 L30,110 L50,40 L70,110 L90,10',
+  X: 'M20,10 L80,110 M80,10 L20,110', Y: 'M18,10 L50,60 L82,10 M50,60 V110', Z: 'M20,10 H80 L20,110 H80',
+  a: 'M74,70 Q66,60 50,60 Q24,60 24,85 Q24,110 50,110 Q74,110 74,85 M74,60 V110', b: 'M26,10 V110 M26,85 Q26,60 52,60 Q78,60 78,85 Q78,110 52,110 Q26,110 26,85',
+  c: 'M76,68 Q66,60 52,60 Q24,60 24,85 Q24,110 52,110 Q66,110 76,102', d: 'M74,10 V110 M74,85 Q74,60 48,60 Q22,60 22,85 Q22,110 48,110 Q74,110 74,85',
+  e: 'M24,86 H76 Q76,60 50,60 Q24,60 24,86 Q24,110 52,110 Q66,110 76,102', f: 'M70,16 Q62,8 54,10 Q40,12 40,30 V110 M24,62 H62',
+  g: 'M74,85 Q74,60 50,60 Q24,60 24,84 Q24,108 50,108 Q74,108 74,85 M74,60 V122 Q74,142 50,142 Q34,142 26,132', h: 'M26,10 V110 M26,82 Q30,60 52,60 Q76,60 76,82 V110',
+  i: 'M50,60 V110 M50,36 V42', j: 'M58,60 V124 Q58,142 40,142 Q28,142 22,134 M58,36 V42', k: 'M28,10 V110 M74,60 L28,92 M44,82 L76,110', l: 'M50,10 V110',
+  m: 'M16,110 V60 M16,78 Q18,60 34,60 Q50,60 50,78 V110 M50,78 Q52,60 68,60 Q84,60 84,78 V110', n: 'M26,110 V60 M26,80 Q30,60 52,60 Q76,60 76,82 V110',
+  o: 'M50,60 Q22,60 22,85 Q22,110 50,110 Q78,110 78,85 Q78,60 50,60', p: 'M26,60 V142 M26,85 Q26,60 52,60 Q78,60 78,85 Q78,110 52,110 Q26,110 26,85',
+  q: 'M74,60 V142 M74,85 Q74,60 48,60 Q22,60 22,85 Q22,110 48,110 Q74,110 74,85', r: 'M30,110 V60 M30,82 Q36,60 60,60 Q70,60 76,66',
+  s: 'M74,66 Q64,58 48,60 Q28,62 30,76 Q32,86 50,86 Q72,88 72,98 Q72,112 48,110 Q32,110 24,102', t: 'M44,20 V100 Q44,112 58,110 Q66,110 72,104 M26,58 H66',
+  u: 'M26,60 V88 Q26,110 50,110 Q74,110 74,88 M74,60 V110', v: 'M24,60 L50,110 L76,60', w: 'M14,60 L32,110 L50,70 L68,110 L86,60',
+  x: 'M26,60 L74,110 M74,60 L26,110', y: 'M24,60 L50,110 M76,60 L40,142', z: 'M26,60 H74 L26,110 H74',
+  0: 'M50,10 Q18,10 18,60 Q18,110 50,110 Q82,110 82,60 Q82,10 50,10', 1: 'M34,30 L54,10 V110', 2: 'M20,36 Q22,10 50,10 Q80,12 78,38 Q75,60 20,110 H82',
+  3: 'M20,22 Q50,0 74,20 Q86,44 50,58 Q88,66 78,96 Q56,122 20,100', 4: 'M62,110 V10 L16,78 H84', 5: 'M76,12 H30 L26,54 Q58,42 74,64 Q84,90 62,106 Q40,116 22,100',
+  6: 'M74,18 Q60,8 46,12 Q16,22 18,70 Q20,110 50,110 Q80,110 80,82 Q80,56 50,56 Q26,56 19,76', 7: 'M18,10 H82 L40,110',
+  8: 'M50,58 Q22,54 22,34 Q22,10 50,10 Q78,10 78,34 Q78,54 50,58 Q18,62 18,86 Q18,110 50,110 Q82,110 82,86 Q82,62 50,58',
+  9: 'M80,36 Q80,62 50,62 Q20,62 20,36 Q20,10 50,10 Q80,10 80,36 Q80,90 60,106 Q44,114 28,104'
+};
+// move/scale an absolute path made of M L H V Q Z
+function pathXf(d, s, dx, dy){
+  const tk = d.match(/[MLHVQZ]|-?\d+(?:\.\d+)?/g) || []; let out = [], cmd = '', ax = true;
+  for (const t of tk){
+    if (/[A-Z]/.test(t)){ cmd = t; out.push(t); ax = true; continue; }
+    const v = +t;
+    if (cmd === 'H'){ out.push(f1(v * s + dx)); continue; }
+    if (cmd === 'V'){ out.push(f1(v * s + dy)); continue; }
+    out.push(f1(ax ? v * s + dx : v * s + dy)); ax = !ax;
+  }
+  return out.join(' ').replace(/ (-?[\d.]+) (-?[\d.]+)/g, ' $1,$2');
+}
+// glyph for a letter or a whole number: path in a box, plus how to place it on the board
+function traceGlyph(ch){
+  const lower = /^[a-z]$/.test(ch);
+  if (/^\d+$/.test(ch) && ch.length > 1){
+    const ds = ch.split(''), sc = .72, step = 74;
+    const d = ds.map((c, k) => pathXf(GLY[c], sc, k * step, 0)).join(' ');
+    const w = (ds.length - 1) * step + 100 * sc, h = 120 * sc, S = Math.min(1.4, 250 / w);
+    return { d, sc: S, tx: (360 - w * S) / 2, ty: 26 + (216 - h * S) / 2 + 4 };
+  }
+  return { d: GLY[ch], sc: lower ? 1.3 : 1.4, tx: lower ? 115 : 110, ty: lower ? 16 : 60 };
+}
+const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), abc = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const nums = n => [...Array(n)].map((_, k) => String(k + 1));
+function traceSet(){
+  const d = AGE_D();
+  return d === 0 ? { name: 'Big letters A–Z and numbers 1–10', list: [...ABC, ...nums(10)] }
+    : d === 1 ? { name: 'A–Z, a–z and numbers 1–20', list: [...ABC, ...abc, ...nums(20)] }
+    : { name: 'a–z, A–Z and numbers 1–30', list: [...abc, ...ABC, ...nums(30)] };
+}
+function traceScene(){
+  const t = G.trace, g = t.g, ok = t.done;
+  let s = `<rect width="360" height="270" fill="#CDEBFF"/><rect width="360" height="270" fill="url(#wp-dots)"/>${rr(36, 16, 288, 236, 12, '#B07A4C')}${rr(46, 26, 268, 216, 6, '#2F5D50')}`;
+  if (/^[a-z]$/.test(t.ch)) s += `<path d="M58,${f1(g.ty + 60 * g.sc)} H302 M58,${f1(g.ty + 110 * g.sc)} H302" stroke="#fff" stroke-width="1" opacity=".25" stroke-dasharray="6 6"/>`;
+  s += `<g transform="translate(${f1(g.tx)},${f1(g.ty)}) scale(${g.sc})"><path id="tracePath" d="${g.d}" fill="none" stroke="${ok ? '#FFE36B' : '#fff'}" stroke-width="${ok ? 9 : 3}" stroke-linecap="round" stroke-linejoin="round" ${ok ? '' : 'stroke-dasharray="1 9" opacity=".8"'}/></g>`;
+  s += (t.pts || []).filter(p => p.hit).map(p => `<circle cx="${f1(p.x)}" cy="${f1(p.y)}" r="7" fill="#FFE36B" opacity=".9"/>`).join('');
+  const nxt = (t.pts || []).find(p => !p.hit); if (nxt && !ok) s += `<circle class="glowb" cx="${f1(nxt.x)}" cy="${f1(nxt.y)}" r="9" fill="none" stroke="#FF8FB8" stroke-width="3"/>`;
+  s += `<path d="${t.trail || ''}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".55"/>`;
+  s += grp(318, 250, .5, robotSVG('lexi', { happy: ok }));
+  if (ok) s += [0, 1, 2, 3, 4].map(k => `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(90 + k * 45, 46 + (k % 2) * 26, 7, 2.6, 4)}" fill="#FFE36B"/>`).join('');
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function traceHTML(){
+  const kid = K(), set = traceSet(); kid.traceI = kid.traceI || {}; const key = AGE_D();
+  if (!G.trace || G.trace.key !== key) G.trace = { key, wins: 0 };
+  const t = G.trace; t.list = set.list; t.i = ((kid.traceI[key] || 0) % t.list.length + t.list.length) % t.list.length;
+  t.ch = t.list[t.i]; t.g = traceGlyph(t.ch); t.done = false; t.pts = null; t.trail = '';
+  const done = kid.traced || {}, isNum = /^\d+$/.test(t.ch);
+  return `<div class="rm-scene interactive" id="traceScene">${traceScene()}</div>
+  ${sayBox(`Trace the ${isNum ? 'number' : /^[a-z]$/.test(t.ch) ? 'small letter' : 'letter'} <b>${t.ch}</b> with your finger. Follow the pink circle!`, robotBox('lexi', { happy: 1 }))}
+  <div class="actions"><button class="btn ghost" data-act="traceStep" data-v="-1">← Back</button><button class="btn sea" data-act="traceStep" data-v="1">Next →</button></div>
+  <div class="field"><span class="flabel">${esc(set.name)} · ${t.list.filter(c => done[c]).length} of ${t.list.length} traced</span><div class="tracepick">${t.list.map((c, k) => `<button data-act="tracePick" data-v="${k}" aria-pressed="${k === t.i}" class="${done[c] ? 'done' : ''}">${c}</button>`).join('')}</div></div>`;
+}
+function traceInit(){
+  const sc = $('#traceScene'); if (!sc) return; const t = G.trace, g = t.g;
+  const path = sc.querySelector('#tracePath'), L = path.getTotalLength(), N = Math.max(18, Math.round(L / 9));
+  t.pts = [...Array(N)].map((_, k) => { const q = path.getPointAtLength(k / (N - 1) * L); return { x: g.tx + q.x * g.sc, y: g.ty + q.y * g.sc, hit: false }; });
+  sceneRedraw('traceScene', traceScene);
+  const pk = document.querySelector('.tracepick [aria-pressed="true"]'); if (pk) pk.scrollIntoView({ block: 'nearest', inline: 'center' });
+  let down = false; const need = AGE_D() >= 2 ? .92 : .86;
+  const mv = e => { if (!down || t.done) return; const p = scenePt('#traceScene', e.clientX, e.clientY); if (!p) return; t.trail = (t.trail ? t.trail + ' L' : 'M') + f1(p.x) + ',' + f1(p.y); t.pts.forEach(q => { if (!q.hit && Math.hypot(q.x - p.x, q.y - p.y) < (AGE_D() ? 16 : 20)) q.hit = true; });
+    if (t.pts.filter(q => q.hit).length / t.pts.length >= need){ t.done = true; t.wins++; const kid = K(); kid.traced = kid.traced || {}; kid.traced[t.ch] = 1; kid.traceI[G.trace.key] = t.i + 1; save(); sfx('win'); rmSay(`You traced ${t.ch}! Amazing!`); addXP(kid, 3); if (t.wins % 3 === 0) playReward(1, 'Traced letters at Bright School'); G.after(() => { reBody(traceHTML()); traceInit(); }, 1500); }
+    sceneRedraw('traceScene', traceScene); };
+  sc.addEventListener('pointerdown', e => { down = true; e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} mv(e); });
+  sc.addEventListener('pointermove', mv); sc.addEventListener('pointerup', () => { down = false; }); sc.addEventListener('pointercancel', () => { down = false; });
+}
+A.traceStep = el => { const kid = K(), k = G.trace.key; kid.traceI[k] = (G.trace.i + +el.dataset.v + G.trace.list.length) % G.trace.list.length; save(); reBody(traceHTML()); traceInit(); };
+A.tracePick = el => { const kid = K(); kid.traceI[G.trace.key] = +el.dataset.v; save(); reBody(traceHTML()); traceInit(); };
+A.traceSkip = A.traceStep.bind(null, { dataset: { v: '1' } });
+
+// ---------- 2. ARCADE KIT: one engine, eight kinds of game, every one tuned by age ----------
+const SVGNS = 'http://www.w3.org/2000/svg';
+// little pictures for the games (centered on 0,0, about 30 wide)
+const SPR = {
+  meatball: `<circle r="12" fill="#9B4A2C"/><circle r="12" fill="url(#fsR)" opacity=".5"/><path d="M-9,-4 q4,-6 9,-3 q5,-4 9,2 q-2,6 -9,4 q-6,3 -9,-3z" fill="#E8414F"/><circle cx="-4" cy="-6" r="2.4" fill="#fff" opacity=".7"/>`,
+  noodle: `<ellipse rx="15" ry="8" fill="#FFE08A"/><path d="M-12,-1 q4,-6 8,0 q4,6 8,0 q4,-6 8,0" stroke="#F2C14E" stroke-width="2.4" fill="none"/><circle cx="4" cy="-4" r="3" fill="#E8414F"/>`,
+  chili: `<path d="M-12,4 Q-6,-10 8,-8 Q14,-6 10,0 Q2,10 -12,4z" fill="#E8414F"/><path d="M8,-8 q4,-6 8,-4" stroke="#3EC46B" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="-2" cy="-3" r="2" fill="#fff" opacity=".6"/>`,
+  slice: `<path d="M0,-14 L13,12 Q0,16 -13,12z" fill="#FFC857"/><path d="M-13,12 Q0,17 13,12 L11,8 Q0,12 -11,8z" fill="#D9963F"/><circle cx="0" cy="-2" r="3" fill="#E8414F"/><circle cx="-4" cy="6" r="2.6" fill="#E8414F"/><circle cx="5" cy="5" r="2.4" fill="#3EC46B"/>`,
+  cone: `<path d="M-11,12 L0,-14 L11,12z" fill="#FF8A3D"/><path d="M-7,3 H7 M-4,-5 H4" stroke="#fff" stroke-width="3"/><rect x="-14" y="11" width="28" height="4" rx="2" fill="#E06A1F"/>`,
+  donut: `<path d="M0,-14 a14,14 0 1 1 0,28 a14,14 0 1 1 0,-28z M0,-5 a5,5 0 1 0 0,10 a5,5 0 1 0 0,-10z" fill="#E8B070" fill-rule="evenodd"/><path d="M0,-12 a12,12 0 1 1 -.1,0z M0,-6 a6,6 0 1 0 .1,0z" fill="#FF8FB8" fill-rule="evenodd"/><path d="M-7,-6 l3,1 M5,-8 l2,3 M8,4 l-3,1 M-8,5 l2,-2 M2,9 l3,-1" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`,
+  donutg: `<path d="M0,-14 a14,14 0 1 1 0,28 a14,14 0 1 1 0,-28z M0,-5 a5,5 0 1 0 0,10 a5,5 0 1 0 0,-10z" fill="#FFD23F" fill-rule="evenodd"/><path d="M0,-12 a12,12 0 1 1 -.1,0z M0,-6 a6,6 0 1 0 .1,0z" fill="#FFE98A" fill-rule="evenodd"/><path d="M-12,-14 l3,4 M13,-12 l-2,4" stroke="#FFD23F" stroke-width="2.4" stroke-linecap="round"/>`,
+  broccoli: `<rect x="-3" y="0" width="6" height="13" rx="3" fill="#8BD17C"/><circle cx="-6" cy="-3" r="7" fill="#3E9E4F"/><circle cx="6" cy="-3" r="7" fill="#3E9E4F"/><circle cx="0" cy="-9" r="7" fill="#4CB860"/><circle cx="-3" cy="-1" r="1.4" fill="#2B2550"/><circle cx="3" cy="-1" r="1.4" fill="#2B2550"/><path d="M-3,3 q3,-2 6,0" stroke="#2B2550" stroke-width="1.4" fill="none"/>`,
+  candy: `<path d="M-16,-7 L-8,0 L-16,7z M16,-7 L8,0 L16,7z" fill="#FF8FB8"/><circle r="9" fill="#FF5A8C"/><path d="M-6,-6 q6,6 12,0 M-6,6 q6,-6 12,0" stroke="#fff" stroke-width="2" fill="none"/>`,
+  lolly: `<rect x="-1.5" y="2" width="3" height="16" rx="1.5" fill="#fff"/><circle cy="-6" r="11" fill="#5FE0C0"/><path d="M0,-6 m-7,0 a7,7 0 1 1 7,7 a4,4 0 1 1 -4,-4" stroke="#fff" stroke-width="2.4" fill="none"/>`,
+  gumdrop: `<path d="M-12,10 Q-12,-12 0,-12 Q12,-12 12,10z" fill="#B58CFF"/><circle cx="-4" cy="-4" r="2" fill="#fff" opacity=".8"/><circle cx="3" cy="2" r="1.4" fill="#fff" opacity=".8"/>`,
+  coal: `<path d="M-11,6 L-8,-8 L4,-11 L12,-2 L9,9 L-4,11z" fill="#4A4458"/><circle cx="-3" cy="-1" r="1.6" fill="#fff"/><circle cx="4" cy="-1" r="1.6" fill="#fff"/><path d="M-3,5 q3.5,-3 7,0" stroke="#fff" stroke-width="1.4" fill="none"/>`,
+  cane: `<path d="M-4,14 V-4 Q-4,-14 4,-14 Q12,-14 12,-6" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M-4,14 V-4 Q-4,-14 4,-14 Q12,-14 12,-6" stroke="#E8414F" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="4 4"/>`,
+  suitR: `<rect x="-13" y="-10" width="26" height="22" rx="5" fill="#E8604C"/><rect x="-5" y="-15" width="10" height="6" rx="2" fill="none" stroke="#7A3A30" stroke-width="2.4"/><rect x="-13" y="-1" width="26" height="3" fill="#7A3A30" opacity=".4"/>`,
+  suitB: `<rect x="-13" y="-10" width="26" height="22" rx="5" fill="#34B2F0"/><rect x="-5" y="-15" width="10" height="6" rx="2" fill="none" stroke="#1F5F80" stroke-width="2.4"/><rect x="-13" y="-1" width="26" height="3" fill="#1F5F80" opacity=".4"/>`,
+  suitY: `<rect x="-13" y="-10" width="26" height="22" rx="5" fill="#FFC63A"/><rect x="-5" y="-15" width="10" height="6" rx="2" fill="none" stroke="#8A6410" stroke-width="2.4"/><rect x="-13" y="-1" width="26" height="3" fill="#8A6410" opacity=".4"/>`,
+  block: `<rect x="-11" y="-11" width="22" height="22" rx="4" fill="#FF5A8C"/><text y="6" text-anchor="middle" font-size="16" font-weight="900" fill="#fff" font-family="Baloo 2,sans-serif">A</text>`,
+  teddy: `<circle cx="-8" cy="-9" r="5" fill="#C98A55"/><circle cx="8" cy="-9" r="5" fill="#C98A55"/><circle r="11" fill="#D9A06A"/><circle cx="-4" cy="-2" r="1.6" fill="#2B2550"/><circle cx="4" cy="-2" r="1.6" fill="#2B2550"/><ellipse cy="4" rx="4" ry="3" fill="#F2D1A8"/>`,
+  shirt: `<path d="M-14,-6 L-6,-12 Q0,-8 6,-12 L14,-6 L10,0 L7,-2 V12 H-7 V-2 L-10,0z" fill="#7B5CFA"/><circle cy="2" r="2.6" fill="#FFE36B"/>`,
+  sock: `<path d="M-5,-13 H5 V3 L12,8 Q14,14 6,14 L-5,8z" fill="#5FE0C0"/><rect x="-5" y="-13" width="10" height="4" fill="#fff"/>`,
+  plate: `<ellipse rx="14" ry="9" fill="#fff"/><ellipse rx="9" ry="5.6" fill="#E9F0FA"/><ellipse rx="14" ry="9" fill="none" stroke="#B9C8E2" stroke-width="1.5"/>`,
+  cup: `<path d="M-9,-10 H9 L7,10 H-7z" fill="#FFF"/><path d="M9,-5 q7,0 6,6 q-1,5 -7,4" stroke="#fff" stroke-width="3" fill="none"/><path d="M-9,-10 H9 L7,10 H-7z" fill="none" stroke="#B9C8E2" stroke-width="1.5"/>`,
+  scoopP: `<path d="M-13,2 Q-14,-14 0,-14 Q14,-14 13,2 Q8,6 4,2 Q0,7 -4,2 Q-8,6 -13,2z" fill="#FF8FB8"/><circle cx="-4" cy="-8" r="2.6" fill="#fff" opacity=".6"/>`,
+  scoopC: `<path d="M-13,2 Q-14,-14 0,-14 Q14,-14 13,2 Q8,6 4,2 Q0,7 -4,2 Q-8,6 -13,2z" fill="#8B5A3C"/><circle cx="-4" cy="-8" r="2.6" fill="#fff" opacity=".4"/>`,
+  scoopM: `<path d="M-13,2 Q-14,-14 0,-14 Q14,-14 13,2 Q8,6 4,2 Q0,7 -4,2 Q-8,6 -13,2z" fill="#9BE3C2"/><circle cx="-5" cy="-6" r="1.4" fill="#3B2A20"/><circle cx="4" cy="-9" r="1.4" fill="#3B2A20"/><circle cx="-4" cy="-8" r="2.6" fill="#fff" opacity=".6"/>`,
+  snowball: `<circle r="12" fill="#fff"/><circle r="12" fill="url(#fsR)" opacity=".35"/><circle cx="-4" cy="-4" r="3" fill="#E9F4FF"/>`,
+  fishy: `<ellipse rx="12" ry="7" fill="#FF8A3D"/><path d="M10,0 L18,-7 V7z" fill="#FF8A3D"/><circle cx="-5" cy="-2" r="1.8" fill="#2B2550"/>`,
+  gem: `<path d="M-10,-4 L-5,-11 H5 L10,-4 L0,12z" fill="#5FE0FF"/><path d="M-10,-4 H10 M-5,-11 L-2,-4 L0,12 L2,-4 L5,-11" stroke="#fff" stroke-width="1.2" fill="none" opacity=".8"/>`,
+  purse: `<path d="M-12,-2 H12 L9,12 H-9z" fill="#FF5A8C"/><path d="M-6,-2 Q-6,-12 0,-12 Q6,-12 6,-2" stroke="#C93A6A" stroke-width="2.6" fill="none"/><circle cy="3" r="2.4" fill="#FFE36B"/>`,
+  star: `<path d="${'M0,-13 L3.8,-4.2 L13,-4 L5.8,2.2 L8,12 L0,6.6 L-8,12 L-5.8,2.2 L-13,-4 L-3.8,-4.2Z'}" fill="#FFD23F" stroke="#F2A900" stroke-width="1.4" stroke-linejoin="round"/>`,
+  coin: `<circle r="11" fill="#FFC63A"/><circle r="8" fill="#FFD866"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="900" fill="#C98A00" font-family="Baloo 2,sans-serif">★</text>`,
+  puddle: `<ellipse cy="6" rx="16" ry="5" fill="#6EC6FF"/><ellipse cx="-4" cy="5" rx="6" ry="1.6" fill="#fff" opacity=".6"/>`,
+  log: `<rect x="-15" y="-6" width="30" height="13" rx="6" fill="#9A6340"/><ellipse cx="15" cy=".5" rx="4" ry="6.5" fill="#C98A55"/>`,
+  aphid: `<ellipse rx="11" ry="8" fill="#8BD17C"/><circle cx="-8" cy="-2" r="5" fill="#6BBF5C"/><circle cx="-9" cy="-3" r="1.4" fill="#2B2550"/><path d="M-4,7 l-2,4 M2,7 l0,4 M7,6 l2,4" stroke="#4E8A42" stroke-width="1.6"/>`,
+  ladybug: `<circle r="11" fill="#E8414F"/><path d="M0,-11 V11" stroke="#2B2550" stroke-width="1.6"/><circle cx="-5" cy="-2" r="2.4" fill="#2B2550"/><circle cx="5" cy="3" r="2.4" fill="#2B2550"/><circle cx="-4" cy="6" r="1.8" fill="#2B2550"/><circle cy="-11" r="5" fill="#2B2550"/>`,
+  bee: `<ellipse cx="-3" cy="-9" rx="6" ry="4" fill="#fff" opacity=".85"/><ellipse cx="4" cy="-9" rx="6" ry="4" fill="#fff" opacity=".85"/><ellipse rx="12" ry="9" fill="#FFC63A"/><path d="M-4,-8 V8 M3,-8 V8" stroke="#2B2550" stroke-width="3"/><circle cx="-8" cy="-2" r="1.6" fill="#2B2550"/>`,
+  frog: `<ellipse cy="3" rx="13" ry="10" fill="#4CBF58"/><circle cx="-6" cy="-6" r="5" fill="#4CBF58"/><circle cx="6" cy="-6" r="5" fill="#4CBF58"/><circle cx="-6" cy="-6" r="2.4" fill="#2B2550"/><circle cx="6" cy="-6" r="2.4" fill="#2B2550"/><path d="M-5,5 q5,4 10,0" stroke="#2B2550" stroke-width="1.6" fill="none"/>`,
+  turtle: `<ellipse cy="2" rx="13" ry="9" fill="#5B8C3A"/><path d="M-8,0 h16 M-4,-6 v12 M4,-6 v12" stroke="#3E6A26" stroke-width="1.6"/><circle cx="-14" cy="0" r="4.4" fill="#8BD17C"/><circle cx="-15" cy="-1" r="1.2" fill="#2B2550"/>`,
+  plane: `<path d="M-14,2 L14,-6 L-4,10z" fill="#fff"/><path d="M-14,2 L14,-6 L-6,2z" fill="#E9F0FA"/><path d="M-6,2 L-4,10" stroke="#B9C8E2" stroke-width="1.2"/>`,
+  rocket: `<path d="M-12,0 Q-4,-9 12,0 Q-4,9 -12,0z" fill="#fff"/><circle cx="2" cy="0" r="3" fill="#6EC6FF"/><path d="M-10,-3 L-16,-8 L-12,0 L-16,8 L-10,3z" fill="#E8414F"/><path d="M-13,-2 L-20,0 L-13,2z" fill="#FFC63A"/>`,
+  dragonfly: `<ellipse cx="-2" cy="-6" rx="8" ry="3.4" fill="#BDEBFF" opacity=".9"/><ellipse cx="-2" cy="6" rx="8" ry="3.4" fill="#BDEBFF" opacity=".9"/><rect x="-14" y="-2" width="24" height="4" rx="2" fill="#5FB8E8"/><circle cx="11" cy="0" r="4" fill="#34B2F0"/>`,
+  beachball: `<circle r="14" fill="#fff"/><path d="M0,-14 A14,14 0 0 1 13,5 L0,0z" fill="#E8414F"/><path d="M13,5 A14,14 0 0 1 -9,11 L0,0z" fill="#34B2F0"/><path d="M-9,11 A14,14 0 0 1 0,-14 L0,0z" fill="#FFC63A"/><circle r="3" fill="#fff"/><circle cx="-5" cy="-6" r="3" fill="#fff" opacity=".5"/>`,
+  soccer: `<circle r="14" fill="#fff" stroke="#2B2550" stroke-width="1.4"/><path d="M0,-5 L5,-1.5 L3,4.5 H-3 L-5,-1.5z" fill="#2B2550"/><path d="M0,-5 V-14 M5,-1.5 L13,-4 M3,4.5 L8,11 M-3,4.5 L-8,11 M-5,-1.5 L-13,-4" stroke="#2B2550" stroke-width="1.4"/>`,
+  bubble: `<circle r="15" fill="#BDEBFF" opacity=".35"/><circle r="15" fill="none" stroke="#fff" stroke-width="2" opacity=".9"/><path d="M-8,-6 q3,-5 8,-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+  bubbleg: `<circle r="15" fill="#FFE36B" opacity=".5"/><circle r="15" fill="none" stroke="#FFD23F" stroke-width="2.4"/><path d="M-8,-6 q3,-5 8,-6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/><text y="5" text-anchor="middle" font-size="13" font-weight="900" fill="#C98A00" font-family="Baloo 2,sans-serif">★</text>`,
+  heart: `<path d="M0,10 C-14,0 -10,-12 0,-5 C10,-12 14,0 0,10z" fill="#FF5A8C"/>`
+};
+const balloon = col => `<path d="M0,14 q-3,6 2,12" stroke="#9AA3B8" stroke-width="1.2" fill="none"/><ellipse rx="12" ry="15" fill="${col}"/><path d="M-2,14 h4 l-2,3z" fill="${col}"/><ellipse cx="-4" cy="-6" rx="3" ry="5" fill="#fff" opacity=".45"/>`;
+const pillar = (h, col, cap, flip) => `${rr(-20, flip ? -h : 0, 40, h, 8, col)}${rr(-24, flip ? -16 : 0, 48, 16, 8, cap)}`;
+// background for a game, by theme
+function arcBg(th){
+  if (th.out) return outdoorShell({ hz: th.hz || 150 }) + (th.deco || '');
+  const w = th.wall || '#FFE9F2', f = th.floor || '#F6D3B5';
+  return `<rect width="360" height="270" fill="${w}"/><rect width="360" height="270" fill="url(#wp-dots)" opacity=".5"/>${[...Array(9)].map((_, k) => `<rect x="${k * 40}" y="0" width="20" height="200" fill="#fff" opacity=".18"/>`).join('')}<rect y="200" width="360" height="70" fill="${f}"/><rect y="200" width="360" height="5" fill="#000" opacity=".06"/>${th.deco || ''}`;
+}
+// ---- the engine ----
+const ARC = { s: null };
+function arcBest(key){ const k = K(); k.arc = k.arc || {}; return k.arc[key] || (k.arc[key] = { best: 0, plays: 0 }); }
+function arcHTML(key){
+  const def = ARCADE[key], b = arcBest(key), d = AGE_D();
+  return `<div class="rm-scene interactive arc" id="arcScene"><svg viewBox="0 0 360 270" class="rm-svg" id="arcSvg">${arcBg(def.th)}<g id="arcL"></g><g id="arcFx"></g><g id="arcHud"></g></svg>${arcCard(key, 'start')}</div>
+  ${sayBox(def.how)}
+  <p class="note-s center">${def.kind} · made for ${AGE_TXT[d]} · Best: <b>${b.best}</b> · Goal: ${def.goal[d]}${def.unit ? ' ' + def.unit : ''}</p>`;
+}
+function arcCard(key, kind, o = {}){
+  const def = ARCADE[key], b = arcBest(key);
+  if (kind === 'start') return `<div class="arc-card" id="arcCard"><b>${esc(def.name)}</b><small>${esc(def.tip)}</small>${b.best ? `<span class="arc-best">Best: ${b.best}</span>` : ''}<button class="btn big sun" data-act="arcPlay" data-v="${key}">▶ Play</button></div>`;
+  return `<div class="arc-card" id="arcCard">${o.newBest ? '<span class="arc-new">New best!</span>' : ''}<b>${o.score} ${esc(def.unit || 'points')}</b><small>${o.msg || ''}</small><span class="arc-best">Best: ${b.best}</span><button class="btn big sun" data-act="arcPlay" data-v="${key}">↻ Play again</button></div>`;
+}
+function arcInit(key){
+  const svg = $('#arcSvg'); if (!svg) return; ARC.s = null;
+  const pt = e => { const m = svg.getScreenCTM(); if (!m) return null; const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse()); return { x: q.x, y: q.y }; };
+  svg.addEventListener('pointerdown', e => { const s = ARC.s; if (!s || !s.on || s.key !== key) return; e.preventDefault(); try { svg.setPointerCapture(e.pointerId); } catch (er) {} const p = pt(e); if (!p) return; s.down = true; s.px = p.x; s.py = p.y; MODES[s.mode].down && MODES[s.mode].down(s, p); });
+  svg.addEventListener('pointermove', e => { const s = ARC.s; if (!s || !s.on || s.key !== key) return; const p = pt(e); if (!p) return; s.px = p.x; s.py = p.y; MODES[s.mode].move && MODES[s.mode].move(s, p); });
+  const up = e => { const s = ARC.s; if (!s || !s.on) return; s.down = false; const p = pt(e); MODES[s.mode].up && MODES[s.mode].up(s, p || { x: s.px, y: s.py }); };
+  svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+}
+A.arcPlay = function(el){
+  const key = el.dataset.v, def = ARCADE[key]; const card = $('#arcCard'); if (card) card.remove();
+  const L = $('#arcL'), FX = $('#arcFx'); if (!L) return; L.innerHTML = ''; FX.innerHTML = '';
+  G.stop();
+  const d = AGE_D();
+  const s = ARC.s = { key, def, mode: def.mode, th: def.th, d, on: true, t: 0, score: 0, lives: def.lives ? def.lives[d] : 3, maxLives: def.lives ? def.lives[d] : 3, combo: 0, objs: [], L, FX, goalHit: false, lt: 0, inv: 0 };
+  MODES[s.mode].start(s); arcHud(); sfx('pop');
+  const loop = ts => { if (!s.on || ARC.s !== s) return; const dt = Math.min(.05, s.lt ? (ts - s.lt) / 1000 : 0); s.lt = ts; s.t += dt; if (s.inv > 0) s.inv -= dt; MODES[s.mode].step(s, dt); arcHud(); G.raf = requestAnimationFrame(loop); };
+  G.raf = requestAnimationFrame(loop);
+};
+function mk(s, markup, x, y, sc = 1, layer){ const g = document.createElementNS(SVGNS, 'g'); g.innerHTML = markup; (layer || s.L).appendChild(g); const o = { el: g, x, y, s: sc, r: 0, a: 1 }; place(o); return o; }
+function place(o){ o.el.setAttribute('transform', `translate(${f1(o.x)},${f1(o.y)})${o.r ? ` rotate(${f1(o.r)})` : ''}${o.s !== 1 ? ` scale(${o.s})` : ''}`); if (o.a !== 1) o.el.setAttribute('opacity', f1(o.a)); }
+function kill(o){ if (o.el) o.el.remove(); o.dead = true; }
+function pop(s, x, y, txt, col = '#FF5A8C'){ const o = mk(s, `<text text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="18" fill="${col}" stroke="#fff" stroke-width="4" paint-order="stroke">${txt}</text>`, x, y, 1, s.FX); let t = 0; const step = () => { t += .03; o.y -= 1.2; o.a = Math.max(0, 1 - t); place(o); if (t < 1 && ARC.s === s) requestAnimationFrame(step); else kill(o); }; requestAnimationFrame(step); }
+function burst(s, x, y, col = '#FFD23F'){ for (let k = 0; k < 7; k++){ const a = k / 7 * 6.28; const o = mk(s, `<circle r="3" fill="${col}"/>`, x, y, 1, s.FX); let t = 0; const step = () => { t += .05; o.x += Math.cos(a) * 2.4; o.y += Math.sin(a) * 2.4; o.a = Math.max(0, 1 - t); place(o); if (t < 1 && ARC.s === s) requestAnimationFrame(step); else kill(o); }; requestAnimationFrame(step); } }
+function addScore(s, n, x, y){
+  s.combo++; const mult = s.def.combo === false ? 1 : s.combo >= 10 ? 3 : s.combo >= 5 ? 2 : 1; s.score += n * mult;
+  if (x != null){ pop(s, x, y, mult > 1 ? `+${n * mult} ×${mult}` : `+${n}`, mult > 1 ? '#7B5CFA' : '#FF5A8C'); burst(s, x, y); }
+  if (s.combo === 5 || s.combo === 10) sfx('coin'); else sfx('pop');
+  if (!s.goalHit && s.score >= s.def.goal[s.d]){ s.goalHit = true; pop(s, 180, 120, 'Goal! ★', '#F2A900'); playReward(1, `${s.def.name} goal`); }
+}
+function hurt(s, x, y){
+  s.combo = 0; if (s.inv > 0) return false;
+  s.lives--; s.inv = 1.2; sfx('boop'); if (x != null) pop(s, x, y, 'Oops!', '#E8414F');
+  const sv = $('#arcSvg'); if (sv){ sv.classList.remove('shake'); void sv.getBBox; requestAnimationFrame(() => sv.classList.add('shake')); }
+  if (s.lives <= 0){ arcEnd(s); return true; } return false;
+}
+function arcHud(){
+  const s = ARC.s, h = $('#arcHud'); if (!s || !h) return;
+  const time = s.def.time ? Math.max(0, Math.ceil(s.def.time - s.t)) : null;
+  const html = `${s.maxLives > 0 && s.def.lives !== null ? [...Array(s.maxLives)].map((_, k) => `<g transform="translate(${18 + k * 22},18) scale(.8)" opacity="${k < s.lives ? 1 : .25}">${SPR.heart}</g>`).join('') : ''}
+    <g transform="translate(342,20)"><rect x="-74" y="-14" width="74" height="26" rx="13" fill="#fff" opacity=".9"/><text x="-37" y="5" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="16" fill="#2B2550">${s.score}</text></g>
+    ${time != null ? `<rect x="110" y="10" width="140" height="8" rx="4" fill="#fff" opacity=".8"/><rect x="110" y="10" width="${f1(140 * Math.max(0, 1 - s.t / s.def.time))}" height="8" rx="4" fill="${time <= 5 ? '#E8414F' : '#3EC46B'}"/>` : ''}
+    ${s.combo >= 5 ? `<text x="180" y="40" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="15" fill="#7B5CFA" stroke="#fff" stroke-width="3" paint-order="stroke">Combo ×${s.combo >= 10 ? 3 : 2}!</text>` : ''}
+    ${s.hud || ''}`;
+  if (h._last !== html){ h.innerHTML = html; h._last = html; }
+  if (s.def.time && s.t >= s.def.time && s.on) arcEnd(s);
+}
+function arcEnd(s){
+  if (!s.on) return; s.on = false; cancelAnimationFrame(G.raf);
+  const kid = K(), b = arcBest(s.key), nb = s.score > b.best; b.plays++; if (nb) b.best = s.score; save();
+  addXP(kid, Math.min(25, 4 + Math.round(s.score / 3)));
+  sfx(nb || s.goalHit ? 'win' : 'lose');
+  const msg = s.goalHit ? 'You reached the goal! Can you beat your best?' : `Goal: ${s.def.goal[s.d]}. Try again, you can do it!`;
+  const sc = $('#arcScene'); if (sc) sc.insertAdjacentHTML('beforeend', arcCard(s.key, 'end', { score: s.score, newBest: nb && s.score > 0, msg }));
+  rmSay(nb && s.score > 0 ? `New best! ${s.score}! Amazing!` : s.goalHit ? 'Great job! You reached the goal!' : 'Nice try! Play again?');
+}
+const rf = (a, b) => a + Math.random() * (b - a);
+const hit = (a, b, r) => Math.hypot(a.x - b.x, a.y - b.y) < r;
+
+// ---- the eight game kinds ----
+const MODES = {
+  // CATCH: slide to catch the good things, dodge the silly ones
+  catch: {
+    start(s){ s.pl = mk(s, `<g transform="scale(.55) translate(0,24)">${charSVG(K().char, { mood: 'happy' })}</g>${s.th.basket || `<path d="M-22,-6 H22 L17,12 H-17z" fill="#C98A55"/><path d="M-22,-6 H22" stroke="#9A6340" stroke-width="3"/>`}`, 180, 236); s.next = .6; s.tx = 180; },
+    down(s, p){ s.tx = p.x; }, move(s, p){ if (s.down) s.tx = p.x; },
+    step(s, dt){
+      const d = s.d, sp = (70 + d * 28) * (1 + s.t * .018), pl = s.pl;
+      pl.x += (clamp(s.tx, 24, 336) - pl.x) * Math.min(1, dt * 14); place(pl);
+      if ((s.next -= dt) <= 0){
+        s.next = Math.max(.32, (1.05 - d * .14) - s.t * .008) * rf(.7, 1.2);
+        const r = Math.random(), bad = r < .14 + d * .06, gold = !bad && r > .94;
+        const o = mk(s, gold ? s.th.gold || SPR.star : bad ? SPR[pick(s.th.bad)] : SPR[pick(s.th.good)], rf(24, 336), -16, 1.1);
+        o.kind = gold ? 'gold' : bad ? 'bad' : 'good'; o.vy = sp * rf(.85, 1.2); o.vx = d >= 2 ? rf(-20, 20) : 0; o.spin = rf(-90, 90); s.objs.push(o);
+      }
+      for (const o of s.objs){
+        o.y += o.vy * dt; o.x += o.vx * dt; if (o.x < 16 || o.x > 344) o.vx *= -1; o.r += o.spin * dt; place(o);
+        if (o.y > 214 && o.y < 248 && Math.abs(o.x - pl.x) < 28){ kill(o); if (o.kind === 'bad'){ if (hurt(s, o.x, o.y)) return; } else addScore(s, o.kind === 'gold' ? 3 : 1, o.x, o.y - 10); }
+        else if (o.y > 290){ kill(o); if (o.kind === 'good') s.combo = 0; }
+      }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // WHACK: tap the right ones as they pop up, not the friends
+  whack: {
+    start(s){
+      const cols = s.d >= 2 ? 4 : 3, rows = 3; s.holes = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++){ const x = 360 / (cols + 1) * (c + 1), y = 92 + r * 62; s.holes.push({ x, y, o: null }); mk(s, `<ellipse cy="8" rx="26" ry="9" fill="${s.th.hole || '#6B4A33'}"/><ellipse cy="6" rx="22" ry="6" fill="#000" opacity=".25"/>`, x, y); }
+      s.next = .5;
+    },
+    down(s, p){
+      let best = null, bd = 34; for (const h of s.holes){ if (!h.o || h.o.out) continue; const dd = Math.hypot(p.x - h.x, p.y - (h.y - 8)); if (dd < bd){ bd = dd; best = h; } }
+      if (!best) return; const o = best.o; o.out = true; o.tapped = true;
+      if (o.kind === 'bad'){ hurt(s, best.x, best.y - 20); } else addScore(s, o.kind === 'gold' ? 3 : 1, best.x, best.y - 26);
+    },
+    step(s, dt){
+      const d = s.d;
+      if ((s.next -= dt) <= 0){
+        s.next = Math.max(.28, (.9 - d * .15) - s.t * .01) * rf(.7, 1.3);
+        const free = s.holes.filter(h => !h.o); if (free.length){ const h = pick(free), r = Math.random(), bad = r < .18 + d * .06, gold = !bad && r > .93;
+          const o = mk(s, gold ? SPR.star : bad ? SPR[pick(s.th.bad)] : SPR[pick(s.th.good)], h.x, h.y + 10, 1.2); o.kind = gold ? 'gold' : bad ? 'bad' : 'good'; o.life = Math.max(.55, (1.7 - d * .3) - s.t * .012); o.age = 0; o.h = h; h.o = o; s.objs.push(o); }
+      }
+      for (const o of s.objs){
+        o.age += dt; const up = o.out ? Math.max(0, 1 - (o.age - o.outAt) * 5) : Math.min(1, o.age * 6);
+        if (o.out && o.outAt == null) o.outAt = o.age;
+        if (!o.out && o.age > o.life){ o.out = true; o.outAt = o.age; }
+        o.y = o.h.y + 10 - up * 26; place(o);
+        if (o.out && up <= 0){ kill(o); o.h.o = null; }
+      }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // RUNNER: tap to jump over things and grab the goodies, it keeps getting faster
+  runner: {
+    start(s){
+      s.gy = 226; s.groundMarks = []; for (let k = 0; k < 10; k++) s.groundMarks.push(mk(s, `<rect x="-8" y="0" width="16" height="4" rx="2" fill="#fff" opacity=".4"/>`, k * 40, 244));
+      mk(s, `<rect x="0" y="0" width="360" height="40" fill="${s.th.ground || '#9BD77A'}"/><rect x="0" y="0" width="360" height="5" fill="#000" opacity=".08"/>`, 0, 236).el.parentNode.insertBefore(s.L.lastChild, s.L.firstChild);
+      s.pl = mk(s, `<g transform="scale(.6) translate(0,0)">${s.th.rider ? s.th.rider() : charSVG(K().char, { mood: 'happy' })}</g>`, 70, s.gy); s.vy = 0; s.jumps = 0; s.next = 1.2; s.nextC = .8; s.speed = 150 + s.d * 32;
+    },
+    down(s){ const maxJ = s.d <= 1 ? 2 : 1; if (s.jumps < maxJ){ s.vy = s.d === 0 ? -400 : -430; s.jumps++; sfx('pop'); } },
+    step(s, dt){
+      const pl = s.pl, g = s.d === 0 ? 1000 : 1150; s.speed += dt * (3 + s.d * 1.5);
+      s.vy += g * dt; pl.y += s.vy * dt; if (pl.y >= s.gy){ pl.y = s.gy; s.vy = 0; s.jumps = 0; }
+      pl.r = pl.y < s.gy ? -8 : Math.sin(s.t * 18) * 3; pl.a = s.inv > 0 ? (Math.sin(s.t * 30) > 0 ? .4 : 1) : 1; place(pl);
+      for (const m of s.groundMarks){ m.x -= s.speed * dt; if (m.x < -10) m.x += 400; place(m); }
+      if ((s.next -= dt) <= 0){ s.next = Math.max(.75, (1.9 - s.d * .25) - s.t * .012) * rf(.8, 1.4); const o = mk(s, SPR[pick(s.th.bad)], 390, s.gy - 2, 1.15); o.kind = 'bad'; s.objs.push(o); }
+      if ((s.nextC -= dt) <= 0){ s.nextC = rf(.6, 1.3); const hy = s.gy - rf(30, 110); const n = Math.random() < .3 ? 3 : 1; for (let k = 0; k < n; k++){ const o = mk(s, SPR[pick(s.th.good)], 390 + k * 26, hy, 1); o.kind = 'good'; s.objs.push(o); } }
+      for (const o of s.objs){ o.x -= s.speed * dt; place(o);
+        const body = { x: pl.x, y: pl.y - 22 };
+        if (o.kind === 'bad' && Math.abs(o.x - pl.x) < 18 && pl.y > s.gy - 26 && !o.hitDone){ o.hitDone = true; if (hurt(s, o.x, o.y - 20)) return; }
+        if (o.kind === 'good' && hit(o, body, 28)){ kill(o); addScore(s, 1, o.x, o.y - 10); }
+        if (o.kind === 'bad' && !o.passed && o.x < pl.x - 20){ o.passed = true; if (!o.hitDone){ s.score += 1; } }
+        if (o.x < -30) kill(o);
+      }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // FLAPPY: tap to fly up, glide through the gaps
+  flappy: {
+    start(s){ s.pl = mk(s, SPR[s.th.flyer], 90, 130, 1.3); s.vy = 0; s.next = .4; s.started = false; s.hud = `<text x="180" y="150" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="18" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Tap to fly!</text>`; },
+    down(s){ s.started = true; s.hud = ''; s.vy = s.d === 0 ? -210 : -235; sfx('pop'); },
+    step(s, dt){
+      const pl = s.pl; if (!s.started){ pl.y = 130 + Math.sin(s.t * 4) * 8; place(pl); s.t = 0; return; }
+      const g = s.d === 0 ? 520 : 640; s.vy = Math.min(320, s.vy + g * dt); pl.y += s.vy * dt; pl.r = clamp(s.vy / 6, -25, 40); pl.a = s.inv > 0 ? (Math.sin(s.t * 30) > 0 ? .4 : 1) : 1; place(pl);
+      if (pl.y > 258 || pl.y < 8){ pl.y = clamp(pl.y, 20, 240); s.vy = -160; if (hurt(s, pl.x, pl.y)) return; }
+      const speed = (90 + s.d * 18) * (1 + s.t * .01), gap = Math.max(80, 138 - s.d * 16 - s.t * .5);
+      if ((s.next -= dt) <= 0){ s.next = Math.max(1.25, 2 - s.d * .15) ; const cy = rf(70, 200); const col = s.th.pipe || '#7FD07A', cap = s.th.cap || '#5BB85A';
+        const top = mk(s, pillar(cy - gap / 2, col, cap, true), 400, cy - gap / 2), bot = mk(s, pillar(280 - (cy + gap / 2), col, cap, false), 400, cy + gap / 2);
+        top.kind = 'top'; bot.kind = 'bot'; top.gy = cy - gap / 2; bot.gy = cy + gap / 2; s.objs.push(top, bot);
+        if (Math.random() < .6){ const st = mk(s, SPR.star, 400, cy, .8); st.kind = 'star'; s.objs.push(st); } }
+      for (const o of s.objs){ o.x -= speed * dt; place(o);
+        if ((o.kind === 'top' || o.kind === 'bot') && Math.abs(o.x - pl.x) < 30){ const inPipe = o.kind === 'top' ? pl.y - 10 < o.gy : pl.y + 10 > o.gy; if (inPipe && !o.hitDone){ o.hitDone = true; if (hurt(s, pl.x, pl.y)) return; } }
+        if (o.kind === 'bot' && !o.passed && o.x < pl.x - 24){ o.passed = true; addScore(s, 1, pl.x + 10, pl.y - 24); }
+        if (o.kind === 'star' && hit(o, pl, 24)){ kill(o); addScore(s, 1, o.x, o.y - 14); }
+        if (o.x < -40) kill(o);
+      }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // SORT: slide each thing into the right bin before it lands
+  sort: {
+    start(s){
+      const n = s.d <= 1 ? 2 : 3; s.bins = s.th.bins.slice(0, n).map((b, k) => ({ ...b, x: 360 / (n + 1) * (k + 1) }));
+      s.bins.forEach(b => { mk(s, `${rr(-40, -22, 80, 44, 12, b.col)}${rr(-40, -22, 80, 44, 12, 'url(#fsR)')}<g transform="translate(0,-2) scale(.9)">${SPR[b.items[0]]}</g>${TX(0, 18, b.n, 11, '#fff')}`, b.x, 238); });
+      s.cur = null; s.wait = .3;
+    },
+    down(s, p){ const c = s.cur; if (!c) return; if (p.y > 205){ const b = s.bins.reduce((a, b2) => Math.abs(b2.x - p.x) < Math.abs(a.x - p.x) ? b2 : a); c.tx = b.x; c.fast = true; } else { c.drag = true; c.tx = p.x; } },
+    move(s, p){ const c = s.cur; if (c && c.drag) c.tx = p.x; },
+    up(s){ if (s.cur){ s.cur.drag = false; } },
+    step(s, dt){
+      if (!s.cur){ if ((s.wait -= dt) > 0) return; const b = pick(s.bins); const o = mk(s, SPR[pick(b.items)], 180, 40, 1.4); o.bin = b; o.tx = 180; o.vy = (32 + s.d * 10) * (1 + s.t * .02); s.cur = o; }
+      const c = s.cur; c.y += (c.fast ? 420 : c.vy) * dt; c.x += (c.tx - c.x) * Math.min(1, dt * 12); place(c);
+      if (c.y >= 214){ const b = s.bins.reduce((a, b2) => Math.abs(b2.x - c.x) < Math.abs(a.x - c.x) ? b2 : a); kill(c); s.cur = null; s.wait = .15;
+        if (b === c.bin) addScore(s, 1, b.x, 200); else if (hurt(s, b.x, 200)) return; }
+    }
+  },
+  // SIMON: watch the pattern, then copy it
+  simon: {
+    start(s){
+      const P = s.th.pads; s.pads = P.map((p, k) => { const x = k % 2 ? 250 : 110, y = k < 2 ? 92 : 192; const o = mk(s, `<g class="pad">${rr(-56, -40, 112, 80, 22, p.col)}${rr(-56, -40, 112, 80, 22, 'url(#fsR)')}<g transform="translate(0,-4) scale(1.4)">${SPR[p.icon] || ''}</g></g>`, x, y); o.p = p; o.k = k; o.a = .55; place(o); return o; });
+      s.seq = []; const n0 = [2, 3, 3, 4][s.d]; for (let k = 0; k < n0; k++) s.seq.push(Math.floor(Math.random() * 4)); s.phase = 'show'; s.i = 0; s.tm = .8; s.round = 0; s.combo = 0;
+      s.hud = `<text id="simTxt" x="180" y="148" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="15" fill="#2B2550">Watch!</text>`;
+    },
+    light(s, k){ const o = s.pads[k]; o.a = 1; o.s = 1.06; place(o); note(k); setTimeout(() => { o.a = .55; o.s = 1; place(o); }, 260); },
+    down(s, p){ if (s.phase !== 'input') return; const k = s.pads.findIndex(o => Math.abs(p.x - o.x) < 58 && Math.abs(p.y - o.y) < 42); if (k < 0) return; MODES.simon.light(s, k);
+      if (k === s.seq[s.i]){ s.i++; if (s.i >= s.seq.length){ s.round++; addScore(s, 1, 180, 140); s.seq.push(Math.floor(Math.random() * 4)); s.phase = 'show'; s.i = 0; s.tm = 1; s.hud = s.hud.replace(/>[^<]*<\/text>$/, '>Watch!</text>'); } }
+      else { if (hurt(s, 180, 140)) return; s.phase = 'show'; s.i = 0; s.tm = 1.1; s.hud = s.hud.replace(/>[^<]*<\/text>$/, '>Watch again!</text>'); } },
+    step(s, dt){
+      if (s.phase !== 'show') return; s.tm -= dt; if (s.tm > 0) return;
+      if (s.i < s.seq.length){ MODES.simon.light(s, s.seq[s.i]); s.i++; s.tm = Math.max(.32, [.8, .66, .54, .44][s.d] - s.round * .015); }
+      else { s.phase = 'input'; s.i = 0; s.hud = s.hud.replace(/>[^<]*<\/text>$/, '>Your turn!</text>'); }
+    }
+  },
+  // BUBBLES: pop the right answers as they float up
+  bubbles: {
+    start(s){ s.next = .2; s.task = null; MODES.bubbles.newTask(s); },
+    newTask(s){ s.task = TASKS[s.th.task](s.d, s); s.hud = s.task.say ? `<rect x="40" y="226" width="280" height="34" rx="17" fill="#fff" opacity=".92"/><text x="180" y="249" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="16" fill="#2B2550">${esc(s.task.say)}</text>` : ''; s.objs.forEach(o => { o.ok = s.task.ok(o.val); }); },
+    down(s, p){ let best = null, bd = 30; for (const o of s.objs){ if (o.dead) continue; const dd = Math.hypot(o.x - p.x, o.y - p.y); if (dd < bd * o.s){ bd = dd; best = o; } } if (!best) return;
+      kill(best); burst(s, best.x, best.y, '#BDEBFF');
+      if (best.gold){ addScore(s, 3, best.x, best.y); return; }
+      if (s.task.ok(best.val)){ addScore(s, 1, best.x, best.y); if (s.task.once) MODES.bubbles.newTask(s); }
+      else if (hurt(s, best.x, best.y)) return; },
+    step(s, dt){
+      const sp = (34 + s.d * 9) * (1 + s.t * .012);
+      if ((s.next -= dt) <= 0){ s.next = Math.max(.35, (.9 - s.d * .1) - s.t * .006);
+        const haveOk = s.objs.some(o => !o.dead && s.task.ok(o.val)); const val = s.task.gen(!haveOk || Math.random() < .4);
+        const gold = s.th.task === 'free' && Math.random() < .08;
+        const lbl = val == null || s.th.task === 'free' ? '' : `<text y="6" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="${String(val).length > 5 ? 9 : String(val).length > 3 ? 11 : 16}" fill="#2B2550">${esc(String(val))}</text>`;
+        const body = s.th.task === 'color' ? balloon(val) : gold ? SPR.bubbleg : SPR.bubble;
+        const o = mk(s, body + (s.th.task === 'color' ? '' : lbl), rf(40, 320), 290, s.th.task === 'color' ? 1.2 : String(val || '').length > 3 ? rf(1.75, 1.95) : rf(1.1, 1.4)); o.val = val; o.gold = gold; o.vy = sp * rf(.8, 1.25); o.w = rf(0, 6); s.objs.push(o); }
+      for (const o of s.objs){ o.y -= o.vy * dt; o.x += Math.sin(s.t * 2 + o.w) * .4; place(o);
+        if (o.y < -20){ kill(o); if (s.th.task === 'free' && !o.gold){ if (hurt(s, o.x, 20)) return; } } }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // KEEP-UP: tap the ball to keep it in the air
+  keepup: {
+    start(s){ s.ball = mk(s, SPR[s.th.ball], 180, 90, 1.5); s.vx = rf(-40, 40); s.vy = 0; s.nextS = 3; s.hud = `<text x="180" y="200" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="16" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Tap the ball to bounce it!</text>`; },
+    down(s, p){ const b = s.ball; const r = [62, 50, 42, 36][s.d]; if (Math.hypot(p.x - b.x, p.y - b.y) > r) return; s.hud = ''; s.vy = -(300 + s.d * 20); s.vx = clamp((b.x - p.x) * 6 + rf(-30, 30), -180, 180); addScore(s, 1, b.x, b.y - 30); },
+    step(s, dt){
+      const b = s.ball, g = (230 + s.d * 70) * (1 + Math.min(1.2, s.score * .03));
+      s.vy += g * dt; if (s.d === 3) s.vx += Math.sin(s.t * .8) * 30 * dt; b.x += s.vx * dt; b.y += s.vy * dt; b.r += s.vx * dt * 2;
+      if (b.x < 22 || b.x > 338){ s.vx *= -.9; b.x = clamp(b.x, 22, 338); }
+      if (b.y < 22){ s.vy = Math.abs(s.vy) * .5; b.y = 22; }
+      if (b.y > 252){ s.combo = 0; if (hurt(s, b.x, 230)) return; b.y = 90; b.x = 180; s.vy = 0; s.vx = rf(-40, 40); s.hud = `<text x="180" y="200" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="16" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Again! Tap the ball!</text>`; }
+      place(b);
+      if ((s.nextS -= dt) <= 0){ s.nextS = rf(3, 6); const o = mk(s, SPR.star, rf(40, 320), rf(40, 160), 1); o.kind = 'star'; o.life = 4; s.objs.push(o); }
+      for (const o of s.objs){ o.life -= dt; o.a = Math.min(1, o.life); place(o); if (hit(o, b, 30)){ kill(o); s.score += 2; pop(s, o.x, o.y, '+2', '#F2A900'); burst(s, o.x, o.y); sfx('coin'); } else if (o.life <= 0) kill(o); }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  }
+};
+function note(k){ try { if (!MUS.ctx || MUS.ctx.state !== 'running') return; const t = MUS.ctx.currentTime + .01; voice('xylo', nf(['C6', 'E6', 'G6', 'C7'][k] || 'A6'), t, .3, .9, MUS.master); } catch (e) {} }
+// questions for the bubble games, by age
+const WORDS = [['CAT', 'C'], ['DOG', 'D'], ['SUN', 'S'], ['BUS', 'B'], ['FISH', 'F'], ['MOON', 'M'], ['PIG', 'P'], ['HAT', 'H'], ['TREE', 'T'], ['LION', 'L'], ['RAIN', 'R'], ['GOAT', 'G'], ['KITE', 'K'], ['NEST', 'N'], ['WOLF', 'W']];
+const SPELL = [['friend', 'freind'], ['because', 'becuase'], ['school', 'skool'], ['people', 'peple'], ['beautiful', 'beutiful'], ['said', 'sed'], ['animal', 'aminal'], ['answer', 'anser'], ['different', 'diffrent'], ['favorite', 'favrite'], ['tomorrow', 'tommorow'], ['island', 'iland']];
+const TASKS = {
+  math(d, s){
+    let q, ans;
+    if (d === 0){ ans = 1 + Math.floor(Math.random() * 10); q = `Pop the number ${ans}`; }
+    else if (d === 1){ const a = 1 + Math.floor(Math.random() * 9), b = 1 + Math.floor(Math.random() * (10 - a)); ans = a + b; q = `Pop the answer: ${a} + ${b}`; }
+    else if (d === 2){ if (Math.random() < .5){ const a = 5 + Math.floor(Math.random() * 11), b = 2 + Math.floor(Math.random() * 9); ans = a + b; q = `Pop the answer: ${a} + ${b}`; } else { const a = 8 + Math.floor(Math.random() * 13), b = 1 + Math.floor(Math.random() * Math.min(9, a - 1)); ans = a - b; q = `Pop the answer: ${a} − ${b}`; } }
+    else { if (Math.random() < .6){ const a = 2 + Math.floor(Math.random() * 9), b = 2 + Math.floor(Math.random() * 9); ans = a * b; q = `Pop the answer: ${a} × ${b}`; } else { const b = 2 + Math.floor(Math.random() * 8), ans2 = 2 + Math.floor(Math.random() * 9); ans = ans2; q = `Pop the answer: ${b * ans2} ÷ ${b}`; } }
+    const lo = Math.max(0, ans - 6), hi = ans + 6;
+    return { say: q, once: true, ok: v => v === ans, gen: good => good ? ans : (() => { let v; do { v = lo + Math.floor(Math.random() * (hi - lo + 1)); } while (v === ans); return v; })() };
+  },
+  letters(d){
+    if (d === 0){ const L = pick(ABC.slice(0, 26)); return { say: `Pop the letter ${L}`, once: true, ok: v => v === L, gen: good => good ? L : pick(ABC.filter(x => x !== L)) }; }
+    if (d === 1){ const [w, L] = pick(WORDS); return { say: `Pop the first letter of ${w}`, once: true, ok: v => v === L, gen: good => good ? L : pick(ABC.filter(x => x !== L)) }; }
+    if (d === 2){ const [w] = pick(WORDS), i = 1 + Math.floor(Math.random() * (w.length - 1)), L = w[i]; return { say: `Missing letter: ${w.slice(0, i)}_${w.slice(i + 1)}`, once: true, ok: v => v === L, gen: good => good ? L : pick(ABC.filter(x => x !== L)) }; }
+    const [r, wr] = pick(SPELL); return { say: 'Pop the word spelled right!', once: true, ok: v => v === r, gen: good => good ? r : (Math.random() < .6 ? wr : pick(SPELL.filter(x => x[0] !== r))[1]) };
+  },
+  color(d, s){
+    const C = [['#E8414F', 'red'], ['#34B2F0', 'blue'], ['#3EC46B', 'green'], ['#FFC63A', 'yellow'], ['#B58CFF', 'purple'], ['#FF8FB8', 'pink']].slice(0, [3, 4, 5, 6][d]);
+    const [col, n] = pick(C); s.popsLeft = [5, 4, 3, 3][d];
+    return { say: `Pop the ${n} balloons!`, once: false, ok: v => v === col, gen: good => good ? col : pick(C.filter(x => x[0] !== col))[0], col };
+  },
+  free(){ return { say: '', once: false, ok: () => true, gen: () => null }; }
+};
+// switch the balloon color after a few good pops
+const _bubDown = MODES.bubbles.down;
+MODES.bubbles.down = function(s, p){ const before = s.score; _bubDown(s, p); if (s.on && s.th.task === 'color' && s.score > before && --s.popsLeft <= 0) MODES.bubbles.newTask(s); };
+
+// ---------- 3. THE GAMES, PLACE BY PLACE ----------
+const bunting = `<path d="M0,26 Q90,46 180,26 Q270,46 360,26" stroke="#fff" stroke-width="2" fill="none"/>${[...Array(12)].map((_, k) => `<path d="M${10 + k * 30},${30 + Math.sin(k) * 3} l10,0 l-5,12z" fill="${['#FF5A8C', '#FFC63A', '#34B2F0', '#3EC46B'][k % 4]}"/>`).join('')}`;
+const scooter = () => `${charSVG(K().char, { mood: 'cheer' })}<g transform="translate(0,6)"><rect x="-26" y="-6" width="52" height="8" rx="4" fill="#FF5A8C"/><rect x="14" y="-40" width="5" height="36" rx="2.5" fill="#9AA3B8"/><circle cx="-18" cy="6" r="8" fill="#2B2550"/><circle cx="18" cy="6" r="8" fill="#2B2550"/><rect x="-14" y="-24" width="22" height="16" rx="3" fill="#E8414F"/></g>`;
+const ginger = () => `<g transform="translate(0,-34)"><circle cy="-22" r="14" fill="#C98A55"/><rect x="-14" y="-10" width="28" height="30" rx="10" fill="#C98A55"/><path d="M-14,-4 L-26,6 M14,-4 L26,6 M-8,18 L-12,34 M8,18 L12,34" stroke="#C98A55" stroke-width="9" stroke-linecap="round"/><circle cx="-5" cy="-24" r="2" fill="#2B2550"/><circle cx="5" cy="-24" r="2" fill="#2B2550"/><path d="M-5,-16 q5,4 10,0" stroke="#fff" stroke-width="2" fill="none"/><circle cy="0" r="2.4" fill="#FF5A8C"/><circle cy="9" r="2.4" fill="#3EC46B"/></g>`;
+const nightDeco = [...Array(22)].map((_, k) => `<circle cx="${(k * 67) % 360}" cy="${(k * 41) % 190}" r="${k % 3 ? 1.4 : 2.2}" fill="#fff" opacity=".8"/>`).join('');
+const ARCADE = {
+  meatball: { room: 'restaurant', label: 'Meatball Catch', name: 'Meatball Catch', kind: 'Exciting', mode: 'catch', time: 45, lives: [3, 3, 3, 3], goal: [8, 12, 16, 22], th: { wall: '#FFF1DE', floor: '#E9C29A', deco: bunting, good: ['meatball', 'noodle'], bad: ['chili'] }, how: 'Slide your finger to catch meatballs and noodles. Watch out for spicy chilies!', tip: 'Slide to catch. Dodge the chilies!' },
+  pizzadash: { room: 'restaurant', label: 'Scooter Dash', name: 'Pizza Scooter Dash', kind: 'Super fun', mode: 'runner', lives: [3, 2, 1, 1], goal: [15, 25, 40, 60], th: { out: true, hz: 160, ground: '#C9C2B4', rider: scooter, good: ['slice'], bad: ['cone'] }, how: 'Tap to jump over the cones and grab pizza slices. It gets faster and faster!', tip: 'Tap to jump!' },
+  glamdash: { room: 'boutique', label: 'Glam Dash', name: 'Glam Dash', kind: 'Super fun', mode: 'runner', lives: [3, 2, 1, 1], goal: [15, 25, 40, 60], th: { wall: '#FFE3F1', floor: '#FF8FB8', ground: '#FF8FB8', deco: bunting, good: ['gem'], bad: ['purse'] }, how: 'Strut down the runway! Tap to jump over purses and collect sparkly gems.', tip: 'Tap to jump!' },
+  numpop: { room: 'school', label: 'Number Bubbles', name: 'Number Bubbles', kind: 'Super fun', mode: 'bubbles', time: 60, lives: [3, 3, 3, 3], goal: [6, 8, 10, 12], th: { wall: '#E9F4FF', floor: '#C9A27A', task: 'math' }, how: 'Read the question at the bottom and pop the bubble with the right number!', tip: 'Pop the right number!' },
+  bugbop: { room: 'greenhouse', label: 'Bug Bop', name: 'Bug Bop', kind: 'Exciting', mode: 'whack', time: 40, lives: [3, 3, 3, 3], goal: [10, 14, 18, 24], th: { wall: '#E6F7EA', floor: '#C9A27A', hole: '#7A5236', good: ['aphid'], bad: ['ladybug', 'bee'] }, how: 'Tap the hungry green bugs. Don’t tap ladybugs or bees, they help the garden!', tip: 'Tap green bugs only!' },
+  busybee: { room: 'greenhouse', label: 'Busy Bee', name: 'Busy Bee', kind: 'Super fun', mode: 'flappy', lives: [3, 2, 1, 1], goal: [3, 5, 8, 12], th: { out: true, hz: 170, flyer: 'bee', pipe: '#6BBF5C', cap: '#FF8FB8' }, how: 'Tap to flap your wings. Fly between the flower stems and grab the stars!', tip: 'Tap to fly!' },
+  beachball: { room: 'hotel', label: 'Beach Ball', name: 'Beach Ball Bounce', kind: 'Super fun', mode: 'keepup', lives: [3, 2, 1, 1], goal: [6, 10, 14, 20], unit: 'bounces', th: { out: true, hz: 180, ball: 'beachball', deco: `<rect y="200" width="360" height="70" fill="#6EC6FF"/><path d="M0,206 q20,-6 40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>` }, how: 'Tap the beach ball to keep it up in the air. Don’t let it splash into the pool!', tip: 'Tap the ball!' },
+  luggage: { room: 'hotel', label: 'Luggage', name: 'Luggage Sort', kind: 'Exciting', mode: 'sort', time: 60, lives: [3, 3, 3, 3], goal: [6, 9, 12, 15], th: { wall: '#EAF2FF', floor: '#D7C2A8', bins: [{ n: 'Red', col: '#E8604C', items: ['suitR'] }, { n: 'Blue', col: '#34B2F0', items: ['suitB'] }, { n: 'Yellow', col: '#FFC63A', items: ['suitY'] }] }, how: 'Slide each suitcase over the cart with the same color, or tap the cart!', tip: 'Match the colors!' },
+  tidy: { room: 'home', label: 'Tidy Up', name: 'Tidy Up!', kind: 'Exciting', mode: 'sort', time: 60, lives: [3, 3, 3, 3], goal: [6, 9, 12, 15], th: { wall: '#FFF4E0', floor: '#E2B98C', bins: [{ n: 'Toy box', col: '#FF8A3D', items: ['teddy', 'block'] }, { n: 'Laundry', col: '#7B5CFA', items: ['shirt', 'sock'] }, { n: 'Sink', col: '#34B2F0', items: ['plate', 'cup'] }] }, how: 'Put each thing where it belongs! Toys in the toy box, clothes in the laundry.', tip: 'Slide it to the right place!' },
+  plane: { room: 'home', label: 'Paper Plane', name: 'Paper Plane Flight', kind: 'Super fun', mode: 'flappy', lives: [3, 2, 1, 1], goal: [3, 5, 8, 12], th: { wall: '#FFF4E0', floor: '#E2B98C', flyer: 'plane', pipe: '#C98A55', cap: '#9A6340' }, how: 'Tap to keep your paper plane flying between the bookshelves!', tip: 'Tap to fly!' },
+  bakeorder: { room: 'bakery', label: 'Recipe Memory', name: 'Recipe Memory', kind: 'Exciting', mode: 'simon', lives: [3, 2, 2, 1], goal: [3, 4, 6, 8], unit: 'rounds', combo: false, th: { wall: '#FFE9F2', floor: '#F6D3B5', pads: [{ col: '#FF8FB8', icon: 'donut' }, { col: '#FFC63A', icon: 'star' }, { col: '#5FE0C0', icon: 'lolly' }, { col: '#B58CFF', icon: 'gumdrop' }] }, how: 'Watch the treats light up, then tap them in the same order. It gets longer each time!', tip: 'Watch, then copy!' },
+  donutdrop: { room: 'bakery', label: 'Donut Drop', name: 'Donut Drop', kind: 'Super fun', mode: 'catch', time: 45, lives: [3, 3, 3, 3], goal: [10, 15, 20, 26], th: { wall: '#FFE9F2', floor: '#F6D3B5', deco: bunting, good: ['donut'], gold: SPR.donutg, bad: ['broccoli'] }, how: 'Catch the donuts! Golden donuts are worth 3. Skip the broccoli!', tip: 'Catch donuts, skip broccoli!' },
+  flavorsort: { room: 'icecream', label: 'Flavor Sort', name: 'Flavor Sort', kind: 'Exciting', mode: 'sort', time: 60, lives: [3, 3, 3, 3], goal: [6, 9, 12, 15], th: { wall: '#EFFBF7', floor: '#F6D3B5', bins: [{ n: 'Strawberry', col: '#FF8FB8', items: ['scoopP'] }, { n: 'Chocolate', col: '#8B5A3C', items: ['scoopC'] }, { n: 'Mint', col: '#5FD3A8', items: ['scoopM'] }] }, how: 'Slide each scoop into the cone with the same flavor!', tip: 'Match the flavors!' },
+  penguin: { room: 'icecream', label: 'Snowy Slide', name: 'Snowy Slide', kind: 'Super fun', mode: 'runner', lives: [3, 2, 1, 1], goal: [15, 25, 40, 60], th: { out: true, hz: 170, ground: '#EAF6FF', rider: () => `<g transform="scale(1.2)">${buddySVG('snowpuff', { cheer: 1 })}</g>`, good: ['fishy', 'scoopP'], bad: ['snowball'] }, how: 'Slide across the ice! Tap to jump over snowballs and catch fish and ice cream.', tip: 'Tap to jump!' },
+  letterpop: { room: 'library', label: 'Letter Bubbles', name: 'Letter Bubbles', kind: 'Super fun', mode: 'bubbles', time: 60, lives: [3, 3, 3, 3], goal: [6, 8, 10, 10], th: { wall: '#F3EEFF', floor: '#C9A27A', task: 'letters' }, how: 'Read the question at the bottom and pop the right letter or word!', tip: 'Pop the right letter!' },
+  balloons: { room: 'toyshop', label: 'Balloon Pop', name: 'Balloon Pop', kind: 'Exciting', mode: 'bubbles', time: 45, lives: [3, 3, 3, 3], goal: [8, 12, 16, 20], th: { wall: '#FFF6D8', floor: '#E2B98C', task: 'color' }, how: 'Pop only the balloons with the color at the bottom. The color changes, so keep watching!', tip: 'Pop the right color!' },
+  rocket: { room: 'toyshop', label: 'Rocket Flight', name: 'Rocket Flight', kind: 'Super fun', mode: 'flappy', lives: [3, 2, 1, 1], goal: [3, 5, 8, 12], th: { wall: '#24306A', floor: '#3A2E6E', deco: nightDeco, flyer: 'rocket', pipe: '#B58CFF', cap: '#7B5CFA' }, how: 'Tap to boost your toy rocket through the space towers!', tip: 'Tap to boost!' },
+  candycatch: { room: 'gingerbread', label: 'Candy Catch', name: 'Candy Catch', kind: 'Exciting', mode: 'catch', time: 45, lives: [3, 3, 3, 3], goal: [8, 12, 16, 22], th: { wall: '#FFF0F6', floor: '#C98A55', deco: bunting, good: ['candy', 'lolly', 'gumdrop'], bad: ['coal'] }, how: 'Catch all the sweets! Don’t catch the grumpy coal.', tip: 'Catch sweets, skip coal!' },
+  gingerrun: { room: 'gingerbread', label: 'Gingerbread Run', name: 'Gingerbread Run', kind: 'Super fun', mode: 'runner', lives: [3, 2, 1, 1], goal: [15, 25, 40, 60], th: { out: true, hz: 170, ground: '#FFFFFF', rider: ginger, good: ['gumdrop', 'candy'], bad: ['cane'] }, how: 'Run, run, as fast as you can! Tap to jump over candy canes and grab gumdrops.', tip: 'Tap to jump!' },
+  splash: { room: 'fountain', label: 'Splash Pattern', name: 'Splash Pattern', kind: 'Exciting', mode: 'simon', lives: [3, 2, 2, 1], goal: [3, 4, 6, 8], unit: 'rounds', combo: false, th: { out: true, hz: 150, pads: [{ col: '#34B2F0', icon: 'bubble' }, { col: '#FF8A3D', icon: 'fishy' }, { col: '#FFC63A', icon: 'star' }, { col: '#FF8FB8', icon: 'heart' }] }, how: 'Watch the fountain lights, then tap them in the same order!', tip: 'Watch, then copy!' },
+  bubbleburst: { room: 'fountain', label: 'Bubble Burst', name: 'Bubble Burst', kind: 'Super fun', mode: 'bubbles', lives: [5, 5, 4, 3], goal: [15, 25, 35, 50], th: { out: true, hz: 150, task: 'free' }, how: 'Pop every bubble before it floats away! Golden bubbles are worth 3.', tip: 'Pop them all!' },
+  frogpop: { room: 'pond', label: 'Frog Pop', name: 'Frog Pop', kind: 'Exciting', mode: 'whack', time: 40, lives: [3, 3, 3, 3], goal: [10, 14, 18, 24], th: { out: true, hz: 90, hole: '#3E9E4F', deco: `<rect y="60" width="360" height="210" fill="url(#water)"/>`, good: ['frog'], bad: ['turtle'] }, how: 'Tap the frogs when they pop up on the lily pads. Let the sleepy turtles rest!', tip: 'Tap the frogs only!' },
+  dragonfly: { room: 'pond', label: 'Dragonfly', name: 'Dragonfly Dash', kind: 'Super fun', mode: 'flappy', lives: [3, 2, 1, 1], goal: [3, 5, 8, 12], th: { out: true, hz: 150, flyer: 'dragonfly', pipe: '#7FB86E', cap: '#C98A55' }, how: 'Tap to zip your dragonfly between the cattails!', tip: 'Tap to fly!' },
+  juggle: { room: 'playground', label: 'Keep-Up', name: 'Soccer Keep-Up', kind: 'Exciting', mode: 'keepup', lives: [3, 2, 1, 1], goal: [6, 10, 14, 20], unit: 'bounces', th: { out: true, hz: 160, ball: 'soccer' }, how: 'Tap the soccer ball to keep it in the air. How many can you do?', tip: 'Tap the ball!' },
+  parkdash: { room: 'playground', label: 'Park Dash', name: 'Playground Dash', kind: 'Super fun', mode: 'runner', lives: [3, 2, 1, 1], goal: [15, 25, 40, 60], th: { out: true, hz: 160, good: ['star', 'coin'], bad: ['puddle', 'log'] }, how: 'Race around the park! Tap to jump over puddles and logs and grab the stars.', tip: 'Tap to jump!' }
+};
+Object.entries(ARCADE).forEach(([key, def]) => { const R = ROOMS[def.room]; if (!R || R.tabs.some(t => t[0] === key)) return; R.tabs.push([key, def.label, () => arcHTML(key), () => arcInit(key)]); });
+
+// ---------- 4. EXISTING LEVEL GAMES START HARDER FOR OLDER KIDS ----------
+const ageBoost = () => [0, 1, 3, 5][AGE_D()];
+
 
 injectDefs();
 injectDefs2();
