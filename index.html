@@ -887,6 +887,33 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
 .tracepick button{flex:none;min-width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--display);font-weight:900;font-size:19px;color:var(--ink)}
 .tracepick button.done{background:#DDF6E4;color:#1E7A3E;box-shadow:none}
 .tracepick button[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:none}
+.arc-rule{display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:15px;color:#7A5200;background:#FFF6C9;border-radius:999px;padding:4px 6px 4px 14px}
+.arc-rule .hearbtn{width:30px;height:30px}
+.arc-card.end{overflow-y:auto;justify-content:flex-start;padding-top:14px}
+.arc-learn{position:relative;background:#F3EEFF;border-radius:18px;padding:10px 44px 10px 14px;text-align:left;width:100%;max-width:330px}
+.arc-learn span{display:block;font-weight:900;font-size:12px;color:#7B5CFA;text-transform:uppercase;letter-spacing:.04em}
+.arc-learn p{margin:2px 0 0;font-size:14px;font-weight:700;color:var(--ink);line-height:1.35}
+.arc-learn .hearbtn{position:absolute;right:8px;top:8px}
+.lvcard .arc-learn{margin:8px auto 0}
+.kbd{display:flex;flex-direction:column;gap:5px;padding:6px 0}
+.kbd div{display:flex;gap:4px;justify-content:center}
+.kbd button{flex:1;max-width:40px;height:44px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line),0 3px 0 var(--line);font-family:var(--display);font-weight:900;font-size:18px;color:var(--ink)}
+.kbd button:active{transform:translateY(2px);box-shadow:inset 0 0 0 1.5px var(--line)}
+.chip.offg{opacity:.75;border-style:dashed}
+.plush.goldp{background:linear-gradient(180deg,#FFF6C9,#FFE36B)}
+.capchip{font-size:18px;min-width:40px;justify-content:center}
+.capchip.locked{opacity:.4}
+.sayit{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.sayit-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border-radius:26px;padding:18px 14px 16px;box-shadow:0 12px 24px -14px rgba(43,37,80,.45),inset 0 0 0 3px #F3EEFF}
+.sayit-e{font-size:76px;line-height:1}
+.sayit-card b{font-family:var(--display);font-size:38px;line-height:1.1;color:var(--ink)}
+.sayit-card small{font-size:17px;font-weight:800;color:#7B5CFA}
+.sayit-card em{font-style:normal;font-size:14px;font-weight:700;color:var(--ink-2)}
+.sayit-l{position:absolute;top:10px;right:12px;font-size:11px;font-weight:900;color:#fff;background:#7B5CFA;border-radius:999px;padding:2px 10px}
+.sayit .btn.on{animation:stepPulse 1s ease-in-out infinite}
+.sayit-heard{text-align:center;font-weight:800;margin:0;color:var(--ink-2)}
+.sayit-stars{display:flex;justify-content:center;gap:8px;font-size:36px;color:#E3E6F0}
+.sayit-stars .on{color:#FFC63A;animation:popIn .3s ease-out}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -1925,7 +1952,7 @@ function render(){
   $('#who').innerHTML = `<button class="profile" data-act="switchProfile" aria-label="Switch profile">${kidMode ? `<span class="avatar mini">${headBox(kid.char)}</span>` : parentAv(30)}<span>Switch</span></button>`;
   $('#strip').innerHTML = kidMode ? `<div class="kidstrip">
       <button class="avatar" data-act="switchProfile" aria-label="Switch profile">${headBox(kid.char)}</button>
-      <div class="kidname"><h1>${esc(kid.name)}'s World</h1><small>Age ${kid.age} · robots teach ${BANDS[bandOf(kid.age)]}</small></div>
+      <div class="kidname"><h1>${esc(kid.name)}'s World</h1><small>${gradeLabel(kid)} · age ${kid.age}</small></div>
       <button class="mailbtn" data-act="openChat" aria-label="Messages from ${esc(pname())}">${MAIL}${unreadFor(kid.id, 'parent') ? `<span class="badge">${unreadFor(kid.id, 'parent')}</span>` : ''}</button>
       <div class="wallet" id="wallet" aria-label="${kid.coins} coins">${COIN(28)}<span id="walletN">${kid.coins}</span></div></div>` : '';
   const views = kidMode ? { home: vHome, explore: vExplore, build: vBuild, market: vMarket, buddies: vBuddies } : { inbox: vInbox, tasks: vTasks, chat: vChat, family: vFamily, controls: vControls };
@@ -2233,7 +2260,7 @@ function vFamily(){
     const days = [...Array(7)].map((_, k) => { const d = new Date(now); d.setDate(now.getDate() - 6 + k); const key = dayKey(d); return { d, sum: h.filter(x => x.kind === 'earn' && dayKey(new Date(x.ts)) === key).reduce((a, x) => a + x.amt, 0), today: k === 6 }; });
     const lt = Object.keys(learnedToday(kid));
     return `<div class="card" style="display:flex;flex-direction:column;gap:12px">
-      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}${raBadge(kid)}</h3><small>${BUDDIES[kid.buddy].name} · energy ${kid.strength}% · lessons for ${BANDS[bandOf(kid.age)]}</small></div><button class="btn small ghost" data-act="editKid" data-v="${id}">Edit</button></div>
+      <div class="appr-top"><div class="avatar">${headBox(kid.char)}</div><div style="flex:1;min-width:0"><h3>${esc(kid.name)}, ${kid.age}${raBadge(kid)}</h3><small>${BUDDIES[kid.buddy].name} · energy ${kid.strength}% · lessons for ${gradeLabel(kid)}</small></div><button class="btn small grape" data-act="learnPlan" data-id="${id}">📚 Plan</button><button class="btn small ghost" data-act="editKid" data-v="${id}">Edit</button></div>
       <div class="stats"><div class="stat"><b>${kid.coins}</b><small>Coins now</small></div><div class="stat"><b>+${earned}</b><small>Earned 7d</small></div><div class="stat"><b>−${spent}</b><small>Spent 7d</small></div></div>
       <div><div class="flabel" style="margin-bottom:6px">Coins earned each day · streak ${kid.streak} days</div><div class="week">${days.map(x => `<div class="${x.sum ? 'has' : ''} ${x.today ? 'today' : ''}"><small>${DAYN[x.d.getDay()]}</small>${x.sum || '–'}</div>`).join('')}</div></div>
       <div><div class="flabel" style="margin-bottom:6px">Learned with robots today</div>${lt.length ? `<div class="chips">${lt.map(r => `<span class="chip">${ROBOTS[r].name} · ${ROBOTS[r].topic}</span>`).join('')}</div>` : `<p class="note-s">No lessons yet today.</p>`}</div>
@@ -6557,8 +6584,8 @@ setFull = function(on){
 //  v16 — harder games for older kids, every letter and number to trace,
 //        and three games in every place (normal, exciting, super fun)
 // =====================================================================
-const AGE_D = () => { const a = (K() && K().age) || 6; return a <= 5 ? 0 : a <= 7 ? 1 : a <= 9 ? 2 : 3; };
-const AGE_TXT = ['ages 4–5', 'ages 6–7', 'ages 8–9', 'ages 10+'];
+const AGE_D = () => { const g = gradeOf(K()); return g === 0 ? 0 : g <= 2 ? 1 : g <= 5 ? 2 : 3; };
+const AGE_TXT = ['Kindergarten', 'grades 1–2', 'grades 3–5', 'grades 6–8'];
 
 // ---------- 1. TRACE: the whole alphabet, lowercase for bigger kids, numbers up to 30 ----------
 const GLY = {
@@ -7030,6 +7057,898 @@ Object.entries(ARCADE).forEach(([key, def]) => { const R = ROOMS[def.room]; if (
 
 // ---------- 4. EXISTING LEVEL GAMES START HARDER FOR OLDER KIDS ----------
 const ageBoost = () => [0, 1, 3, 5][AGE_D()];
+
+
+// =====================================================================
+//  v17 — grades K–8, a learning plan the parent picks, languages,
+//        and every game different (and teaching something)
+// =====================================================================
+const GRADES = ['Kindergarten', '1st grade', '2nd grade', '3rd grade', '4th grade', '5th grade', '6th grade', '7th grade', '8th grade'];
+const GSHORT = ['K', '1', '2', '3', '4', '5', '6', '7', '8'];
+const gradeOf = kid => (kid && kid.grade != null) ? kid.grade : clamp(((kid && kid.age) || 6) - 5, 0, 8);
+const GR = () => gradeOf(K());
+const gradeLabel = kid => GRADES[gradeOf(kid)];
+const US_STATES = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Outside the US'];
+
+// ---------- 1. TOPICS by subject, with the grades they fit ----------
+const TOPICS = {
+  math: { name: 'Math', t: { count: ['Counting to 20', 0, 1], add: ['Adding', 0, 3], sub: ['Subtracting', 0, 3], shapes: ['Shapes', 0, 2], place: ['Place value', 1, 5], skip: ['Skip counting', 1, 3], evenodd: ['Even & odd', 2, 3], time: ['Telling time', 1, 3], money: ['Money', 1, 4], mult: ['Multiplying', 3, 5], div: ['Dividing', 3, 6], frac: ['Fractions', 3, 6], prime: ['Factors & primes', 4, 6], dec: ['Decimals', 4, 6], neg: ['Negative numbers', 6, 8], ratio: ['Ratios & percents', 6, 7], alg: ['Equations', 6, 8], sq: ['Squares & roots', 7, 8] } },
+  read: { name: 'Reading & words', t: { letters: ['Letters', 0, 0], sounds: ['Letter sounds', 0, 1], rhyme: ['Rhyming', 0, 2], sight: ['Sight words', 0, 2], plural: ['Plurals', 1, 3], nounverb: ['Nouns & verbs', 1, 4], adj: ['Adjectives', 2, 4], past: ['Past tense', 2, 4], syn: ['Same & opposite words', 2, 6], prefix: ['Prefixes', 3, 6], spell: ['Spelling', 2, 8], homo: ['Homophones', 3, 6], speech: ['Parts of speech', 5, 8], figur: ['Similes & metaphors', 5, 8] } },
+  sci: { name: 'Science', t: { living: ['Living & nonliving', 0, 2], animals: ['Animals & habitats', 0, 3], weather: ['Weather & seasons', 0, 3], plants: ['Plants', 1, 4], matter: ['Solids, liquids & gases', 2, 5], body: ['Human body', 2, 6], space: ['Earth & space', 1, 6], energy: ['Energy & magnets', 3, 8], cells: ['Cells', 6, 8], chem: ['Elements & compounds', 7, 8] } },
+  world: { name: 'People & world', t: { feelings: ['Feelings & kindness', 0, 8], helpers: ['Community helpers', 0, 2], maps: ['Maps & continents', 2, 6] } }
+};
+const LANGS = { es: ['Spanish', 'es-ES'], fr: ['French', 'fr-FR'], pt: ['Portuguese', 'pt-BR'], it: ['Italian', 'it-IT'], de: ['German', 'de-DE'], zh: ['Chinese', 'zh-CN'], ja: ['Japanese', 'ja-JP'] };
+function topicFits(lo, hi, g){ return g >= lo && g <= hi; }
+function planOf(kid){
+  const g = gradeOf(kid);
+  if (!kid.plan || kid.plan.g !== g && !kid.plan.custom){
+    const p = { g, langs: (kid.plan && kid.plan.langs) || [], speak: kid.plan ? kid.plan.speak !== false : true };
+    Object.keys(TOPICS).forEach(s => { p[s] = Object.entries(TOPICS[s].t).filter(([, v]) => topicFits(v[1], v[2], g)).map(([k]) => k); });
+    kid.plan = p;
+  }
+  return kid.plan;
+}
+
+// ---------- 2. LEARNING CONTENT: groups to find, sort and catch ----------
+const N = (a, b) => [...Array(b - a + 1)].map((_, k) => String(a + k));
+const LET = 'ABCDEFGHJKLMNPRSTUWY'.split('');
+const SETS = [
+  // math
+  { top: 'count', g: [0, 0], a: 'Numbers', b: 'Letters', A: () => N(1, 10), B: () => LET, learn: 'Numbers tell us how many. Letters are for making words.' },
+  { top: 'count', g: [0, 0], a: 'More than 5', b: '5 or less', A: () => N(6, 10), B: () => N(1, 5), learn: 'Numbers after 5 are bigger: 6, 7, 8, 9, 10.' },
+  { top: 'count', g: [1, 1], a: 'More than 12', b: '12 or less', A: () => N(13, 20), B: () => N(1, 12), learn: 'When we count past 12 we get bigger numbers: 13, 14, 15 and up to 20.' },
+  { top: 'add', g: [0, 0], a: 'Makes 5', b: 'Not 5', A: () => ['2+3', '1+4', '4+1', '3+2', '5+0', '0+5'], B: () => ['2+2', '1+1', '3+3', '4+2', '1+2', '3+1'], learn: '2 + 3 = 5. Hold up 2 fingers, then 3 more. Now you have 5!' },
+  { top: 'add', g: [1, 1], a: 'Makes 10', b: 'Not 10', A: () => ['7+3', '6+4', '5+5', '8+2', '9+1', '4+6', '3+7'], B: () => ['5+4', '6+3', '7+2', '8+3', '4+4', '6+5'], learn: 'Pairs that make 10, like 7 + 3 and 6 + 4, help you add fast.' },
+  { top: 'add', g: [2, 3], a: 'Equals 15', b: 'Not 15', A: () => ['8+7', '9+6', '10+5', '7+8', '6+9', '11+4', '12+3'], B: () => ['8+6', '9+7', '7+7', '10+4', '6+8', '11+5'], learn: '8 + 7 = 15. Make a 10 first: 8 + 2 = 10, then add the 5 that is left.' },
+  { top: 'sub', g: [0, 1], a: 'Equals 2', b: 'Not 2', A: () => ['5−3', '4−2', '3−1', '6−4', '7−5', '10−8'], B: () => ['5−2', '4−1', '6−3', '7−3', '9−4', '8−5'], learn: 'Taking away means we end up with fewer. 5 take away 3 leaves 2.' },
+  { top: 'sub', g: [2, 3], a: 'Equals 8', b: 'Not 8', A: () => ['15−7', '12−4', '17−9', '11−3', '16−8', '14−6'], B: () => ['15−6', '12−5', '17−8', '13−4', '16−9'], learn: '15 − 7 = 8. Count up from 7 to 15 and you count 8 steps.' },
+  { top: 'shapes', g: [0, 2], a: 'Squares', b: 'Not squares', A: () => ['🟥', '🟦', '🟩', '🟨', '🟪', '🟧'], B: () => ['🔺', '🔴', '🔵', '⭐', '❤️', '🟠'], learn: 'A square has 4 sides that are all the same length, and 4 corners.' },
+  { top: 'shapes', g: [0, 2], a: 'Circles', b: 'Not circles', A: () => ['🔴', '🔵', '🟠', '🟢', '🟣', '🟡'], B: () => ['🟥', '🔺', '⭐', '🟦', '🔶', '🟩'], learn: 'A circle is perfectly round. It has no corners and no straight sides.' },
+  { top: 'place', g: [1, 2], a: 'Has 3 tens', b: 'Not 3 tens', A: () => N(30, 39), B: () => [...N(20, 29), ...N(40, 49)], learn: 'In 34, the 3 means 3 tens (30) and the 4 means 4 ones.' },
+  { top: 'place', g: [3, 3], a: '5 in the hundreds place', b: 'Not 5 hundreds', A: () => ['512', '587', '503', '559', '546'], B: () => ['152', '415', '625', '345', '251'], learn: 'In 512, the 5 is in the hundreds place. It is worth 500.' },
+  { top: 'place', g: [4, 4], a: '7 in the thousands place', b: 'Not 7 thousands', A: () => ['7,215', '7,004', '7,980', '7,321'], B: () => ['1,725', '2,170', '9,817', '4,072'], learn: 'In 7,215 the 7 is worth 7,000.' },
+  { top: 'place', g: [5, 5], a: '3 in the tenths place', b: 'Not 3 tenths', A: () => ['4.3', '0.35', '12.38', '7.31'], B: () => ['3.4', '0.53', '1.03', '3.08'], learn: 'The first digit after the decimal point is the tenths place. In 4.3 it is 3 tenths.' },
+  { top: 'skip', g: [1, 1], a: 'Count by 2s', b: 'Not by 2s', A: () => ['2', '4', '6', '8', '10', '12', '14', '16'], B: () => ['3', '5', '7', '9', '11', '13', '15'], learn: 'Counting by 2s: 2, 4, 6, 8, 10. Skip one number each time!' },
+  { top: 'skip', g: [2, 3], a: 'Count by 5s', b: 'Not by 5s', A: () => ['5', '10', '15', '20', '25', '30', '35', '40'], B: () => ['12', '18', '22', '27', '33', '41', '8'], learn: 'Counting by 5s always ends in 5 or 0: 5, 10, 15, 20.' },
+  { top: 'evenodd', g: [2, 3], a: 'Even numbers', b: 'Odd numbers', A: () => ['2', '4', '8', '10', '14', '16', '20', '22', '28'], B: () => ['1', '3', '7', '9', '13', '15', '19', '21', '27'], learn: 'Even numbers can be split into two equal groups. They end in 0, 2, 4, 6 or 8.' },
+  { top: 'time', g: [1, 3], a: 'Half past', b: 'O’clock', A: () => ['1:30', '4:30', '7:30', '10:30', '12:30', '6:30'], B: () => ['1:00', '4:00', '7:00', '10:00', '12:00', '6:00'], learn: 'Half past means 30 minutes after the hour. O’clock means exactly on the hour.' },
+  { top: 'money', g: [1, 2], a: 'Worth 10¢', b: 'Not 10¢', A: () => ['1 dime', '2 nickels', '10 pennies', '1 nickel + 5 pennies'], B: () => ['1 quarter', '3 nickels', '1 penny', '2 dimes', '1 nickel'], learn: 'A dime is worth 10 cents. So are 2 nickels or 10 pennies.' },
+  { top: 'money', g: [3, 4], a: 'Worth $1', b: 'Not $1', A: () => ['4 quarters', '10 dimes', '20 nickels', '100 pennies', '2 half dollars'], B: () => ['3 quarters', '8 dimes', '5 dimes', '15 nickels', '50 pennies'], learn: 'One dollar is 100 cents: 4 quarters, 10 dimes or 20 nickels.' },
+  { top: 'mult', g: [3, 3], a: 'Equals 24', b: 'Not 24', A: () => ['3×8', '4×6', '6×4', '8×3', '2×12', '12×2'], B: () => ['5×5', '4×5', '3×7', '6×5', '2×11', '7×4'], learn: '4 × 6 means 4 groups of 6. That makes 24.' },
+  { top: 'mult', g: [4, 5], a: 'Equals 36', b: 'Not 36', A: () => ['4×9', '6×6', '9×4', '3×12', '12×3', '2×18'], B: () => ['5×7', '4×8', '6×7', '3×11', '7×5'], learn: 'There are many ways to make 36: 4 × 9, 6 × 6 and 3 × 12.' },
+  { top: 'div', g: [3, 6], a: 'Equals 6', b: 'Not 6', A: () => ['12÷2', '18÷3', '24÷4', '30÷5', '36÷6', '42÷7'], B: () => ['15÷3', '20÷4', '16÷2', '28÷4', '35÷5'], learn: 'Dividing means sharing equally. 24 ÷ 4 = 6 because 4 groups of 6 make 24.' },
+  { top: 'frac', g: [3, 4], a: 'Equal to ½', b: 'Not ½', A: () => ['2/4', '3/6', '4/8', '5/10', '6/12'], B: () => ['1/3', '2/3', '3/4', '1/4', '2/5'], learn: 'A fraction equals ½ when the top is exactly half of the bottom, like 3/6.' },
+  { top: 'frac', g: [5, 6], a: 'Greater than ½', b: 'Less than ½', A: () => ['3/4', '2/3', '5/8', '7/10', '4/5'], B: () => ['1/3', '2/5', '3/8', '1/4', '1/6'], learn: 'A fraction is more than ½ when the top is more than half of the bottom.' },
+  { top: 'prime', g: [4, 6], a: 'Prime numbers', b: 'Not prime', A: () => ['2', '3', '5', '7', '11', '13', '17', '19', '23', '29'], B: () => ['4', '6', '8', '9', '12', '15', '21', '25', '27'], learn: 'A prime number has exactly two factors: 1 and itself. 7 is prime, 9 is not (3 × 3).' },
+  { top: 'dec', g: [4, 6], a: 'More than 0.5', b: 'Less than 0.5', A: () => ['0.6', '0.75', '0.9', '0.51', '0.8'], B: () => ['0.4', '0.25', '0.09', '0.49', '0.3'], learn: 'Compare decimals digit by digit from the left. 0.6 is more than 0.5; 0.49 is less.' },
+  { top: 'neg', g: [6, 8], a: 'Less than zero', b: 'More than zero', A: () => ['−3', '−10', '−1', '−7', '−0.5', '−12'], B: () => ['2', '0.5', '7', '1', '10', '12'], learn: 'Negative numbers are less than zero. On a number line they are to the left of 0.' },
+  { top: 'ratio', g: [6, 7], a: 'Equals 50%', b: 'Not 50%', A: () => ['½', '0.5', '50/100', '3/6', '5/10'], B: () => ['¼', '0.25', '75%', '2/3', '0.05'], learn: '50% means 50 out of 100, which is the same as one half.' },
+  { top: 'alg', g: [6, 8], a: 'x = 3 works', b: 'x = 3 does not work', A: () => ['2x = 6', 'x + 4 = 7', '3x = 9', 'x − 1 = 2', '10 − x = 7'], B: () => ['2x = 8', 'x + 3 = 7', 'x − 2 = 3', '4x = 8', '5 + x = 9'], learn: 'To check a solution, put the number in for x. If both sides match, it works.' },
+  { top: 'sq', g: [7, 8], a: 'Perfect squares', b: 'Not squares', A: () => ['1', '4', '9', '16', '25', '36', '49', '64', '81', '100'], B: () => ['2', '8', '12', '18', '20', '27', '50', '72'], learn: 'A perfect square is a number times itself: 7 × 7 = 49.' },
+  { top: 'sq', g: [8, 8], a: 'Irrational', b: 'Rational', A: () => ['√2', 'π', '√5', '√3', '√7'], B: () => ['0.5', '3/4', '√9', '−2', '0.25'], learn: 'Irrational numbers go on forever without repeating, like π. √9 = 3, so it is rational.' },
+  // reading
+  { top: 'letters', g: [0, 0], a: 'Big letters', b: 'Small letters', A: () => ['A', 'B', 'M', 'R', 'T', 'G', 'D'], B: () => ['a', 'b', 'm', 'r', 't', 'g', 'd'], learn: 'Every letter has a big (capital) shape and a small shape, like B and b.' },
+  { top: 'sounds', g: [0, 1], a: 'Starts with B', b: 'Starts with another sound', A: () => ['🐝 bee', '⚽ ball', '🍌 banana', '🐻 bear', '🚌 bus', '🎈 balloon'], B: () => ['🐱 cat', '🍎 apple', '🐶 dog', '🐟 fish', '☀️ sun', '🌙 moon'], learn: 'B says “buh”, like in bee, ball and bear.' },
+  { top: 'sounds', g: [0, 1], a: 'Starts with S', b: 'Starts with another sound', A: () => ['☀️ sun', '🧦 sock', '⭐ star', '🐍 snake', '🥪 sandwich', '🐌 snail'], B: () => ['🐶 dog', '🐮 cow', '🍎 apple', '🐸 frog', '🎩 hat', '🦁 lion'], learn: 'S says “sss”, like a snake! Sun, sock and star all start with S.' },
+  { top: 'rhyme', g: [0, 2], a: 'Rhymes with cat', b: 'Does not rhyme', A: () => ['🎩 hat', '🦇 bat', '🐀 rat', 'mat', 'sat', 'fat'], B: () => ['🐶 dog', '☀️ sun', '🐟 fish', '🚗 car', '🌳 tree', '🐮 cow'], learn: 'Words rhyme when they end with the same sound: cat, hat, bat.' },
+  { top: 'sight', g: [0, 2], a: 'Real words', b: 'Not real words', A: () => ['the', 'and', 'see', 'is', 'you', 'we', 'go', 'like', 'said', 'was'], B: () => ['teh', 'nad', 'ese', 'si', 'yuo', 'ew', 'og', 'lkie'], learn: 'Sight words are words we see a lot, like the, and, see and you.' },
+  { top: 'plural', g: [1, 3], a: 'More than one', b: 'Just one', A: () => ['cats', 'dogs', 'boxes', 'foxes', 'children', 'mice', 'feet'], B: () => ['cat', 'dog', 'box', 'fox', 'child', 'mouse', 'foot'], learn: 'We usually add s or es for more than one. Some words change: mouse → mice.' },
+  { top: 'nounverb', g: [1, 4], a: 'Nouns (things)', b: 'Verbs (actions)', A: () => ['dog', 'table', 'teacher', 'apple', 'park', 'ball', 'river'], B: () => ['run', 'jump', 'eat', 'swim', 'read', 'sing', 'climb'], learn: 'A noun is a person, place or thing. A verb is an action word.' },
+  { top: 'adj', g: [2, 4], a: 'Describing words', b: 'Not describing', A: () => ['happy', 'tall', 'soft', 'blue', 'tiny', 'loud', 'shiny'], B: () => ['jump', 'table', 'run', 'house', 'sing', 'chair'], learn: 'Adjectives describe things: a tiny, shiny, blue fish.' },
+  { top: 'past', g: [2, 4], a: 'Already happened', b: 'Happening now', A: () => ['jumped', 'ran', 'ate', 'played', 'swam', 'wrote', 'sang'], B: () => ['jump', 'run', 'eat', 'play', 'swim', 'write', 'sing'], learn: 'Past tense tells what already happened. Many words add -ed; some change, like run → ran.' },
+  { top: 'syn', g: [2, 4], a: 'Means happy', b: 'Does not', A: () => ['glad', 'cheerful', 'joyful', 'pleased', 'merry'], B: () => ['sad', 'angry', 'tired', 'grumpy', 'scared'], learn: 'Synonyms are words that mean almost the same, like happy and glad.' },
+  { top: 'syn', g: [4, 6], a: 'Opposite of brave', b: 'Not the opposite', A: () => ['scared', 'fearful', 'timid', 'cowardly'], B: () => ['bold', 'heroic', 'fearless', 'daring', 'strong'], learn: 'Antonyms are opposites: brave and scared.' },
+  { top: 'prefix', g: [3, 6], a: 'Means NOT', b: 'Does not', A: () => ['unhappy', 'impossible', 'dislike', 'incorrect', 'unfair', 'invisible'], B: () => ['uniform', 'important', 'display', 'under', 'inside', 'island'], learn: 'The prefixes un-, im-, in- and dis- can mean “not”: unhappy = not happy.' },
+  { top: 'spell', g: [2, 3], a: 'Spelled right', b: 'Spelled wrong', A: () => ['because', 'friend', 'said', 'again', 'people', 'school'], B: () => ['becuz', 'freind', 'sed', 'agen', 'peple', 'skool'], learn: 'Some words are tricky! Friend has “ie” and said has “ai”.' },
+  { top: 'spell', g: [4, 8], a: 'Spelled right', b: 'Spelled wrong', A: () => ['necessary', 'separate', 'definitely', 'receive', 'beginning', 'rhythm'], B: () => ['neccessary', 'seperate', 'definately', 'recieve', 'begining', 'rythm'], learn: 'Remember: i before e except after c (receive), and sep-A-rate has an A in the middle.' },
+  { top: 'homo', g: [3, 6], a: 'Number words', b: 'Sound-alike words', A: () => ['two', 'four', 'eight', 'one'], B: () => ['too', 'for', 'ate', 'won'], learn: 'Homophones sound the same but mean different things: two, too, to.' },
+  { top: 'speech', g: [5, 8], a: 'Adverbs', b: 'Not adverbs', A: () => ['quickly', 'softly', 'very', 'often', 'carefully', 'never'], B: () => ['quick', 'soft', 'run', 'blue', 'dog', 'happy'], learn: 'Adverbs tell how, when or how much: she ran quickly.' },
+  { top: 'figur', g: [5, 8], a: 'Similes', b: 'Metaphors', A: () => ['as brave as a lion', 'sleeps like a log', 'as cold as ice', 'runs like the wind'], B: () => ['she is a star', 'time is money', 'snow is a blanket', 'he is a night owl'], learn: 'A simile compares using like or as. A metaphor says one thing IS another.' },
+  // science
+  { top: 'living', g: [0, 2], a: 'Living things', b: 'Not living', A: () => ['🐶 dog', '🌳 tree', '🐟 fish', '🌻 flower', '🐦 bird', '🐛 bug', '🐄 cow'], B: () => ['🪨 rock', '🚗 car', '🧸 teddy', '💧 water', '☁️ cloud', '✏️ pencil', '⚽ ball'], learn: 'Living things grow, eat or drink, and breathe. Rocks and toys do not.' },
+  { top: 'animals', g: [0, 1], a: 'Lives in water', b: 'Lives on land', A: () => ['🐟 fish', '🐙 octopus', '🐬 dolphin', '🦀 crab', '🐳 whale', '🦭 seal'], B: () => ['🐄 cow', '🦁 lion', '🐿️ squirrel', '🐎 horse', '🦒 giraffe', '🐔 chicken'], learn: 'An animal’s home is its habitat. Fish and whales live in the ocean.' },
+  { top: 'animals', g: [2, 3], a: 'Mammals', b: 'Not mammals', A: () => ['🐶 dog', '🐳 whale', '🦇 bat', '🐘 elephant', '🐄 cow', '🐒 monkey'], B: () => ['🐍 snake', '🐸 frog', '🐟 fish', '🐦 bird', '🐊 crocodile', '🐢 turtle'], learn: 'Mammals have hair or fur and feed their babies milk. Even whales and bats!' },
+  { top: 'weather', g: [0, 3], a: 'Cold weather', b: 'Hot weather', A: () => ['❄️ snow', '🧤 mittens', '⛄ snowman', '🧣 scarf', '🥶 brrr'], B: () => ['☀️ sunny', '🩳 shorts', '🍉 melon', '🏖️ beach', '🍦 ice cream'], learn: 'In winter it is cold and we bundle up. In summer it is hot and sunny.' },
+  { top: 'plants', g: [1, 4], a: 'Plants need', b: 'Plants don’t need', A: () => ['sunlight', 'water', 'air', 'soil'], B: () => ['candy', 'toys', 'music', 'shoes', 'TV'], learn: 'Plants need sunlight, water, air and soil to grow.' },
+  { top: 'plants', g: [2, 4], a: 'Parts of a plant', b: 'Not plant parts', A: () => ['root', 'stem', 'leaf', 'flower', 'seed'], B: () => ['wing', 'paw', 'fin', 'beak', 'tail'], learn: 'Roots drink water, the stem holds the plant up, and leaves make food from sunlight.' },
+  { top: 'matter', g: [2, 3], a: 'Solids', b: 'Liquids', A: () => ['🧊 ice', '🪨 rock', '🪵 wood', '🥄 spoon', '🧱 brick'], B: () => ['💧 water', '🥛 milk', '🧃 juice', '🍯 honey', '🫗 oil'], learn: 'Solids keep their shape. Liquids flow and take the shape of their container.' },
+  { top: 'matter', g: [4, 5], a: 'Gases', b: 'Not gases', A: () => ['steam', 'air', 'oxygen', 'helium', 'carbon dioxide'], B: () => ['ice', 'milk', 'sand', 'juice', 'iron'], learn: 'Gases spread out to fill any space. Steam is water as a gas.' },
+  { top: 'body', g: [2, 6], a: 'Organs', b: 'Not organs', A: () => ['heart', 'lungs', 'brain', 'stomach', 'liver', 'kidneys'], B: () => ['elbow', 'knee', 'ankle', 'eyebrow', 'fingernail'], learn: 'Organs do special jobs: the heart pumps blood and the lungs breathe air.' },
+  { top: 'space', g: [1, 6], a: 'Planets', b: 'Not planets', A: () => ['Mercury', 'Venus', 'Earth', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'], B: () => ['Moon', 'Sun', 'Pluto', 'Comet', 'Polaris', 'Milky Way'], learn: 'There are 8 planets. The Sun is a star and the Moon goes around Earth.' },
+  { top: 'energy', g: [3, 8], a: 'Renewable energy', b: 'Not renewable', A: () => ['solar', 'wind', 'hydro', 'geothermal'], B: () => ['coal', 'oil', 'natural gas', 'gasoline'], learn: 'Renewable energy, like sun and wind, never runs out.' },
+  { top: 'energy', g: [3, 5], a: 'Magnets stick', b: 'Magnets don’t stick', A: () => ['iron nail', 'paper clip', 'steel spoon', 'fridge door'], B: () => ['wood', 'plastic', 'glass', 'rubber', 'paper'], learn: 'Magnets pull on things made of iron or steel.' },
+  { top: 'cells', g: [6, 8], a: 'Parts of a cell', b: 'Not cell parts', A: () => ['nucleus', 'membrane', 'mitochondria', 'cytoplasm', 'ribosome'], B: () => ['petal', 'bone', 'muscle', 'vein', 'tooth'], learn: 'The nucleus is the cell’s control center, and mitochondria make energy.' },
+  { top: 'chem', g: [7, 8], a: 'Elements', b: 'Compounds', A: () => ['oxygen', 'gold', 'iron', 'carbon', 'helium', 'sodium'], B: () => ['water', 'salt', 'sugar', 'rust', 'baking soda'], learn: 'Elements are made of one kind of atom. Compounds join elements, like water (H₂O).' },
+  // people & world
+  { top: 'feelings', g: [0, 8], a: 'Kind choices', b: 'Unkind choices', A: () => ['share toys', 'say thank you', 'help a friend', 'take turns', 'say sorry'], B: () => ['grab toys', 'call names', 'push in line', 'leave a friend out', 'yell'], learn: 'Kind choices make everyone feel safe and happy, including you.' },
+  { top: 'helpers', g: [0, 2], a: 'Helps sick people', b: 'Other helpers', A: () => ['👩‍⚕️ doctor', '🧑‍⚕️ nurse', '🚑 paramedic', '🦷 dentist'], B: () => ['🧑‍🚒 firefighter', '👮 police', '🧑‍🍳 chef', '🧑‍🌾 farmer', '🧑‍🏫 teacher'], learn: 'Doctors and nurses help sick people. Firefighters, police and teachers help too!' },
+  { top: 'maps', g: [2, 6], a: 'Continents', b: 'Countries', A: () => ['Africa', 'Asia', 'Europe', 'Australia', 'Antarctica', 'North America', 'South America'], B: () => ['Canada', 'Brazil', 'Japan', 'Egypt', 'Mexico', 'France', 'India'], learn: 'There are 7 continents. Countries are inside continents, like Mexico in North America.' }
+];
+// languages: word list for the language picker
+const LWORDS = [
+  ['👋', 'hello', 'hola', 'bonjour', 'olá', 'ciao', 'hallo', '你好|nǐ hǎo', 'こんにちは|konnichiwa'],
+  ['🙏', 'thank you', 'gracias', 'merci', 'obrigado', 'grazie', 'danke', '谢谢|xièxie', 'ありがとう|arigatō'],
+  ['🙂', 'please', 'por favor', 's’il te plaît', 'por favor', 'per favore', 'bitte', '请|qǐng', 'おねがい|onegai'],
+  ['👋', 'goodbye', 'adiós', 'au revoir', 'tchau', 'arrivederci', 'tschüss', '再见|zàijiàn', 'さようなら|sayōnara'],
+  ['✅', 'yes', 'sí', 'oui', 'sim', 'sì', 'ja', '是|shì', 'はい|hai'],
+  ['❌', 'no', 'no', 'non', 'não', 'no', 'nein', '不|bù', 'いいえ|iie'],
+  ['🐱', 'cat', 'gato', 'chat', 'gato', 'gatto', 'Katze', '猫|māo', 'ねこ|neko'],
+  ['🐶', 'dog', 'perro', 'chien', 'cachorro', 'cane', 'Hund', '狗|gǒu', 'いぬ|inu'],
+  ['🐦', 'bird', 'pájaro', 'oiseau', 'pássaro', 'uccello', 'Vogel', '鸟|niǎo', 'とり|tori'],
+  ['🐟', 'fish', 'pez', 'poisson', 'peixe', 'pesce', 'Fisch', '鱼|yú', 'さかな|sakana'],
+  ['🍎', 'apple', 'manzana', 'pomme', 'maçã', 'mela', 'Apfel', '苹果|píngguǒ', 'りんご|ringo'],
+  ['💧', 'water', 'agua', 'eau', 'água', 'acqua', 'Wasser', '水|shuǐ', 'みず|mizu'],
+  ['🥛', 'milk', 'leche', 'lait', 'leite', 'latte', 'Milch', '牛奶|niúnǎi', 'ぎゅうにゅう|gyūnyū'],
+  ['🍞', 'bread', 'pan', 'pain', 'pão', 'pane', 'Brot', '面包|miànbāo', 'パン|pan'],
+  ['🔴', 'red', 'rojo', 'rouge', 'vermelho', 'rosso', 'rot', '红色|hóngsè', 'あか|aka'],
+  ['🔵', 'blue', 'azul', 'bleu', 'azul', 'blu', 'blau', '蓝色|lánsè', 'あお|ao'],
+  ['🟢', 'green', 'verde', 'vert', 'verde', 'verde', 'grün', '绿色|lǜsè', 'みどり|midori'],
+  ['🟡', 'yellow', 'amarillo', 'jaune', 'amarelo', 'giallo', 'gelb', '黄色|huángsè', 'きいろ|kiiro'],
+  ['1️⃣', 'one', 'uno', 'un', 'um', 'uno', 'eins', '一|yī', 'いち|ichi'],
+  ['2️⃣', 'two', 'dos', 'deux', 'dois', 'due', 'zwei', '二|èr', 'に|ni'],
+  ['3️⃣', 'three', 'tres', 'trois', 'três', 'tre', 'drei', '三|sān', 'さん|san'],
+  ['4️⃣', 'four', 'cuatro', 'quatre', 'quatro', 'quattro', 'vier', '四|sì', 'よん|yon'],
+  ['5️⃣', 'five', 'cinco', 'cinq', 'cinco', 'cinque', 'fünf', '五|wǔ', 'ご|go'],
+  ['👩', 'mom', 'mamá', 'maman', 'mamãe', 'mamma', 'Mama', '妈妈|māma', 'おかあさん|okāsan'],
+  ['👨', 'dad', 'papá', 'papa', 'papai', 'papà', 'Papa', '爸爸|bàba', 'おとうさん|otōsan'],
+  ['🧒', 'friend', 'amigo', 'ami', 'amigo', 'amico', 'Freund', '朋友|péngyou', 'ともだち|tomodachi'],
+  ['🏠', 'house', 'casa', 'maison', 'casa', 'casa', 'Haus', '家|jiā', 'いえ|ie'],
+  ['📖', 'book', 'libro', 'livre', 'livro', 'libro', 'Buch', '书|shū', 'ほん|hon'],
+  ['☀️', 'sun', 'sol', 'soleil', 'sol', 'sole', 'Sonne', '太阳|tàiyáng', 'たいよう|taiyō']
+];
+const LCOL = { es: 2, fr: 3, pt: 4, it: 5, de: 6, zh: 7, ja: 8 };
+const lword = (row, lang) => { const v = row[LCOL[lang]] || ''; const [nat, rom] = v.split('|'); return { nat, rom: rom || nat }; };
+// pick a content group for a kid (optionally only some subjects / topics)
+function pickSet(kid, subjects, tops){
+  const g = gradeOf(kid), plan = planOf(kid);
+  const want = new Set(); (subjects || ['math', 'read', 'sci', 'world']).forEach(s => (plan[s] || []).forEach(t => want.add(t)));
+  let pool = SETS.filter(x => (!tops || tops.includes(x.top)) && want.has(x.top) && g >= x.g[0] && g <= x.g[1]);
+  if (!pool.length){ const cand = SETS.filter(x => (!tops || tops.includes(x.top)) && (!subjects || subjects.some(s => TOPICS[s].t[x.top]))); const dist = x => g < x.g[0] ? x.g[0] - g : g > x.g[1] ? g - x.g[1] : 0; const md = Math.min(...cand.map(dist)); pool = cand.filter(x => dist(x) === md); }
+  if (!pool.length) pool = SETS.filter(x => g >= x.g[0] && g <= x.g[1]);
+  if (!pool.length) pool = SETS.slice(0, 2);
+  const s = pick(pool); return { ...s, Al: s.A(), Bl: s.B() };
+}
+const emojiOnly = t => /^\p{Extended_Pictographic}/u.test(t) || /^[\u{1F1E6}-\u{1FAFF}☀-➿]/u.test(t);
+
+// ---------- 3. TEACHER QUESTIONS that fit the grade and the plan ----------
+function near(ans, n = 2, lo = 0){ const out = new Set(); let tries = 0; while (out.size < n && tries++ < 50){ const d = RI(1, Math.max(2, Math.ceil(Math.abs(ans) * .25) + 2)) * (Math.random() < .5 ? -1 : 1); const v = ans + d; if (v !== ans && v >= lo) out.add(v); } while (out.size < n) out.add(ans + out.size + 1); return [...out]; }
+const EMO = ['🍎', '🍓', '⭐', '🐟', '🎈', '🍪', '🌸', '🐞'];
+const PROB = {
+  count(g, h){ const e = pick(EMO); if (g === 0 && Math.random() < .6){ const n = RI(1, h ? 10 : 7); return { t: 'Point and count each one.', q: `How many? ${e.repeat(n)}`, ans: n, why: `There are ${n}. Touch each one as you count!` }; } const n = RI(1, g ? 18 : 9); return { t: 'Think of counting up by one.', q: `What number comes after ${n}?`, ans: n + 1, why: `After ${n} comes ${n + 1}.` }; },
+  add(g, h){ let a, b; if (g === 0){ a = RI(0, h ? 5 : 3); b = RI(1, h ? 5 : 2); const e = pick(EMO); return { t: 'Count them all together.', q: `${e.repeat(a)} + ${e.repeat(b)} = ?`, ans: a + b, why: `${a} + ${b} = ${a + b}.` }; } if (g === 1){ a = RI(2, 10); b = RI(1, h ? 10 : 9); } else if (g === 2){ a = RI(11, 60); b = RI(5, 39); } else { a = RI(100, 600); b = RI(50, 399); } return { t: g >= 2 ? 'Add the ones first, then the tens (and hundreds).' : 'Start with the bigger number and count on.', q: `${a} + ${b} = ?`, ans: a + b, why: `${a} + ${b} = ${a + b}.` }; },
+  sub(g, h){ let a, b; if (g === 0){ a = RI(2, h ? 6 : 5); b = RI(1, a - 1); const e = pick(EMO); return { t: 'Take some away and count what is left.', q: `${e.repeat(a)} take away ${b} = ?`, ans: a - b, why: `${a} take away ${b} leaves ${a - b}.` }; } if (g === 1){ a = RI(5, 20); b = RI(1, Math.min(10, a)); } else if (g === 2){ a = RI(30, 99); b = RI(10, a - 5); } else { a = RI(300, 999); b = RI(100, a - 50); } return { t: 'You can count back, or count up from the smaller number.', q: `${a} − ${b} = ?`, ans: a - b, why: `${a} − ${b} = ${a - b}.` }; },
+  place(g){ if (g <= 2){ const n = RI(21, 99); return { t: 'The first digit tells how many tens.', q: `How many tens are in ${n}?`, ans: Math.floor(n / 10), why: `${n} is ${Math.floor(n / 10)} tens and ${n % 10} ones.` }; } if (g === 3){ const n = RI(120, 980); return { t: 'Round up if the ones digit is 5 or more.', q: `Round ${n} to the nearest ten.`, ans: Math.round(n / 10) * 10, why: `${n} rounds to ${Math.round(n / 10) * 10}.` }; } if (g === 4){ const n = RI(1200, 9800); return { t: 'Look at the tens digit to round to hundreds.', q: `Round ${n} to the nearest hundred.`, ans: Math.round(n / 100) * 100, why: `${n} rounds to ${Math.round(n / 100) * 100}.` }; } const w = RI(1, 9), t = RI(1, 9), hh = RI(0, 9); return { t: 'The first digit after the decimal point is the tenths place.', q: `What digit is in the tenths place of ${w}.${t}${hh}?`, ans: t, why: `In ${w}.${t}${hh}, the ${t} is in the tenths place.` }; },
+  skip(g){ const by = g <= 1 ? pick([2, 10]) : pick([5, 10, 3, 4]); const s = by * RI(1, 4); return { t: `Count by ${by}s.`, q: `What comes next? ${s}, ${s + by}, ${s + 2 * by}, __`, ans: s + 3 * by, why: `Counting by ${by}s: ${s}, ${s + by}, ${s + 2 * by}, ${s + 3 * by}.` }; },
+  time(g){ const hrs = RI(1, 12), half = g >= 2 && Math.random() < .5; const clock = String.fromCodePoint((half ? 0x1F55C : 0x1F550) + hrs - 1); return { t: half ? 'When the long hand points to 6, it is half past.' : 'When the long hand points to 12, it is o’clock.', q: `What time is it? ${clock}`, ans: `${hrs}:${half ? '30' : '00'}`, wrong: [`${hrs % 12 + 1}:${half ? '30' : '00'}`, `${hrs}:${half ? '00' : '30'}`], why: `It is ${hrs}:${half ? '30' : '00'}.` }; },
+  money(g){ if (g >= 6){ const pr = pick([20, 30, 40, 60, 80]), pc = pick([10, 20, 25, 50]); return Math.random() < .5 ? { t: `${pc}% off means you pay ${100 - pc}% of the price.`, q: `A $${pr} game is ${pc}% off. What is the new price in dollars?`, ans: pr * (100 - pc) / 100, why: `${pc}% of $${pr} is $${pr * pc / 100}, so it costs $${pr * (100 - pc) / 100}.` } : { t: 'Simple interest = money × rate × years.', q: `You save $${pr * 5} at ${pc / 5}% interest per year. How many dollars of interest after 1 year?`, ans: pr * 5 * pc / 500, why: `${pc / 5}% of $${pr * 5} is $${pr * 5 * pc / 500}.` }; }
+    if (g >= 4){ const cost = RI(120, 880) / 100, paid = cost < 5 ? 5 : 10; const ch = Math.round((paid - cost) * 100) / 100; return { t: 'Count up from the price to the money you paid.', q: `Lunch costs $${cost.toFixed(2)}. You pay $${paid}. How much change?`, ans: '$' + ch.toFixed(2), wrong: ['$' + (ch + .1).toFixed(2), '$' + Math.max(.05, ch - 1).toFixed(2)], why: `$${paid} − $${cost.toFixed(2)} = $${ch.toFixed(2)}.` }; }
+    if (g <= 1){ const d = RI(0, 2), n = RI(0, 3), p = RI(0, 4); const v = d * 10 + n * 5 + p; return { t: 'Dime = 10¢, nickel = 5¢, penny = 1¢.', q: `${d} dime${d === 1 ? '' : 's'}, ${n} nickel${n === 1 ? '' : 's'} and ${p} penn${p === 1 ? 'y' : 'ies'}. How many cents?`, ans: v, why: `${d * 10} + ${n * 5} + ${p} = ${v}¢.` }; } const cost = RI(15, 95), paid = cost <= 50 ? 50 : 100; return { t: 'Count up from the price to what you paid.', q: `A toy costs ${cost}¢. You pay ${paid}¢. How much change?`, ans: paid - cost, why: `${paid} − ${cost} = ${paid - cost}¢ change.` }; },
+  mult(g, h){ let a, b; if (g <= 3){ a = RI(2, h ? 10 : 6); b = RI(2, 10); } else if (g === 4){ a = RI(11, 40); b = RI(2, 9); } else { a = RI(11, 30); b = RI(11, 25); } return { t: `${a} × ${b} means ${a} groups of ${b}.`, q: `${a} × ${b} = ?`, ans: a * b, why: `${a} × ${b} = ${a * b}.` }; },
+  div(g){ const b = RI(2, g <= 3 ? 9 : 12), q = RI(2, g <= 3 ? 9 : 15); return { t: 'Think: what times the divisor makes the number?', q: `${b * q} ÷ ${b} = ?`, ans: q, why: `${b} × ${q} = ${b * q}, so ${b * q} ÷ ${b} = ${q}.` }; },
+  frac(g){ if (g <= 3){ const d = pick([2, 4]), n = d * RI(1, 5); return { t: `To find 1/${d}, split into ${d} equal groups.`, q: `What is 1/${d} of ${n}?`, ans: n / d, why: `${n} ÷ ${d} = ${n / d}.` }; } if (g === 4){ const d = pick([5, 6, 8, 10]), a = RI(1, d - 2), b = RI(1, d - 1 - a); return { t: 'Same bottom number? Add the tops, keep the bottom.', q: `${a}/${d} + ${b}/${d} = ?/${d}`, ans: a + b, why: `${a} + ${b} = ${a + b}, so ${a + b}/${d}.` }; } const n = RI(2, 9) * 4; return { t: '3/4 of a number: divide by 4, then times 3.', q: `What is 3/4 of ${n}?`, ans: n / 4 * 3, why: `${n} ÷ 4 = ${n / 4}, and × 3 = ${n / 4 * 3}.` }; },
+  dec(g){ const a = RI(1, 9) / 10, b = RI(1, 9) / 100 + RI(1, 5) / 10; const ans = Math.round((a + b) * 100) / 100; return { t: 'Line up the decimal points and add.', q: `${a} + ${b.toFixed(2)} = ?`, ans: ans.toFixed(2), wrong: [(ans + .1).toFixed(2), (ans - .01).toFixed(2)], why: `${a} + ${b.toFixed(2)} = ${ans.toFixed(2)}.` }; },
+  neg(g){ const a = -RI(2, 12), b = RI(1, 15); return { t: 'Start at the negative number and move right on the number line.', q: `${a} + ${b} = ?`, ans: a + b, why: `${a} + ${b} = ${a + b}.`, neg: true }; },
+  ratio(g){ const p = pick([10, 20, 25, 50]), n = pick([20, 40, 60, 80, 100, 200]); return { t: `${p}% means ${p} out of every 100.`, q: `What is ${p}% of ${n}?`, ans: n * p / 100, why: `${p}% of ${n} = ${n * p / 100}.` }; },
+  alg(g){ const x = RI(2, 12); if (g === 6){ const b = RI(2, 15); return { t: 'Do the opposite to both sides to get x alone.', q: `x + ${b} = ${x + b}. What is x?`, ans: x, why: `${x + b} − ${b} = ${x}.` }; } const a = RI(2, 6), b = RI(1, 12); return { t: 'Undo the adding first, then undo the multiplying.', q: `${a}x + ${b} = ${a * x + b}. What is x?`, ans: x, why: `${a * x + b} − ${b} = ${a * x}, and ${a * x} ÷ ${a} = ${x}.` }; },
+  sq(g){ const n = RI(3, 13); return Math.random() < .5 ? { t: 'A square is a number times itself.', q: `What is ${n}²?`, ans: n * n, why: `${n} × ${n} = ${n * n}.` } : { t: 'The square root undoes squaring.', q: `What is √${n * n}?`, ans: n, why: `${n} × ${n} = ${n * n}, so √${n * n} = ${n}.` }; },
+  evenodd(g){ const nums = shuffle([RI(1, 20) * 2, RI(0, 19) * 2 + 1, RI(0, 19) * 2 + 1]); const ev = nums.find(v => v % 2 === 0); return { t: 'Even numbers end in 0, 2, 4, 6 or 8.', q: 'Which number is even?', ans: ev, wrong: nums.filter(v => v !== ev), why: `${ev} is even. It splits into two equal groups.` }; },
+  prime(g){ const pr = pick([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]), no = shuffle([4, 6, 8, 9, 10, 12, 14, 15, 21, 25, 27]).slice(0, 2); return { t: 'A prime number has only two factors: 1 and itself.', q: 'Which number is prime?', ans: pr, wrong: no, why: `${pr} can only be divided evenly by 1 and ${pr}.` }; },
+  shapes(g){ const S2 = [['triangle', 3, '🔺'], ['square', 4, '🟦'], ['pentagon', 5, '⬟'], ['hexagon', 6, '⬢']]; const [n, k, e] = pick(g === 0 ? S2.slice(0, 2) : S2); return { t: 'Count the straight sides.', q: `How many sides does a ${n} ${e} have?`, ans: k, why: `A ${n} has ${k} sides.` }; }
+};
+function fromProb(p){ const wrong = (p.wrong || near(p.ans, 2, p.neg ? -99 : 0)).map(String); const opts = shuffle([String(p.ans), ...wrong.slice(0, 2)]); return { t: p.t, q: p.q, a: opts, ok: opts.indexOf(String(p.ans)), why: p.why }; }
+const SETQ = { 'Numbers': 'Which one is a number?', 'More than 5': 'Which number is more than 5?', 'More than 12': 'Which number is more than 12?', 'Makes 5': 'Which one makes 5?', 'Makes 10': 'Which one makes 10?', 'Equals 15': 'Which one equals 15?', 'Equals 2': 'Which one equals 2?', 'Equals 8': 'Which one equals 8?', 'Squares': 'Which one is a square?', 'Circles': 'Which one is a circle?', 'Has 3 tens': 'Which number has 3 tens?', 'Count by 2s': 'Which number do you say when you count by 2s?', 'Count by 5s': 'Which number do you say when you count by 5s?', 'Even numbers': 'Which number is even?', 'Half past': 'Which time is half past?', 'Worth 10¢': 'Which one is worth 10 cents?', 'Worth $1': 'Which one is worth one dollar?', 'Equals 24': 'Which one equals 24?', 'Equals 36': 'Which one equals 36?', 'Equals 6': 'Which one equals 6?', 'Equal to ½': 'Which fraction equals one half?', 'Greater than ½': 'Which fraction is more than one half?', 'Prime numbers': 'Which number is prime?', 'More than 0.5': 'Which decimal is more than 0.5?', 'Less than zero': 'Which number is less than zero?', 'Equals 50%': 'Which one equals 50%?', 'x = 3 works': 'Which equation is true when x = 3?', 'Perfect squares': 'Which number is a perfect square?', 'Irrational': 'Which number is irrational?', 'Big letters': 'Which one is a big letter?', 'Starts with B': 'Which one starts with the B sound?', 'Starts with S': 'Which one starts with the S sound?', 'Rhymes with cat': 'Which one rhymes with cat?', 'Real words': 'Which one is a real word?', 'More than one': 'Which word means more than one?', 'Nouns (things)': 'Which word is a noun (a person, place or thing)?', 'Describing words': 'Which word describes something?', 'Already happened': 'Which word tells about the past?', 'Means happy': 'Which word means happy?', 'Opposite of brave': 'Which word is the opposite of brave?', 'Means NOT': 'Which word has a prefix that means NOT?', 'Spelled right': 'Which word is spelled right?', 'Number words': 'Which one is a number word?', 'Adverbs': 'Which word is an adverb?', 'Similes': 'Which one is a simile?', 'Living things': 'Which one is alive?', 'Lives in water': 'Which animal lives in water?', 'Mammals': 'Which animal is a mammal?', 'Cold weather': 'Which one goes with cold weather?', 'Plants need': 'What do plants need?', 'Parts of a plant': 'Which one is a part of a plant?', 'Solids': 'Which one is a solid?', 'Gases': 'Which one is a gas?', 'Organs': 'Which one is an organ inside your body?', 'Planets': 'Which one is a planet?', 'Renewable energy': 'Which energy is renewable?', 'Magnets stick': 'What does a magnet stick to?', 'Parts of a cell': 'Which one is part of a cell?', 'Elements': 'Which one is an element?', 'Kind choices': 'Which one is a kind choice?', 'Helps sick people': 'Who helps sick people?', 'Continents': 'Which one is a continent?' };
+function fromSet(st){ const good = pick(st.Al), bad = shuffle(st.Bl).slice(0, 2); const opts = shuffle([good, ...bad]); const tn = Object.values(TOPICS).map(x => x.t[st.top]).find(Boolean); return { t: tn ? `Let’s think about ${tn[0].toLowerCase()}. Tap 🔊 to hear the choices.` : 'Read each choice carefully.', q: SETQ[st.a] || `Which one fits: ${st.a}?`, a: opts, ok: opts.indexOf(good), why: st.learn }; }
+function langQ(kid){ const L = pick(planOf(kid).langs), row = pick(LWORDS), w = lword(row, L), others = shuffle(LWORDS.filter(r => r !== row)).slice(0, 2).map(r => lword(r, L).rom); const opts = shuffle([w.rom, ...others]); return { t: `Let’s practice ${LANGS[L][0]}! Learn new words in the Say It! game at school.`, q: `How do you say “${row[1]}” ${row[0]} in ${LANGS[L][0]}?`, a: opts, ok: opts.indexOf(w.rom), why: `“${row[1]}” in ${LANGS[L][0]} is ${w.nat}${w.rom !== w.nat ? ' (' + w.rom + ')' : ''}.`, lang: L, say: w.nat }; }
+const TEACH_SUBJ = { bolt: ['math', null], lexi: ['read', null], kindy: ['world', ['feelings', 'helpers']], penny: ['math', ['money', 'count', 'add', 'sub', 'dec', 'ratio']], sprout: ['sci', ['living', 'animals', 'plants', 'body', 'cells']], cosmo: ['sci', ['space', 'weather', 'matter', 'energy', 'chem']], wave: ['sci', ['animals', 'weather', 'matter', 'maps']] };
+function makeLesson(kid, id){
+  const g = gradeOf(kid), plan = planOf(kid), h = robotLv(kid, id).lvl > 1;
+  if (id === 'lexi' && plan.langs.length && Math.random() < .4) return langQ(kid);
+  const [subj, only] = TEACH_SUBJ[id] || ['math', null];
+  if (id === 'penny'){ return fromProb(PROB.money(Math.max(g, 0))); }
+  if (subj === 'math'){
+    const mine = (plan.math || []).filter(t => topicFits(TOPICS.math.t[t][1] - 1, TOPICS.math.t[t][2] + 1, g));
+    const pool = mine.length ? mine : Object.keys(TOPICS.math.t).filter(t => topicFits(TOPICS.math.t[t][1], TOPICS.math.t[t][2], g));
+    const t = pick(pool); if (PROB[t] && (Math.random() < .7 || !SETS.some(x => x.top === t && g >= x.g[0] && g <= x.g[1]))) return fromProb(PROB[t](g, h));
+    return fromSet(pickSet(kid, ['math'], [t]));
+  }
+  return fromSet(pickSet(kid, [subj], only));
+}
+// teacher sheet subtitle shows the grade
+const _robotSheetG = robotSheet;
+robotSheet = function(id){ const kid = K(), r = ROBOTS[id]; let h = _robotSheetG(id); const sub = id === 'lexi' && planOf(kid).langs.length ? `${r.topic} & ${planOf(kid).langs.map(l => LANGS[l][0]).join(' & ')}` : r.topic; return h.replace(/<p class="sub">[^<]*<\/p>/, `<p class="sub">${esc(sub)} · ${esc(gradeLabel(kid))}</p>`); };
+
+// ---------- 4. SPEAK A WORD IN ANOTHER LANGUAGE (device voice for that language) ----------
+function sayLang(text, lang){
+  try { stopSpeech(); const u = new SpeechSynthesisUtterance(text); u.lang = LANGS[lang] ? LANGS[lang][1] : lang; u.rate = .8; const v = speechSynthesis.getVoices().find(x => x.lang && x.lang.replace('_', '-').toLowerCase().startsWith(u.lang.slice(0, 2).toLowerCase())); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) {}
+}
+A.sayLang = el => sayLang(el.dataset.v, el.dataset.l);
+const _robotSheetL = robotSheet;
+robotSheet = function(id){ let h = _robotSheetL(id); const c = ui.lesson && ui.lesson.cur; if (c && c.lang) h = h.replace('<h3 style="font-size:19px">', `<button class="btn small grape" data-act="sayLang" data-v="${esc(c.say)}" data-l="${c.lang}">🗣️ Hear it in ${LANGS[c.lang][0]}</button><h3 style="font-size:19px">`); return h; };
+
+// ---------- 5. THE LEARNING PLAN (grown-ups) ----------
+function learnSheet(id){
+  const kid = kidOf(id), g = gradeOf(kid), plan = planOf(kid), showAll = ui.planAll;
+  const sec = s => { const T = TOPICS[s].t; const keys = Object.keys(T).filter(k => showAll || topicFits(T[k][1] - 1, T[k][2] + 1, g));
+    return `<div class="field"><span class="flabel">${TOPICS[s].name}</span><div class="chips">${keys.map(k => `<button class="chip ${topicFits(T[k][1], T[k][2], g) ? '' : 'offg'}" data-act="planTop" data-s="${s}" data-v="${k}" data-id="${id}" aria-pressed="${plan[s].includes(k)}">${T[k][0]}</button>`).join('')}</div></div>`; };
+  return `<div class="grab"></div><div><h3>What is ${esc(kid.name)} learning?</h3><p class="sub">Teachers, school games and the games in every place use this. Pick what ${esc(kid.name)} is working on right now.</p></div>
+  <div class="field"><span class="flabel">Grade</span><div class="chips">${GSHORT.map((n, k) => `<button class="chip" data-act="planGrade" data-v="${k}" data-id="${id}" aria-pressed="${g === k}">${n}</button>`).join('')}</div><p class="note-s">${esc(GRADES[g])}. Changing the grade picks that grade’s usual topics. You can then turn topics on or off.</p></div>
+  <div class="field"><label for="planState">State</label><select class="text" id="planState" data-id="${id}"><option value="">Choose…</option>${US_STATES.map(s => `<option ${kid.state === s ? 'selected' : ''}>${s}</option>`).join('')}</select><p class="note-s">Lessons follow the grade-level goals that most states share. Your topic picks below matter most.</p></div>
+  ${['math', 'read', 'sci', 'world'].map(sec).join('')}
+  <button class="btn small ghost" data-act="planAll" data-id="${id}">${showAll ? 'Show only topics near this grade' : 'Show topics from every grade'}</button>
+  <div class="field"><span class="flabel">Learn a new language (pick up to 2)</span><div class="chips">${Object.entries(LANGS).map(([k, v]) => `<button class="chip" data-act="planLang" data-v="${k}" data-id="${id}" aria-pressed="${plan.langs.includes(k)}">${v[0]}</button>`).join('')}</div><p class="note-s">Adds words to Lexi’s lessons and to the Say It! game at school.</p></div>
+  <div class="setrow"><div><b>Speaking practice</b><small>Say It! at school listens to ${esc(kid.name)} say words out loud${plan.langs.length ? ' in ' + plan.langs.map(l => LANGS[l][0]).join(' and ') : ''} and helps with pronunciation.</small></div><button class="tog" data-act="planSpeak" data-id="${id}" aria-pressed="${plan.speak}" aria-label="Speaking practice"></button></div>
+  <button class="btn big" data-act="closeSheet">Done</button>`;
+}
+Object.assign(A, {
+  learnPlan(el){ ui.planAll = false; openSheet(learnSheet(el.dataset.id || el.dataset.v)); },
+  planGrade(el){ const kid = kidOf(el.dataset.id); kid.grade = +el.dataset.v; kid.gradeSet = true; kid.plan = null; planOf(kid); save(); openSheet(learnSheet(el.dataset.id)); render(); },
+  planTop(el){ const kid = kidOf(el.dataset.id), p = planOf(kid), s = el.dataset.s, k = el.dataset.v; p[s] = p[s].includes(k) ? p[s].filter(x => x !== k) : [...p[s], k]; p.custom = true; save(); el.setAttribute('aria-pressed', p[s].includes(k)); },
+  planAll(el){ ui.planAll = !ui.planAll; openSheet(learnSheet(el.dataset.id)); },
+  planLang(el){ const kid = kidOf(el.dataset.id), p = planOf(kid), k = el.dataset.v; p.langs = p.langs.includes(k) ? p.langs.filter(x => x !== k) : [...p.langs, k].slice(-2); p.custom = true; save(); openSheet(learnSheet(el.dataset.id)); },
+  planSpeak(el){ const kid = kidOf(el.dataset.id), p = planOf(kid); p.speak = !p.speak; save(); el.setAttribute('aria-pressed', p.speak); }
+});
+document.addEventListener('change', e => { if (e.target.id === 'planState'){ const kid = kidOf(e.target.dataset.id); kid.state = e.target.value; save(); } });
+// grade in the add/edit kid sheet too
+const _kidSheetG = kidSheet;
+kidSheet = function(){ const d = ui.kd; if (d.grade == null) d.grade = d.isNew ? clamp((d.age || 6) - 5, 0, 8) : gradeOf(kidOf(d.id)); return _kidSheetG().replace('<div class="field"><span class="flabel">Character</span>', `<div class="field"><span class="flabel">Grade</span><div class="chips">${GSHORT.map((n, k) => `<button class="chip" data-act="kdGrade" data-v="${k}" aria-pressed="${d.grade === k}">${n}</button>`).join('')}</div><p class="note-s">${GRADES[d.grade]}. Teachers and games match the grade. Fine-tune topics in the Learning plan.</p></div><div class="field"><span class="flabel">Character</span>`); };
+A.kdGrade = el => { ui.kd.grade = +el.dataset.v; openSheet(kidSheet()); };
+const _kdAgeG = A.kdAge; A.kdAge = function(el, e){ const d = ui.kd; if (d.isNew && !d.gradeTouched) d.grade = clamp(+el.dataset.v - 5, 0, 8); _kdAgeG(el, e); };
+const _kdGradeT = A.kdGrade; A.kdGrade = el => { ui.kd.gradeTouched = true; _kdGradeT(el); };
+const _saveKidG = A.saveKid;
+A.saveKid = function(el, e){ const d = ui.kd, before = new Set(S.order); _saveKidG(el, e); const id = d.isNew ? S.order.find(x => !before.has(x)) : d.id; const kid = id && kidOf(id); if (kid && d.grade != null && kid.grade !== d.grade){ kid.grade = d.grade; kid.gradeSet = true; kid.plan = null; planOf(kid); save(); render(); } };
+
+// ---------- 6. GROWN-UPS CHOOSE THE GAMES IN EACH PLACE ----------
+const offG = () => (S.settings.offGames = S.settings.offGames || {});
+function gamesSheet(){
+  const off = offG();
+  return `<div class="grab"></div><div><h3>Games in each place</h3><p class="sub">Turn games on or off. Each place keeps at least one.</p></div>
+  ${Object.entries(ROOMS).filter(([k]) => k !== 'event').map(([k, r]) => `<div class="field"><span class="flabel">${esc(r.title)}</span><div class="chips">${r.tabs.map(t => `<button class="chip" data-act="gameTog" data-r="${k}" data-v="${t[0]}" aria-pressed="${!off[t[0]]}">${esc(t[1])}</button>`).join('')}</div></div>`).join('')}
+  <button class="btn big" data-act="closeSheet">Done</button>`;
+}
+A.gamesOpen = () => openSheet(gamesSheet());
+A.gameTog = el => { const off = offG(), k = el.dataset.v, R = ROOMS[el.dataset.r]; if (!off[k] && R.tabs.filter(t => !off[t[0]]).length <= 1) return toast('Each place needs at least one game.'); off[k] = !off[k]; if (!off[k]) delete off[k]; save(); el.setAttribute('aria-pressed', !off[k]); };
+const _drawRoomOff = drawRoom;
+drawRoom = function(){
+  const r = ui.room; if (!r || !ROOMS[r.t] || !S) return _drawRoomOff();
+  const def = ROOMS[r.t], all = def.tabs, off = offG(), vis = all.filter(t => !off[t[0]]);
+  if (!vis.length || vis.length === all.length) return _drawRoomOff();
+  if (!vis.some(t => t[0] === r.tab)) r.tab = vis[0][0];
+  def.tabs = vis; try { _drawRoomOff(); } finally { def.tabs = all; }
+};
+const _soundCtlPlan = soundControls;
+soundControls = function(){ return _soundCtlPlan() + `<div class="card"><div class="setrow"><div><b>Games in each place</b><small>Choose which games show up in the restaurant, toy shop, school and every other place.</small></div><button class="btn small grape" data-act="gamesOpen">Choose</button></div>
+  <div class="setrow"><div><b>Learning plan</b><small>Grade, state, topics in each subject, and languages for each kid.</small></div></div><div class="chips">${S.order.map(id => `<button class="chip" data-act="learnPlan" data-id="${id}">📚 ${esc(kidOf(id).name)} · ${GSHORT[gradeOf(kidOf(id))]}</button>`).join('')}</div></div>`; };
+
+// ---------- 7. NEW GAME KINDS (part 1) ----------
+const FONT = 'font-family="Baloo 2,sans-serif" font-weight="900"';
+function pill(t, o = {}){ const s = String(t), fs = o.fs || 12; const w = Math.max(26, Math.min(o.max || 340, [...s].length * fs * .6 + 16)); return `<rect x="${f1(-w / 2)}" y="-12" width="${f1(w)}" height="24" rx="12" fill="${o.bg || '#fff'}" stroke="#2B2550" stroke-opacity=".18"/><text y="5" text-anchor="middle" ${FONT} font-size="${fs}" fill="${o.col || '#2B2550'}">${esc(s)}</text>`; }
+const ruleHud = (s, txt) => `<g transform="translate(180,46)">${pill(txt, { fs: 13, bg: '#FFF6C9' })}</g>`;
+function setItem(s, wantGood){ const st = s.set, good = wantGood == null ? Math.random() < .55 : wantGood; return { label: pick(good ? st.Al : st.Bl), good }; }
+const segDist = (px, py, ax, ay, bx, by) => { const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy || 1; let t = ((px - ax) * dx + (py - ay) * dy) / l; t = clamp(t, 0, 1); return Math.hypot(px - (ax + t * dx), py - (ay + t * dy)); };
+const FRUITC = [['#E8414F', '#B92B38'], ['#FF9F1C', '#E07A00'], ['#7BD15A', '#4FA736'], ['#B58CFF', '#7B5CFA'], ['#FFD23F', '#E0A800']];
+Object.assign(MODES, {
+  // FRUIT CHOP: swipe through the fruit that matches the rule
+  slice: {
+    start(s){ s.next = .4; s.trail = []; s.trailEl = mk(s, '<path fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>', 0, 0, 1, s.FX); s.hud = ruleHud(s, `Slice: ${s.set.a}`); },
+    down(s, p){ s.trail = [[p.x, p.y]]; s.lx = p.x; s.ly = p.y; },
+    move(s, p){ if (!s.down) return; s.trail.push([p.x, p.y]); if (s.trail.length > 7) s.trail.shift();
+      for (const o of s.objs){ if (o.cut || o.dead || o.half) continue; if (segDist(o.x, o.y, s.lx, s.ly, p.x, p.y) < 22){ o.cut = true; MODES.slice.cut(s, o); } }
+      s.lx = p.x; s.ly = p.y; },
+    up(s){ s.trail = []; },
+    cut(s, o){ kill(o); for (const side of [-1, 1]){ const h = mk(s, `<path d="M0,-17 A17,17 0 0 ${side > 0 ? 1 : 0} 0,17z" fill="${o.c[0]}"/><path d="M0,-13 A13,13 0 0 ${side > 0 ? 1 : 0} 0,13z" fill="#FFF3D6"/>`, o.x, o.y); h.vx = side * 70 + o.vx * .5; h.vy = -60; h.half = true; s.objs.push(h); }
+      if (o.good) addScore(s, 1, o.x, o.y - 20); else hurt(s, o.x, o.y - 20); },
+    step(s, dt){
+      if ((s.next -= dt) <= 0){ s.next = Math.max(.45, (1.2 - s.d * .15) - s.t * .008) * rf(.7, 1.2); const it = setItem(s), c = pick(FRUITC);
+        const o = mk(s, `<circle r="17" fill="${c[0]}"/><circle cx="-6" cy="-6" r="5" fill="#fff" opacity=".35"/><path d="M0,-17 q4,-8 10,-8" stroke="#3E9E4F" stroke-width="3" fill="none"/><g transform="translate(0,26)">${pill(it.label, { fs: 11 })}</g>`, rf(50, 310), 290); o.c = c; o.good = it.good; o.vx = (180 - o.x) * rf(.15, .45); o.vy = -rf(330, 390) * (1 + s.d * .04); s.objs.push(o); }
+      for (const o of s.objs){ o.vy += 420 * dt; o.x += o.vx * dt; o.y += o.vy * dt; if (o.half){ o.r += o.vx * dt; o.a = Math.max(0, o.a - dt); } place(o); if (o.y > 310 && o.vy > 0){ if (!o.half && o.good && !o.cut) s.combo = 0; kill(o); } }
+      s.objs = s.objs.filter(o => !o.dead);
+      const tr = s.trail; s.trailEl.el.firstChild.setAttribute('d', tr.length > 1 ? 'M' + tr.map(q => f1(q[0]) + ',' + f1(q[1])).join(' L') : '');
+    }
+  },
+  // DANCE PARTY: tap the lane when the note reaches the line
+  rhythm: {
+    start(s){ s.lanes = [90, 180, 270]; s.beat = 60 / (84 + s.d * 14); s.nb = .8; s.travel = 1.7 - s.d * .2; s.win = 30 - s.d * 4; s.pads = s.lanes.map((x, k) => { mk(s, `<rect x="-34" y="-260" width="68" height="300" rx="20" fill="#fff" opacity=".12"/>`, x, 240); return mk(s, `<circle r="24" fill="${['#FF5A8C', '#FFC63A', '#34B2F0'][k]}" opacity=".35"/><circle r="24" fill="none" stroke="#fff" stroke-width="3"/>`, x, 222); }); s.hits = 0; },
+    down(s, p){ const k = s.lanes.reduce((b, x, i) => Math.abs(x - p.x) < Math.abs(s.lanes[b] - p.x) ? i : b, 0); const pad = s.pads[k]; pad.s = 1.2; place(pad); setTimeout(() => { pad.s = 1; place(pad); }, 120);
+      const n = s.objs.filter(o => o.lane === k && !o.done).sort((a, b) => Math.abs(a.y - 222) - Math.abs(b.y - 222))[0];
+      if (n && Math.abs(n.y - 222) < s.win){ n.done = true; kill(n); note(k); const perfect = Math.abs(n.y - 222) < s.win / 2.5; addScore(s, perfect ? 2 : 1, s.lanes[k], 190); if (perfect) pop(s, s.lanes[k], 170, 'Perfect!', '#7B5CFA'); } else s.combo = 0; },
+    step(s, dt){
+      if ((s.nb -= dt) <= 0){ s.nb += s.beat * (Math.random() < .25 ? 2 : 1); const lanes = s.d >= 2 && Math.random() < .2 ? shuffle([0, 1, 2]).slice(0, 2) : [Math.floor(Math.random() * 3)];
+        lanes.forEach(k => { const o = mk(s, `<g>${[SPR.star, SPR.heart, SPR.gem][k]}</g>`, s.lanes[k], -12, 1.2); o.lane = k; s.objs.push(o); }); }
+      const sp = 234 / s.travel;
+      for (const o of s.objs){ o.y += sp * dt; o.r = Math.sin(s.t * 6) * 10; place(o); if (o.y > 252 && !o.done){ o.done = true; s.combo = 0; pop(s, o.x, 240, 'miss', '#9AA3B8'); kill(o); } }
+      s.objs = s.objs.filter(o => !o.dead);
+      const pulse = 1 + .08 * Math.max(0, 1 - ((s.t % s.beat) / s.beat) * 4); s.pads.forEach(p => { if (p.s < 1.1){ p.s = pulse; place(p); } });
+    }
+  },
+  // WORD BUILDER / WORD RACE: tap the letters (little kids) or type the falling words (big kids)
+  wordrace: {
+    start(s){ s.tiles = s.d < 2; if (s.tiles) MODES.wordrace.nextWord(s); else { s.buf = ''; s.next = .5; s.hud = ''; } },
+    nextWord(s){
+      s.objs.forEach(o => kill(o)); s.objs = [];
+      const list = s.d === 0 ? WR_K : WR_1; const [e, w] = pick(list); s.word = w; s.i = 0;
+      const lets = shuffle([...w.split(''), ...shuffle('abcdefghijklmnoprstuw'.split('').filter(c => !w.includes(c))).slice(0, s.d === 0 ? 2 : 3)]);
+      s.pic = mk(s, `<text text-anchor="middle" font-size="58" y="20">${e}</text>`, 180, 70);
+      s.slots = w.split('').map((c, k) => mk(s, `<rect x="-17" y="-22" width="34" height="40" rx="9" fill="#fff" stroke="#B9C8E2" stroke-width="2"/><text class="sl" y="8" text-anchor="middle" ${FONT} font-size="24" fill="#2B2550"></text>`, 180 + (k - (w.length - 1) / 2) * 40, 132));
+      const cols = Math.ceil(lets.length / (lets.length > 6 ? 2 : 1)); s.tilesO = lets.map((c, k) => { const row = Math.floor(k / cols), col = k % cols, n = Math.min(cols, lets.length - row * cols); const o = mk(s, `<rect x="-21" y="-21" width="42" height="42" rx="11" fill="#FFC63A"/><rect x="-21" y="-21" width="42" height="42" rx="11" fill="url(#fsR)"/><text y="9" text-anchor="middle" ${FONT} font-size="25" fill="#2B2550">${c}</text>`, 180 + (col - (n - 1) / 2) * 50, 192 + row * 48); o.c = c; return o; });
+      s.objs.push(s.pic, ...s.slots, ...s.tilesO);
+      s.hud = `<g transform="translate(180,22)">${pill('Spell the word!', { fs: 13, bg: '#FFF6C9' })}</g>`;
+    },
+    down(s, p){
+      if (!s.tiles) return; const t = s.tilesO.find(o => !o.used && Math.abs(o.x - p.x) < 23 && Math.abs(o.y - p.y) < 23); if (!t) return;
+      if (t.c === s.word[s.i]){ t.used = true; t.a = .25; place(t); s.slots[s.i].el.querySelector('.sl').textContent = t.c; s.i++; sfx('pop');
+        if (s.i >= s.word.length){ addScore(s, 1, 180, 100); say(s.word, { force: true }); const w = s.word; setTimeout(() => { if (s.on && s.word === w) MODES.wordrace.nextWord(s); }, 900); } }
+      else { s.combo = 0; sfx('boop'); t.s = .85; place(t); setTimeout(() => { t.s = 1; place(t); }, 150); }
+    },
+    key(s, c){
+      if (s.tiles || !s.on) return;
+      if (c === '⌫'){ s.buf = s.buf.slice(0, -1); return; }
+      s.buf += c; const ws = s.objs.filter(o => !o.dead);
+      if (!ws.some(o => o.w.startsWith(s.buf))){ s.buf = ''; s.combo = 0; sfx('boop'); return; }
+      const done = ws.find(o => o.w === s.buf); if (done){ kill(done); addScore(s, 1, done.x, done.y); s.buf = ''; }
+    },
+    step(s, dt){
+      if (s.tiles) return;
+      if ((s.next -= dt) <= 0){ s.next = Math.max(1.5, (3.6 - s.d * .5) - s.t * .02); const w = pick(s.d === 2 ? WR_3 : WR_6); const o = mk(s, pill(w, { fs: 15 }), rf(70, 290), -10); o.w = w; o.vy = (16 + s.d * 5) * (1 + s.t * .012); s.objs.push(o); }
+      for (const o of s.objs){ o.y += o.vy * dt; place(o); const match = s.buf && o.w.startsWith(s.buf); o.el.querySelector('rect').setAttribute('fill', match ? '#DDF6E4' : '#fff'); if (o.y > 236){ kill(o); if (hurt(s, o.x, 220)) return; } }
+      s.objs = s.objs.filter(o => !o.dead);
+      s.hud = `<g transform="translate(180,256)">${pill(s.buf ? s.buf + '▍' : 'type a word…', { fs: 15, bg: '#F3EEFF' })}</g>`;
+    }
+  },
+  // GARDEN MAZE: guide the water drop to the flower
+  maze: {
+    start(s){ s.size = [[5, 4], [6, 5], [8, 6], [10, 7]][s.d]; MODES.maze.build(s); },
+    build(s){
+      s.objs.forEach(o => kill(o)); s.objs = []; if (s.wallG) kill(s.wallG);
+      const [C, R] = s.size, cs = Math.min(320 / C, 200 / R), ox = 180 - C * cs / 2, oy = 46 + (205 - R * cs) / 2; s.C = C; s.R = R; s.cs = cs; s.ox = ox; s.oy = oy;
+      const W = [...Array(C * R)].map(() => [1, 1, 1, 1]), seen = new Set([0]), st = [0];
+      while (st.length){ const c = st[st.length - 1], x = c % C, y = Math.floor(c / C); const nb = [[0, -1, 0, 2], [1, 0, 1, 3], [0, 1, 2, 0], [-1, 0, 3, 1]].filter(([dx, dy]) => { const nx = x + dx, ny = y + dy; return nx >= 0 && ny >= 0 && nx < C && ny < R && !seen.has(ny * C + nx); });
+        if (!nb.length){ st.pop(); continue; } const [dx, dy, a, b] = pick(nb), n = (y + dy) * C + x + dx; W[c][a] = 0; W[n][b] = 0; seen.add(n); st.push(n); }
+      s.W = W; let g = `<rect x="${f1(ox - 6)}" y="${f1(oy - 6)}" width="${f1(C * cs + 12)}" height="${f1(R * cs + 12)}" rx="12" fill="#C9A27A"/>`;
+      for (let c = 0; c < C * R; c++){ const x = ox + (c % C) * cs, y = oy + Math.floor(c / C) * cs, w = W[c];
+        if (w[0]) g += `<path d="M${f1(x)},${f1(y)} h${f1(cs)}"/>`; if (w[3]) g += `<path d="M${f1(x)},${f1(y)} v${f1(cs)}"/>`; if (c % C === C - 1 && w[1]) g += `<path d="M${f1(x + cs)},${f1(y)} v${f1(cs)}"/>`; if (c >= C * (R - 1) && w[2]) g += `<path d="M${f1(x)},${f1(y + cs)} h${f1(cs)}"/>`; }
+      s.wallG = mk(s, `<g>${g.replace(/<path /g, '<path stroke="#3E9E4F" stroke-width="7" stroke-linecap="round" ')}</g>`, 0, 0);
+      s.goal = mk(s, `<g transform="scale(${f1(cs / 40)})"><circle r="6" fill="#FFD23F"/>${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-10" rx="5" ry="8" fill="#FF8FB8" transform="rotate(${a})"/>`).join('')}<circle r="5" fill="#FFD23F"/></g>`, ox + (C - .5) * cs, oy + (R - .5) * cs);
+      s.seeds = shuffle([...Array(C * R).keys()].slice(1, -1)).slice(0, 3 + s.d).map(c => { const o = mk(s, `<g transform="scale(${f1(cs / 46)})">${SPR.coin}</g>`, ox + (c % C + .5) * cs, oy + (Math.floor(c / C) + .5) * cs); o.c = c; return o; });
+      s.pc = 0; s.pl = mk(s, `<g transform="scale(${f1(cs / 34)})"><path d="M0,-14 Q10,0 9,6 A9,9 0 0 1 -9,6 Q-10,0 0,-14z" fill="#34B2F0"/><circle cx="-3" cy="3" r="1.6" fill="#2B2550"/><circle cx="3" cy="3" r="1.6" fill="#2B2550"/><path d="M-3,7 q3,2 6,0" stroke="#2B2550" stroke-width="1.2" fill="none"/></g>`, ox + cs / 2, oy + cs / 2);
+      s.objs.push(s.goal, ...s.seeds, s.pl); s.path = [];
+    },
+    cellAt(s, p){ const x = Math.floor((p.x - s.ox) / s.cs), y = Math.floor((p.y - s.oy) / s.cs); return x >= 0 && y >= 0 && x < s.C && y < s.R ? y * s.C + x : -1; },
+    open(s, a, b){ const C = s.C, ax = a % C, ay = Math.floor(a / C), bx = b % C, by = Math.floor(b / C); if (Math.abs(ax - bx) + Math.abs(ay - by) !== 1) return false; const dir = bx > ax ? 1 : bx < ax ? 3 : by > ay ? 2 : 0; return !s.W[a][dir]; },
+    go(s, p){ const c = MODES.maze.cellAt(s, p); if (c < 0 || c === s.pc) return;
+      if (MODES.maze.open(s, s.pc, c)){ s.path = [c]; return; }
+      if (s.d === 0){ const prev = new Map([[s.pc, -1]]), q = [s.pc]; while (q.length){ const u = q.shift(); if (u === c) break; for (const v of [u - s.C, u + 1, u + s.C, u - 1]) if (v >= 0 && v < s.C * s.R && !prev.has(v) && MODES.maze.open(s, u, v)){ prev.set(v, u); q.push(v); } } if (prev.has(c)){ const path = []; for (let v = c; v !== s.pc; v = prev.get(v)) path.unshift(v); s.path = path; } } },
+    down(s, p){ MODES.maze.go(s, p); }, move(s, p){ if (s.down && !s.path.length) MODES.maze.go(s, p); },
+    step(s, dt){
+      const pl = s.pl; if (s.path.length){ const c = s.path[0], tx = s.ox + (c % s.C + .5) * s.cs, ty = s.oy + (Math.floor(c / s.C) + .5) * s.cs; const dx = tx - pl.x, dy = ty - pl.y, dd = Math.hypot(dx, dy), sp = 160 * dt;
+        if (dd <= sp){ pl.x = tx; pl.y = ty; s.pc = c; s.path.shift(); const sd = s.seeds.find(o => o.c === c && !o.dead); if (sd){ kill(sd); addScore(s, 1, tx, ty - 14); }
+          if (c === s.C * s.R - 1){ addScore(s, 3, tx, ty - 20); burst(s, tx, ty, '#FF8FB8'); s.path = []; setTimeout(() => { if (s.on){ if (s.size[0] < 12) s.size = [s.size[0] + 1, Math.min(9, s.size[1] + (s.size[0] % 2))]; MODES.maze.build(s); } }, 500); } }
+        else { pl.x += dx / dd * sp; pl.y += dy / dd * sp; } }
+      pl.r = Math.sin(s.t * 5) * 4; place(pl);
+    }
+  },
+  // LUGGAGE LANES: switch lanes to grab the right ones
+  lanes: {
+    start(s){ s.lx = [100, 180, 260]; s.ln = 1; s.marks = []; for (let k = 0; k < 8; k++) for (const x of [140, 220]) s.marks.push(mk(s, `<rect x="-3" y="-12" width="6" height="24" rx="3" fill="#fff" opacity=".5"/>`, x, k * 36));
+      s.pl = mk(s, `<g transform="translate(0,-6) scale(.45)">${charSVG(K().char, { mood: 'happy' })}</g><rect x="-22" y="0" width="44" height="12" rx="4" fill="#C9A227"/><circle cx="-14" cy="14" r="5" fill="#2B2550"/><circle cx="14" cy="14" r="5" fill="#2B2550"/>`, 180, 226); s.next = .4; s.hud = ruleHud(s, `Grab: ${s.set.a}`); },
+    down(s, p){ s.sx = p.x; s.moved = false; },
+    move(s, p){ if (s.down && !s.moved && Math.abs(p.x - s.sx) > 30){ s.moved = true; s.ln = clamp(s.ln + (p.x > s.sx ? 1 : -1), 0, 2); } },
+    up(s, p){ if (!s.moved){ s.ln = clamp(s.ln + (p.x > 180 ? 1 : -1), 0, 2); } },
+    step(s, dt){
+      const sp = (90 + s.d * 25) * (1 + s.t * .015);
+      for (const m of s.marks){ m.y += sp * dt; if (m.y > 280) m.y -= 288; place(m); }
+      const pl = s.pl; pl.x += (s.lx[s.ln] - pl.x) * Math.min(1, dt * 14); place(pl);
+      if ((s.next -= dt) <= 0){ s.next = Math.max(.5, (1.15 - s.d * .12) - s.t * .006); const it = setItem(s), ln = Math.floor(Math.random() * 3); const o = mk(s, `<g transform="translate(0,-12)">${SPR[pick(['suitR', 'suitB', 'suitY'])]}</g><g transform="translate(0,14)">${pill(it.label, { fs: 11 })}</g>`, s.lx[ln], -20); o.ln = ln; o.good = it.good; s.objs.push(o); }
+      for (const o of s.objs){ o.y += sp * dt; place(o); if (!o.hitDone && o.ln === s.ln && Math.abs(o.y - 220) < 22){ o.hitDone = true; kill(o); if (o.good) addScore(s, 1, o.x, o.y - 16); else if (hurt(s, o.x, o.y - 16)) return; } if (o.y > 300) kill(o); }
+      s.objs = s.objs.filter(o => !o.dead);
+    }
+  },
+  // POOL PARTY BREAKOUT: bounce the ball to pop all the floaties
+  breakout: {
+    start(s){ s.pw = [96, 80, 66, 56][s.d]; s.pad = mk(s, `<rect x="${-s.pw / 2}" y="-7" width="${s.pw}" height="14" rx="7" fill="#FF5A8C"/><rect x="${-s.pw / 2}" y="-7" width="${s.pw}" height="14" rx="7" fill="url(#fsR)"/>`, 180, 246); s.ball = mk(s, `<circle r="7" fill="#fff" stroke="#34B2F0" stroke-width="2"/>`, 180, 232); s.launched = false; s.level = 0; MODES.breakout.bricks(s); s.hud = `<text x="180" y="200" text-anchor="middle" ${FONT} font-size="15" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Tap to launch!</text>`; },
+    bricks(s){ const rows = Math.min(5, [2, 3, 4, 5][s.d] + s.level), cols = 8; s.br = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++){ const col = ['#FF8FB8', '#FFC63A', '#5FE0C0', '#6EC6FF', '#B58CFF'][r % 5]; const o = mk(s, `<rect x="-17" y="-8" width="34" height="16" rx="8" fill="${col}"/><rect x="-14" y="-6" width="12" height="4" rx="2" fill="#fff" opacity=".6"/>`, 42 + c * 39.5, 60 + r * 22); o.star = Math.random() < .12; if (o.star) o.el.insertAdjacentHTML('beforeend', `<g transform="scale(.45)">${SPR.star}</g>`); s.br.push(o); } },
+    down(s, p){ s.tx = p.x; if (!s.launched){ s.launched = true; s.hud = ''; const sp = 170 + s.d * 25; s.vx = sp * .55 * (Math.random() < .5 ? -1 : 1); s.vy = -sp; } },
+    move(s, p){ s.tx = p.x; },
+    step(s, dt){
+      const pad = s.pad, b = s.ball; if (s.tx != null){ pad.x += (clamp(s.tx, s.pw / 2, 360 - s.pw / 2) - pad.x) * Math.min(1, dt * 16); place(pad); }
+      if (!s.launched){ b.x = pad.x; b.y = 232; place(b); return; }
+      b.x += s.vx * dt; b.y += s.vy * dt;
+      if (b.x < 7 || b.x > 353){ s.vx *= -1; b.x = clamp(b.x, 7, 353); } if (b.y < 30){ s.vy = Math.abs(s.vy); }
+      if (s.vy > 0 && b.y > 236 && b.y < 252 && Math.abs(b.x - pad.x) < s.pw / 2 + 6){ const off = (b.x - pad.x) / (s.pw / 2), sp = Math.hypot(s.vx, s.vy) * 1.01; s.vx = sp * off * .8; s.vy = -Math.sqrt(Math.max(1, sp * sp - s.vx * s.vx)); sfx('pop'); }
+      for (const o of s.br){ if (o.dead) continue; if (Math.abs(b.x - o.x) < 24 && Math.abs(b.y - o.y) < 15){ kill(o); if (Math.abs(b.x - o.x) > 17) s.vx *= -1; else s.vy *= -1; addScore(s, o.star ? 3 : 1, o.x, o.y); break; } }
+      s.br = s.br.filter(o => !o.dead);
+      if (!s.br.length){ s.level++; addScore(s, 5, 180, 120); MODES.breakout.bricks(s); s.launched = false; s.hud = `<text x="180" y="200" text-anchor="middle" ${FONT} font-size="15" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Next level! Tap to launch</text>`; }
+      if (b.y > 275){ s.launched = false; if (hurt(s, b.x, 240)) return; s.hud = `<text x="180" y="200" text-anchor="middle" ${FONT} font-size="15" fill="#2B2550" stroke="#fff" stroke-width="4" paint-order="stroke">Tap to launch!</text>`; }
+      place(b);
+    }
+  },
+  // PICTURE PUZZLE: swap the pieces to fix the picture
+  puzzle: {
+    start(s){ s.n = [[3, 2], [3, 3], [4, 3], [4, 4]][s.d]; s.pic = 0; MODES.puzzle.build(s); },
+    build(s){
+      s.objs.forEach(o => kill(o)); s.objs = []; const [C, R] = s.n, kid = K();
+      const pics = [() => outdoorShell({ hz: 150 }) + R_.tree(60, 200) + R_.pine(310, 190) + grp(170, 240, 1.3, charSVG(kid.char, { mood: 'cheer' })) + grp(250, 245, .9, buddySVG(kid.buddy, { cheer: 1 })),
+        () => `<rect width="360" height="270" fill="#FFE9F2"/>${rr(0, 200, 360, 70, 0, '#F6D3B5')}` + grp(180, 210, 1.6, cupcakeSVG({ liner: '#FF8FB8', frost: '#FFF', frostP: 1, sprPts: [[-10, -60], [8, -52], [0, -70], [-16, -48], [14, -64]], top: 'cherry' })) + grp(60, 240, .9, buddySVG('mochi', { cheer: 1 })) + grp(300, 240, .9, buddySVG('pip', { cheer: 1 })),
+        () => `<rect width="360" height="270" fill="#24306A"/>${nightDeco}<circle cx="290" cy="60" r="34" fill="#FFF6C9"/><circle cx="278" cy="52" r="6" fill="#E9DFA8"/>` + grp(170, 200, 1.6, SPR.rocket.replace('<path', '<path')) + grp(80, 230, 1.1, buddySVG('luna', { cheer: 1 }))];
+      const P = pics[s.pic % pics.length](); s.pic++;
+      const W = 300, H = 225, ox = 30, oy = 34, tw = W / C, th = H / R;
+      s.L.insertAdjacentHTML('afterbegin', ''); let defs = s.L.querySelector('#puzDefs'); if (!defs){ defs = document.createElementNS(SVGNS, 'defs'); defs.id = 'puzDefs'; s.L.appendChild(defs); } defs.innerHTML = `<g id="puzPic">${P}</g>`;
+      const ids = [...Array(C * R).keys()]; let pos; do { pos = shuffle(ids.slice()); } while (pos.every((p, i) => p === i));
+      s.tiles = ids.map(id => { const sx = (id % C) * 360 / C, sy = Math.floor(id / C) * 270 / R; const o = mk(s, `<svg x="0" y="0" width="${f1(tw)}" height="${f1(th)}" viewBox="${f1(sx)} ${f1(sy)} ${f1(360 / C)} ${f1(270 / R)}" preserveAspectRatio="none"><use href="#puzPic"/></svg><rect class="tb" width="${f1(tw)}" height="${f1(th)}" fill="none" stroke="#fff" stroke-width="2"/>`, 0, 0); o.id = id; return o; });
+      s.pos = pos; s.sel = null; s.geo = { ox, oy, tw, th, C }; MODES.puzzle.lay(s);
+    },
+    lay(s){ const { ox, oy, tw, th, C } = s.geo; s.tiles.forEach(o => { const slot = s.pos.indexOf(o.id); o.x = ox + (slot % C) * tw; o.y = oy + Math.floor(slot / C) * th; place(o); o.el.querySelector('.tb').setAttribute('stroke', s.sel === o.id ? '#FF5A8C' : '#fff'); o.el.querySelector('.tb').setAttribute('stroke-width', s.sel === o.id ? 5 : 2); }); },
+    down(s, p){ const { ox, oy, tw, th, C } = s.geo; const cx = Math.floor((p.x - ox) / tw), cy = Math.floor((p.y - oy) / th); if (cx < 0 || cy < 0 || cx >= C || cy >= s.n[1]) return; const slot = cy * C + cx, id = s.pos[slot];
+      if (s.sel == null){ s.sel = id; sfx('pop'); } else if (s.sel === id){ s.sel = null; } else { const a = s.pos.indexOf(s.sel), b = slot; [s.pos[a], s.pos[b]] = [s.pos[b], s.pos[a]]; s.sel = null; sfx('pop'); if (s.pos[a] === a || s.pos[b] === b) s.combo++;
+        if (s.pos.every((v, i) => v === i)){ MODES.puzzle.lay(s); addScore(s, 5, 180, 140); burst(s, 180, 140); s.tiles.forEach(o => o.el.querySelector('.tb').setAttribute('stroke-opacity', '0')); setTimeout(() => { if (s.on) MODES.puzzle.build(s); }, 1300); return; } }
+      MODES.puzzle.lay(s); },
+    step(){}
+  },
+  // CONNECT THE DOTS: tap the dots in counting order to make a picture
+  dots: {
+    start(s){ MODES.dots.build(s); },
+    seq(g){ if (g === 0) return { L: N(1, 10), rule: 'Count 1 to 10' }; if (g === 1) return Math.random() < .5 ? { L: N(1, 15), rule: 'Count 1 to 15' } : { L: N(1, 12).map(v => String(v * 2)), rule: 'Count by 2s' };
+      if (g === 2) return Math.random() < .5 ? { L: N(1, 12).map(v => String(v * 5)), rule: 'Count by 5s' } : { L: N(1, 12).map(v => String(v * 10)), rule: 'Count by 10s' };
+      if (g === 3) { const b = pick([3, 4]); return { L: N(1, 12).map(v => String(v * b)), rule: `Count by ${b}s` }; } if (g === 4) { const b = pick([6, 7, 8]); return { L: N(1, 12).map(v => String(v * b)), rule: `Multiples of ${b}` }; }
+      if (g === 5) return Math.random() < .5 ? { L: N(1, 12).map(v => (v / 10).toFixed(1)), rule: 'Count by tenths' } : { L: ['¼', '½', '¾', '1', '1¼', '1½', '1¾', '2', '2¼', '2½', '2¾', '3'], rule: 'Count by quarters' };
+      if (g <= 7) return { L: N(1, 12).map(v => String(v - 7).replace('-', '−')), rule: 'From negative to positive' }; return { L: N(1, 12).map(v => String(v * v)), rule: 'Perfect squares' }; },
+    build(s){
+      s.objs.forEach(o => kill(o)); s.objs = []; if (s.lineEl) kill(s.lineEl);
+      const sq = MODES.dots.seq(GR()), n = sq.L.length, shape = pick(['star', 'heart', 'fish', 'house']);
+      const pts = MODES.dots.shape(shape, n).map(([x, y]) => [180 + x * 105, 145 + y * 92]);
+      s.lineEl = mk(s, `<path d="" fill="none" stroke="#7B5CFA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`, 0, 0); s.objs.push(s.lineEl);
+      s.dotsO = pts.map(([x, y], i) => { const o = mk(s, `<circle r="9" fill="#fff" stroke="#7B5CFA" stroke-width="3"/><g transform="translate(0,-18)">${pill(sq.L[i], { fs: 11 })}</g>`, x, y); o.i = i; return o; });
+      s.objs.push(...s.dotsO); s.k = 0; s.shape = shape; s.sqRule = sq.rule; s.pts = pts; s.hud = ruleHud(s, `Tap in order: ${sq.rule}`); MODES.dots.hint(s);
+    },
+    shape(t, n){ const out = []; for (let i = 0; i < n; i++){ const a = i / n * Math.PI * 2;
+        if (t === 'star'){ const r = i % 2 ? .45 : 1, b = -Math.PI / 2 + i / n * Math.PI * 2; out.push([Math.cos(b) * r, Math.sin(b) * r]); }
+        else if (t === 'heart'){ const tt = Math.PI - a; out.push([16 * Math.sin(tt) ** 3 / 17, -(13 * Math.cos(tt) - 5 * Math.cos(2 * tt) - 2 * Math.cos(3 * tt) - Math.cos(4 * tt)) / 17]); }
+        else if (t === 'fish'){ out.push([Math.cos(a) * (a < Math.PI * .85 || a > Math.PI * 1.15 ? .8 : 1.05) - .1, Math.sin(a) * .55 * (Math.abs(Math.cos(a)) > .9 && Math.cos(a) < 0 ? 1.6 : 1)]); }
+        else { const poly = [[-.8, .9], [-.8, -.1], [-1, -.1], [0, -1], [1, -.1], [.8, -.1], [.8, .9]]; const f = i / n * poly.length, k = Math.floor(f), u = f - k, A2 = poly[k], B2 = poly[(k + 1) % poly.length]; out.push([A2[0] + (B2[0] - A2[0]) * u, A2[1] + (B2[1] - A2[1]) * u]); } }
+      return out; },
+    hint(s){ s.dotsO.forEach(o => { const c = o.el.querySelector('circle'); c.setAttribute('fill', o.i < s.k ? '#7B5CFA' : '#fff'); c.setAttribute('class', s.d === 0 && o.i === s.k ? 'glowb' : ''); }); },
+    down(s, p){ const o = s.dotsO.find(o => Math.hypot(o.x - p.x, o.y - p.y) < 22 || Math.hypot(o.x - p.x, o.y - 18 - p.y) < 18); if (!o || o.i < s.k) return;
+      if (o.i === s.k){ s.k++; sfx('pop'); s.combo++; const d = s.pts.slice(0, s.k).map((q, i) => (i ? 'L' : 'M') + f1(q[0]) + ',' + f1(q[1])).join(' '); s.lineEl.el.firstChild.setAttribute('d', d); MODES.dots.hint(s);
+        if (s.k >= s.dotsO.length){ s.lineEl.el.firstChild.setAttribute('d', d + 'Z'); s.lineEl.el.firstChild.setAttribute('fill', pick(['#FFE36B', '#FF8FB8', '#9BE3C2', '#BDEBFF'])); addScore(s, 3, 180, 145); pop(s, 180, 120, { star: '⭐ A star!', heart: '❤️ A heart!', fish: '🐟 A fish!', house: '🏠 A house!' }[s.shape], '#7B5CFA'); setTimeout(() => { if (s.on) MODES.dots.build(s); }, 1300); } }
+      else { s.combo = 0; sfx('boop'); const sv = $('#arcSvg'); if (sv){ sv.classList.remove('shake'); requestAnimationFrame(() => sv.classList.add('shake')); } } },
+    step(){}
+  },
+  // SPRINKLE SNAKE: steer the snake to eat the right scoops
+  snake: {
+    start(s){ s.gc = 12; s.gr = 8; s.cz = 26; s.gx = 24; s.gy = 44; s.body = [[5, 4], [4, 4], [3, 4]]; s.dir = [1, 0]; s.nd = [1, 0]; s.tick = 0; s.foods = []; s.bodyEls = []; mk(s, `<rect x="${s.gx}" y="${s.gy}" width="${s.gc * s.cz}" height="${s.gr * s.cz}" rx="14" fill="#fff" opacity=".45"/>`, 0, 0); for (let k = 0; k < 3; k++) MODES.snake.food(s); s.hud = ruleHud(s, `Eat: ${s.set.a}`); MODES.snake.draw(s); },
+    food(s){ const goodNeeded = !s.foods.some(f => f.good); for (let t = 0; t < 40; t++){ const c = [Math.floor(Math.random() * s.gc), Math.floor(Math.random() * s.gr)]; if (s.body.some(b => b[0] === c[0] && b[1] === c[1]) || s.foods.some(f => f.c[0] === c[0] && f.c[1] === c[1])) continue; const it = setItem(s, goodNeeded ? true : null); const o = mk(s, `<g transform="translate(0,-6) scale(.8)">${SPR[pick(['scoopP', 'scoopC', 'scoopM'])]}</g><g transform="translate(0,10) scale(.85)">${pill(it.label, { fs: 10 })}</g>`, s.gx + (c[0] + .5) * s.cz, s.gy + (c[1] + .5) * s.cz); o.c = c; o.good = it.good; s.foods.push(o); return; } },
+    turn(s, dx, dy){ if (dx === -s.dir[0] && dy === -s.dir[1]) return; s.nd = [dx, dy]; },
+    down(s, p){ s.sx = p.x; s.sy = p.y; s.sw = false; },
+    move(s, p){ if (!s.down || s.sw) return; const dx = p.x - s.sx, dy = p.y - s.sy; if (Math.hypot(dx, dy) > 22){ s.sw = true; Math.abs(dx) > Math.abs(dy) ? MODES.snake.turn(s, Math.sign(dx), 0) : MODES.snake.turn(s, 0, Math.sign(dy)); } },
+    up(s, p){ if (s.sw) return; const h = s.body[0], hx = s.gx + (h[0] + .5) * s.cz, hy = s.gy + (h[1] + .5) * s.cz, dx = p.x - hx, dy = p.y - hy; if (s.dir[0]) MODES.snake.turn(s, 0, Math.sign(dy) || 1); else MODES.snake.turn(s, Math.sign(dx) || 1, 0); },
+    reset(s){ s.body = [[5, 4], [4, 4], [3, 4]]; s.dir = [1, 0]; s.nd = [1, 0]; },
+    step(s, dt){
+      s.tick += dt; const iv = Math.max(.11, [.34, .27, .21, .17][s.d] - s.body.length * .004); if (s.tick < iv) return; s.tick = 0;
+      s.dir = s.nd; const h = s.body[0]; let nx = h[0] + s.dir[0], ny = h[1] + s.dir[1];
+      if (nx < 0 || ny < 0 || nx >= s.gc || ny >= s.gr){ if (s.d <= 1){ nx = (nx + s.gc) % s.gc; ny = (ny + s.gr) % s.gr; } else { if (hurt(s, s.gx + (h[0] + .5) * s.cz, s.gy + (h[1] + .5) * s.cz)) return; MODES.snake.reset(s); MODES.snake.draw(s); return; } }
+      if (s.d >= 2 && s.body.some(b => b[0] === nx && b[1] === ny)){ if (hurt(s, s.gx + (nx + .5) * s.cz, s.gy + (ny + .5) * s.cz)) return; MODES.snake.reset(s); MODES.snake.draw(s); return; }
+      s.body.unshift([nx, ny]); const f = s.foods.find(o => o.c[0] === nx && o.c[1] === ny);
+      if (f){ kill(f); s.foods = s.foods.filter(o => o !== f); if (f.good){ addScore(s, 1, f.x, f.y - 12); } else { s.body.pop(); if (s.body.length > 2) s.body.pop(); if (hurt(s, f.x, f.y - 12)) return; } MODES.snake.food(s); }
+      else s.body.pop();
+      MODES.snake.draw(s);
+    },
+    draw(s){ s.bodyEls.forEach(o => kill(o)); s.bodyEls = s.body.map((b, i) => mk(s, i ? `<circle r="11" fill="${['#FF8FB8', '#FFE36B', '#9BE3C2', '#BDEBFF'][i % 4]}"/><circle cx="-3" cy="-3" r="2" fill="#fff" opacity=".7"/>` : `<circle r="12.5" fill="#FF5A8C"/><circle cx="${4 * s.dir[0] - 3 * s.dir[1]}" cy="${4 * s.dir[1] - 3 * s.dir[0]}" r="2.6" fill="#2B2550"/><circle cx="${4 * s.dir[0] + 3 * s.dir[1]}" cy="${4 * s.dir[1] + 3 * s.dir[0]}" r="2.6" fill="#2B2550"/>`, s.gx + (b[0] + .5) * s.cz, s.gy + (b[1] + .5) * s.cz)); }
+  }
+});
+const WR_K = [['🐱', 'cat'], ['🐶', 'dog'], ['☀️', 'sun'], ['🐷', 'pig'], ['🛏️', 'bed'], ['🚌', 'bus'], ['🎩', 'hat'], ['🦊', 'fox'], ['🐝', 'bee'], ['🥚', 'egg'], ['🐮', 'cow'], ['🗺️', 'map']];
+const WR_1 = [['🐸', 'frog'], ['🐟', 'fish'], ['🥛', 'milk'], ['🌳', 'tree'], ['⭐', 'star'], ['🦆', 'duck'], ['🐻', 'bear'], ['🍰', 'cake'], ['🚢', 'ship'], ['🌙', 'moon'], ['🦁', 'lion'], ['🐐', 'goat'], ['🌧️', 'rain'], ['🦀', 'crab']];
+const WR_3 = ['planet', 'garden', 'rocket', 'yellow', 'castle', 'jungle', 'pencil', 'winter', 'thunder', 'dolphin', 'library', 'friendly', 'mountain', 'science', 'blanket', 'kitchen', 'giraffe', 'ocean'];
+const WR_6 = ['adventure', 'telescope', 'chemistry', 'hurricane', 'democracy', 'microscope', 'ecosystem', 'equation', 'perimeter', 'metaphor', 'continent', 'volcanic', 'molecule', 'algebra', 'hypothesis', 'gravity'];
+const R_ = { tree: (x, y) => R.tree(x, y), pine: (x, y) => R.pine(x, y) };
+
+// ---------- 8. NEW GAME KINDS (part 2) ----------
+const ING = [['🍓', 'strawberry', '#FF6F91'], ['🍌', 'banana', '#FFE066'], ['🥛', 'milk', '#F4F7FF'], ['🍫', 'chocolate', '#8B5A3C'], ['🫐', 'blueberry', '#7B8CFF']];
+const OBJ = [['🐶', 'dog', 'animal pet mammal'], ['🐱', 'cat', 'animal pet mammal'], ['🐟', 'fish', 'animal water pet'], ['🐸', 'frog', 'animal water green'], ['🐦', 'bird', 'animal fly'], ['🐝', 'bee', 'insect fly yellow'], ['🐞', 'ladybug', 'insect red'], ['🐄', 'cow', 'animal farm mammal'], ['🐷', 'pig', 'animal farm mammal pink'], ['🐔', 'chicken', 'animal farm'], ['🍎', 'apple', 'food fruit red'], ['🍌', 'banana', 'food fruit yellow'], ['🍇', 'grapes', 'food fruit purple'], ['🍓', 'strawberry', 'food fruit red'], ['🥕', 'carrot', 'food vegetable orange'], ['🥦', 'broccoli', 'food vegetable green'], ['🍪', 'cookie', 'food sweet'], ['🍦', 'ice cream', 'food sweet cold'], ['🚗', 'car', 'vehicle red'], ['🚌', 'bus', 'vehicle yellow'], ['🚲', 'bike', 'vehicle'], ['✈️', 'airplane', 'vehicle fly sky'], ['🚀', 'rocket', 'vehicle sky fly'], ['⛵', 'boat', 'vehicle water'], ['☀️', 'sun', 'sky yellow hot'], ['🌙', 'moon', 'sky'], ['⭐', 'star', 'sky yellow'], ['☁️', 'cloud', 'sky'], ['🧸', 'teddy bear', 'toy'], ['⚽', 'ball', 'toy'], ['🪁', 'kite', 'toy sky fly'], ['🎸', 'guitar', 'music'], ['🥁', 'drum', 'music'], ['🧦', 'sock', 'clothes'], ['🧢', 'cap', 'clothes'], ['👟', 'shoe', 'clothes'], ['🔨', 'hammer', 'tool'], ['✏️', 'pencil', 'tool school yellow'], ['📚', 'books', 'school'], ['❄️', 'snowflake', 'cold'], ['🌻', 'sunflower', 'plant yellow'], ['🌳', 'tree', 'plant green']].map(([e, n, t]) => ({ e, n, t: t.split(' ') }));
+const ADJ = { animal: 'an animal', pet: 'a pet', mammal: 'a mammal', water: 'in the water', fly: 'able to fly', insect: 'an insect', farm: 'from a farm', food: 'food', fruit: 'a fruit', vegetable: 'a vegetable', sweet: 'sweet', cold: 'cold', vehicle: 'a vehicle', sky: 'in the sky', toy: 'a toy', music: 'for music', clothes: 'clothing', tool: 'a tool', school: 'for school', plant: 'a plant', red: 'red', yellow: 'yellow', green: 'green', purple: 'purple', orange: 'orange', pink: 'pink', hot: 'hot' };
+const CLUE = { animal: 'an animal', pet: 'a pet', mammal: 'a mammal', water: 'something that lives or floats on water', fly: 'something that flies', insect: 'an insect', farm: 'a farm animal', food: 'something you can eat', fruit: 'a fruit', vegetable: 'a vegetable', sweet: 'a sweet treat', cold: 'something cold', vehicle: 'something you can ride in', sky: 'something in the sky', toy: 'a toy', music: 'something that makes music', clothes: 'something you wear', tool: 'a tool', school: 'something for school', plant: 'a plant', red: 'something red', yellow: 'something yellow', green: 'something green', purple: 'something purple', orange: 'something orange', pink: 'something pink', hot: 'something hot' };
+Object.assign(MODES, {
+  // MILKSHAKE MIXER: follow the recipe (counting → fractions → ratios → percents)
+  mixer: {
+    start(s){ s.ing = s.d === 0 ? ING.slice(0, 3) : ING; s.cnt = s.ing.map(() => 0); s.lay = [];
+      s.cup = mk(s, `<path d="M-38,-70 L38,-70 L30,40 Q0,52 -30,40z" fill="#fff" opacity=".7" stroke="#B9C8E2" stroke-width="3"/><g class="fill"></g><path d="M-38,-70 L38,-70" stroke="#B9C8E2" stroke-width="4"/>`, 180, 150);
+      s.btns = s.ing.map((g, k) => { const n = s.ing.length; const o = mk(s, `<rect x="-26" y="-24" width="52" height="48" rx="14" fill="#fff" stroke="${g[2]}" stroke-width="3"/><text y="10" text-anchor="middle" font-size="28">${g[0]}</text><text class="c" y="-14" x="20" text-anchor="middle" ${FONT} font-size="12" fill="#7B5CFA"></text>`, 180 + (k - (n - 1) / 2) * 60, 232); o.k = k; return o; });
+      s.undo = mk(s, `<rect x="-30" y="-14" width="60" height="28" rx="14" fill="#fff" stroke="#B9C8E2"/><text y="5" text-anchor="middle" ${FONT} font-size="12" fill="#5F5A86">↶ Undo</text>`, 60, 160);
+      s.blend = mk(s, `<rect x="-36" y="-16" width="72" height="32" rx="16" fill="#3EC46B"/><text y="5" text-anchor="middle" ${FONT} font-size="14" fill="#fff">Blend!</text>`, 300, 160);
+      MODES.mixer.recipe(s); },
+    recipe(s){
+      const g = GR(), n = s.ing.length; s.cnt = s.cnt.map(() => 0); s.lay = []; let need = s.ing.map(() => 0), txt, learn;
+      const A2 = RI(0, n - 1); let B2 = RI(0, n - 1); if (B2 === A2) B2 = (A2 + 1) % n; const a = s.ing[A2], b = s.ing[B2];
+      if (g === 0){ const k = RI(1, 5); need[A2] = k; txt = `Put in ${k} ${a[0]}`; learn = `You counted ${k} ${a[1]}${k > 1 ? 's' : ''}!`; }
+      else if (g <= 2){ const x = RI(1, 5), y = RI(1, 5); need[A2] = x; need[B2] = y; txt = `${x} ${a[0]} and ${y} ${b[0]}`; learn = `${x} + ${y} = ${x + y} scoops in all.`; }
+      else if (g <= 4){ const tot = pick([4, 6, 8, 10, 12]); if (Math.random() < .5){ need[A2] = tot / 2; need[B2] = tot / 2; txt = `${tot} scoops: ½ ${a[0]}, ½ ${b[0]}`; learn = `Half of ${tot} is ${tot / 2}.`; } else { const t4 = pick([4, 8, 12]); need[A2] = t4 / 4; need[B2] = t4 * 3 / 4; txt = `${t4} scoops: ¼ ${a[0]}, ¾ ${b[0]}`; learn = `¼ of ${t4} is ${t4 / 4}, and ¾ is ${t4 * 3 / 4}.`; } }
+      else if (g <= 6){ const [p, q] = pick([[1, 2], [2, 3], [1, 3], [3, 2], [1, 4]]), m = RI(1, 3); need[A2] = p * m; need[B2] = q * m; txt = `Ratio ${a[0]} : ${b[0]} = ${p} : ${q}, ${(p + q) * m} scoops total`; learn = `${p} : ${q} with ${(p + q) * m} scoops means ${p * m} and ${q * m}.`; }
+      else { const tot = pick([8, 12, 16, 20]), pc = pick([25, 50, 75]); need[A2] = tot * pc / 100; need[B2] = tot - need[A2]; txt = `${tot} scoops: ${pc}% ${a[0]}, the rest ${b[0]}`; learn = `${pc}% of ${tot} is ${tot * pc / 100}, so ${tot - tot * pc / 100} are ${b[1]}.`; }
+      s.need = need; s.mixLearn = learn; s.hud = `<g transform="translate(180,24)">${pill('Recipe: ' + txt, { fs: 13, bg: '#FFF6C9' })}</g>`; MODES.mixer.draw(s);
+    },
+    draw(s){ const tot = s.lay.length, h = 100; s.cup.el.querySelector('.fill').innerHTML = s.lay.map((k, i) => `<rect x="${-30 + i * 0}" y="${f1(38 - (i + 1) * Math.min(14, h / Math.max(1, tot)))}" width="60" height="${f1(Math.min(14, h / Math.max(1, tot)))}" fill="${s.ing[k][2]}"/>`).join(''); s.btns.forEach(o => { o.el.querySelector('.c').textContent = s.cnt[o.k] || ''; }); },
+    down(s, p){
+      if (s.lock) return; const b = s.btns.find(o => Math.abs(o.x - p.x) < 28 && Math.abs(o.y - p.y) < 26);
+      if (b){ if (s.lay.length >= 24) return; s.cnt[b.k]++; s.lay.push(b.k); sfx('pop'); b.s = 1.12; place(b); setTimeout(() => { b.s = 1; place(b); }, 110); return MODES.mixer.draw(s); }
+      if (Math.abs(p.x - 60) < 32 && Math.abs(p.y - 160) < 16){ const k = s.lay.pop(); if (k != null) s.cnt[k]--; return MODES.mixer.draw(s); }
+      if (Math.abs(p.x - 300) < 38 && Math.abs(p.y - 160) < 18){ const ok = s.cnt.every((c, i) => c === s.need[i]);
+        if (ok){ s.cup.r = 0; let t = 0; const iv = setInterval(() => { t++; s.cup.r = t % 2 ? 6 : -6; place(s.cup); if (t > 8){ clearInterval(iv); s.cup.r = 0; place(s.cup); } }, 60); addScore(s, 1, 180, 90); s.lastLearn = s.mixLearn; s.lock = true; setTimeout(() => { s.lock = false; if (s.on) MODES.mixer.recipe(s); }, 700); }
+        else { const miss = s.need.map((c, i) => c !== s.cnt[i] ? `${c} ${s.ing[i][0]}` : '').filter(Boolean).join(', '); pop(s, 180, 90, 'Not quite!', '#E8414F'); rmSay(`The recipe needs ${s.need.map((c, i) => c ? `${c} ${s.ing[i][1]}` : '').filter(Boolean).join(' and ')}. ${s.mixLearn}`); if (hurt(s)) return; s.cnt = s.cnt.map(() => 0); s.lay = []; MODES.mixer.draw(s); } }
+    },
+    step(){}
+  },
+  // WORD DETECTIVE: find the thing by its name, a clue, or a word in another language
+  hidden: {
+    start(s){ s.items = []; const n = [10, 12, 14, 16][s.d]; const slots = shuffle([...Array(24).keys()]).slice(0, n); slots.forEach(k => MODES.hidden.add(s, k)); MODES.hidden.target(s); },
+    add(s, k, avoid){ const used = new Set(s.items.filter(o => !o.dead).map(o => o.o.n)); const o0 = pick(OBJ.filter(o => !used.has(o.n) && o !== avoid)); const x = 30 + (k % 6) * 60 + rf(-10, 10), y = 62 + Math.floor(k / 6) * 50 + rf(-8, 8);
+      const o = mk(s, `<text text-anchor="middle" y="12" font-size="${f1(rf(28, 36) - s.d * 2)}">${o0.e}</text>`, x, y); o.r = rf(-18, 18); place(o); o.o = o0; o.k = k; s.items.push(o); return o; },
+    target(s){
+      const live = s.items.filter(o => !o.dead), t = pick(live); s.tg = t; const plan = planOf(K());
+      let txt, speak, lang = null;
+      if (s.d === 0){ txt = `Find the ${t.o.e} ${t.o.n}`; speak = `Find the ${t.o.n}`; }
+      else if (s.d === 1){ txt = `Find: ${t.o.n}`; speak = `Find the ${t.o.n}`; }
+      else { const L = plan.langs[0], row = L && LWORDS.find(r => r[1] === t.o.n);
+        if (row && Math.random() < .5){ const w = lword(row, L); txt = `Find: ${w.rom} (${LANGS[L][0]})`; speak = w.nat; lang = L; }
+        else { const tags = shuffle(t.o.t.slice()); let tag = tags.find(tg => CLUE[tg] && live.filter(o => o.o.t.includes(tg)).length === 1);
+          if (!tag && s.d === 3){ for (const a of t.o.t) for (const b of t.o.t) if (a < b && CLUE[a] && CLUE[b] && live.filter(o => o.o.t.includes(a) && o.o.t.includes(b)).length === 1){ txt = `Find something that is ${ADJ[a]} and ${ADJ[b]}`; } }
+          if (!txt){ if (!tag){ txt = `Find: ${t.o.n}`; } else txt = `Find ${CLUE[tag]}`; } speak = txt; } }
+      s.speak = speak; s.lang = lang; s.hud = `<g transform="translate(180,24)">${pill(txt, { fs: 13, bg: '#FFF6C9' })}</g>`;
+    },
+    down(s, p){ const o = s.items.filter(o => !o.dead).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0]; if (!o || Math.hypot(o.x - p.x, o.y - p.y) > 26) return;
+      if (o === s.tg){ addScore(s, 1, o.x, o.y - 16); burst(s, o.x, o.y); kill(o); const n = MODES.hidden.add(s, o.k, o.o); n.a = 0; place(n); let a = 0; const iv = setInterval(() => { a += .1; n.a = Math.min(1, a); place(n); if (a >= 1) clearInterval(iv); }, 40); MODES.hidden.target(s); }
+      else { o.s = 1.3; place(o); setTimeout(() => { o.s = 1; place(o); }, 200); pop(s, o.x, o.y - 16, `That’s ${o.o.n}`, '#E8414F'); hurt(s); } },
+    step(s){ for (const o of s.items){ if (!o.dead){ o.y += Math.sin(s.t * 2 + o.k) * .03; place(o); } } }
+  },
+  // FOUR IN A ROW: drop pieces and get a line before the toy robot
+  connect4: {
+    start(s){ const cfg = [[5, 4, 3], [6, 5, 4], [7, 6, 4], [7, 6, 4]][s.d]; [s.C, s.R, s.need] = cfg; s.cz = Math.min(44, 300 / s.C, 200 / s.R); s.ox = 180 - s.C * s.cz / 2; s.oy = 48; MODES.connect4.newBoard(s); },
+    newBoard(s){ s.objs.forEach(o => kill(o)); s.objs = []; s.b = [...Array(s.C)].map(() => []); s.turn = 'kid'; s.over = false;
+      s.objs.push(mk(s, `<rect x="${f1(s.ox - 8)}" y="${f1(s.oy - 8)}" width="${f1(s.C * s.cz + 16)}" height="${f1(s.R * s.cz + 16)}" rx="16" fill="#5A6FD8"/>${[...Array(s.C * s.R)].map((_, i) => `<circle cx="${f1(s.ox + (i % s.C + .5) * s.cz)}" cy="${f1(s.oy + (Math.floor(i / s.C) + .5) * s.cz)}" r="${f1(s.cz * .38)}" fill="#E9F0FF"/>`).join('')}`, 0, 0));
+      s.hud = `<g transform="translate(180,22)">${pill(`Get ${s.need} in a row before the robot!`, { fs: 13, bg: '#FFF6C9' })}</g>`; },
+    win(b, C, R, need, who){ const at = (c, r) => b[c] && b[c][r]; for (let c = 0; c < C; c++) for (let r = 0; r < R; r++){ if (at(c, r) !== who) continue; for (const [dc, dr] of [[1, 0], [0, 1], [1, 1], [1, -1]]){ let k = 1; while (k < need && at(c + dc * k, r + dr * k) === who) k++; if (k >= need) return true; } } return false; },
+    drop(s, c, who){ if (s.b[c].length >= s.R) return false; s.b[c].push(who); const r = s.b[c].length - 1; const o = mk(s, `<circle r="${f1(s.cz * .38)}" fill="${who === 'kid' ? '#FF5A8C' : '#FFC63A'}"/><circle r="${f1(s.cz * .38)}" fill="url(#fsR)"/>`, s.ox + (c + .5) * s.cz, s.oy - 10); s.objs.push(o); const ty = s.oy + (s.R - r - .5) * s.cz; let vy = 0; const fall = () => { vy += 40; o.y = Math.min(ty, o.y + vy * .05); place(o); if (o.y < ty && ARC.s === s) requestAnimationFrame(fall); }; requestAnimationFrame(fall); sfx('pop'); return true; },
+    score(b, C, R, need){ let sc = 0; const at = (c, r) => (b[c] && b[c][r]) || null; for (let c = 0; c < C; c++) for (let r = 0; r < R; r++) for (const [dc, dr] of [[1, 0], [0, 1], [1, 1], [1, -1]]){ let me = 0, you = 0, ok = true; for (let k = 0; k < need; k++){ const cc = c + dc * k, rr2 = r + dr * k; if (cc < 0 || cc >= C || rr2 < 0 || rr2 >= R){ ok = false; break; } const v = at(cc, rr2); if (v === 'bot') me++; else if (v === 'kid') you++; } if (!ok || (me && you)) continue; sc += me ? me * me : 0; sc -= you ? you * you * 1.1 : 0; } return sc; },
+    mm(s, b, depth, max, a, bb){ const { C, R, need } = s; if (MODES.connect4.win(b, C, R, need, 'bot')) return 1e5 + depth; if (MODES.connect4.win(b, C, R, need, 'kid')) return -1e5 - depth; if (!depth || b.every(col => col.length >= R)) return MODES.connect4.score(b, C, R, need);
+      const order = [...Array(C).keys()].sort((x, y) => Math.abs(x - (C - 1) / 2) - Math.abs(y - (C - 1) / 2)); let best = max ? -Infinity : Infinity;
+      for (const c of order){ if (b[c].length >= R) continue; b[c].push(max ? 'bot' : 'kid'); const v = MODES.connect4.mm(s, b, depth - 1, !max, a, bb); b[c].pop(); if (max){ best = Math.max(best, v); a = Math.max(a, v); } else { best = Math.min(best, v); bb = Math.min(bb, v); } if (bb <= a) break; } return best; },
+    bot(s){ const { C, R, need, b } = s, free = [...Array(C).keys()].filter(c => b[c].length < R); if (!free.length) return -1;
+      const tryWin = who => free.find(c => { b[c].push(who); const w = MODES.connect4.win(b, C, R, need, who); b[c].pop(); return w; });
+      if (s.d === 0){ const w = Math.random() < .5 ? tryWin('bot') : undefined; return w != null ? w : pick(free); }
+      if (s.d === 1){ const w = tryWin('bot'); if (w != null) return w; const bl = tryWin('kid'); if (bl != null && Math.random() < .85) return bl; return pick(free); }
+      const depth = s.d === 2 ? 3 : 5; let best = free[0], bv = -Infinity; for (const c of free){ b[c].push('bot'); const v = MODES.connect4.mm(s, b, depth - 1, false, -Infinity, Infinity) + rf(0, .5); b[c].pop(); if (v > bv){ bv = v; best = c; } } return best; },
+    end(s, who){ s.over = true; if (who === 'kid'){ addScore(s, 3, 180, 140); pop(s, 180, 120, 'You win!', '#3EC46B'); setTimeout(() => { if (s.on) MODES.connect4.newBoard(s); }, 1400); } else if (who === 'bot'){ pop(s, 180, 120, 'Robot wins!', '#E8414F'); if (hurt(s)) return; setTimeout(() => { if (s.on) MODES.connect4.newBoard(s); }, 1400); } else { s.score += 1; pop(s, 180, 120, 'Tie!', '#7B5CFA'); setTimeout(() => { if (s.on) MODES.connect4.newBoard(s); }, 1400); } },
+    down(s, p){ if (s.turn !== 'kid' || s.over) return; const c = Math.floor((p.x - s.ox) / s.cz); if (c < 0 || c >= s.C || !MODES.connect4.drop(s, c, 'kid')) return;
+      if (MODES.connect4.win(s.b, s.C, s.R, s.need, 'kid')) return MODES.connect4.end(s, 'kid'); if (s.b.every(col => col.length >= s.R)) return MODES.connect4.end(s, 'tie');
+      s.turn = 'bot'; setTimeout(() => { if (!s.on || s.over) return; const c2 = MODES.connect4.bot(s); if (c2 >= 0) MODES.connect4.drop(s, c2, 'bot'); if (MODES.connect4.win(s.b, s.C, s.R, s.need, 'bot')) return MODES.connect4.end(s, 'bot'); if (s.b.every(col => col.length >= s.R)) return MODES.connect4.end(s, 'tie'); s.turn = 'kid'; }, 450); },
+    step(){}
+  },
+  // CANDY SWAP: swap neighbors to line up 3 or more
+  match3: {
+    start(s){ s.n = s.d >= 2 ? 7 : 6; s.k = [4, 5, 5, 6][s.d]; s.cz = Math.min(34, 220 / s.n); s.ox = 180 - s.n * s.cz / 2; s.oy = 34; s.g = []; for (let y = 0; y < s.n; y++){ s.g[y] = []; for (let x = 0; x < s.n; x++){ let c; do { c = RI(0, s.k - 1); } while ((x >= 2 && s.g[y][x - 1] === c && s.g[y][x - 2] === c) || (y >= 2 && s.g[y - 1][x] === c && s.g[y - 2][x] === c)); s.g[y][x] = c; } }
+      s.busy = false; s.sel = null; mk(s, `<rect x="${f1(s.ox - 6)}" y="${f1(s.oy - 6)}" width="${f1(s.n * s.cz + 12)}" height="${f1(s.n * s.cz + 12)}" rx="14" fill="#fff" opacity=".6"/>`, 0, 0); s.cells = []; MODES.match3.draw(s); },
+    candy(c){ const col = ['#FF5A8C', '#34B2F0', '#3EC46B', '#FFC63A', '#B58CFF', '#FF8A3D'][c]; return [`<circle r="12" fill="${col}"/><circle cx="-4" cy="-4" r="3.4" fill="#fff" opacity=".6"/>`, `<rect x="-11" y="-11" width="22" height="22" rx="6" fill="${col}"/><rect x="-7" y="-8" width="6" height="4" rx="2" fill="#fff" opacity=".6"/>`, `<path d="M0,-13 L12,10 H-12z" fill="${col}"/><circle cx="-2" cy="0" r="2.6" fill="#fff" opacity=".6"/>`, `<path d="M0,-13 L3.8,-4 L13,-4 L5.8,2.2 L8,12 L0,6.6 L-8,12 L-5.8,2.2 L-13,-4 L-3.8,-4Z" fill="${col}"/>`, `<path d="M0,12 C-15,0 -10,-12 0,-5 C10,-12 15,0 0,12z" fill="${col}"/>`, `<ellipse rx="13" ry="9" fill="${col}"/><path d="M-13,0 l-5,-5 v10z M13,0 l5,-5 v10z" fill="${col}"/>`][c]; },
+    draw(s){ s.cells.forEach(o => kill(o)); s.cells = []; for (let y = 0; y < s.n; y++) for (let x = 0; x < s.n; x++){ const c = s.g[y][x]; if (c == null) continue; const o = mk(s, MODES.match3.candy(c), s.ox + (x + .5) * s.cz, s.oy + (y + .5) * s.cz, s.cz / 34 * (s.sel && s.sel[0] === x && s.sel[1] === y ? 1.25 : 1)); s.cells.push(o); } },
+    matches(s){ const m = new Set(), n = s.n, g = s.g; for (let y = 0; y < n; y++) for (let x = 0; x < n - 2; x++){ const c = g[y][x]; if (c != null && g[y][x + 1] === c && g[y][x + 2] === c){ let k = x; while (k < n && g[y][k] === c) m.add(y * n + k++); } } for (let x = 0; x < n; x++) for (let y = 0; y < n - 2; y++){ const c = g[y][x]; if (c != null && g[y + 1][x] === c && g[y + 2][x] === c){ let k = y; while (k < n && g[k][x] === c) m.add(k++ * n + x); } } return m; },
+    resolve(s, chain = 1){ const m = MODES.match3.matches(s); if (!m.size){ s.busy = false; return; }
+      m.forEach(i => { s.g[Math.floor(i / s.n)][i % s.n] = null; }); const pts = m.size; s.combo = chain - 1; addScore(s, pts, 180, 120); if (chain > 1) pop(s, 180, 100, `Chain ×${chain}!`, '#7B5CFA'); MODES.match3.draw(s);
+      setTimeout(() => { if (!s.on) return; for (let x = 0; x < s.n; x++){ const col = []; for (let y = s.n - 1; y >= 0; y--) if (s.g[y][x] != null) col.push(s.g[y][x]); for (let y = s.n - 1, k = 0; y >= 0; y--, k++) s.g[y][x] = k < col.length ? col[k] : RI(0, s.k - 1); } MODES.match3.draw(s); setTimeout(() => { if (s.on) MODES.match3.resolve(s, chain + 1); }, 220); }, 220); },
+    down(s, p){ if (s.busy) return; const x = Math.floor((p.x - s.ox) / s.cz), y = Math.floor((p.y - s.oy) / s.cz); if (x < 0 || y < 0 || x >= s.n || y >= s.n) return; s.dx0 = p.x; s.dy0 = p.y; s.dc = [x, y];
+      if (s.sel && Math.abs(s.sel[0] - x) + Math.abs(s.sel[1] - y) === 1) return MODES.match3.swap(s, s.sel, [x, y]); s.sel = [x, y]; MODES.match3.draw(s); },
+    move(s, p){ if (!s.down || s.busy || !s.dc) return; const dx = p.x - s.dx0, dy = p.y - s.dy0; if (Math.hypot(dx, dy) < 14) return; const [x, y] = s.dc, to = Math.abs(dx) > Math.abs(dy) ? [x + Math.sign(dx), y] : [x, y + Math.sign(dy)]; s.dc = null; if (to[0] >= 0 && to[1] >= 0 && to[0] < s.n && to[1] < s.n) MODES.match3.swap(s, [x, y], to); },
+    swap(s, a, b){ const g = s.g; [g[a[1]][a[0]], g[b[1]][b[0]]] = [g[b[1]][b[0]], g[a[1]][a[0]]]; s.sel = null; s.busy = true; MODES.match3.draw(s); sfx('pop');
+      if (!MODES.match3.matches(s).size){ setTimeout(() => { if (!s.on) return; [g[a[1]][a[0]], g[b[1]][b[0]]] = [g[b[1]][b[0]], g[a[1]][a[0]]]; s.busy = false; s.combo = 0; MODES.match3.draw(s); }, 260); } else setTimeout(() => { if (s.on) MODES.match3.resolve(s); }, 150); },
+    step(){}
+  },
+  // GUMDROP LAUNCH: pull back, aim and fling at the candy towers
+  slingshot: {
+    start(s){ s.base = { x: 64, y: 196 }; s.shots = [12, 10, 9, 8][s.d]; mk(s, `<path d="M-14,40 L-6,0 M14,40 L6,0" stroke="#9A6340" stroke-width="7" stroke-linecap="round"/><path d="M-10,8 V44 M10,8 V44" stroke="#9A6340" stroke-width="5"/>`, s.base.x, s.base.y + 4); s.band = mk(s, `<path d="" stroke="#5A3A20" stroke-width="3" fill="none"/>`, 0, 0); s.ball = mk(s, SPR.gumdrop, s.base.x, s.base.y, 1); s.dots = mk(s, '<g></g>', 0, 0); s.fly = null; MODES.slingshot.targets(s); s.hud = ''; MODES.slingshot.hudU(s); },
+    hudU(s){ s.hud = `<g transform="translate(70,24)">${pill(`Gumdrops: ${s.shots}`, { fs: 12, bg: '#F3EEFF' })}</g>`; },
+    targets(s){ (s.tg || []).forEach(o => kill(o)); const n = [3, 4, 5, 6][s.d]; s.tg = []; for (let k = 0; k < n; k++){ const tall = Math.random() < .5, x = rf(200, 335), y = 238 - (tall ? rf(20, 110) : 0); const o = mk(s, `<rect x="-14" y="-14" width="28" height="28" rx="6" fill="#C98A55"/><circle cx="-5" cy="-3" r="2" fill="#2B2550"/><circle cx="5" cy="-3" r="2" fill="#2B2550"/><path d="M-5,5 q5,4 10,0" stroke="#fff" stroke-width="2" fill="none"/>`, x, y); o.vy = 0; s.tg.push(o); if (s.d >= 3 && k === n - 1) o.bob = true; } },
+    down(s, p){ if (s.fly || Math.hypot(p.x - s.base.x, p.y - s.base.y) > 60) return; s.aim = true; },
+    move(s, p){ if (!s.aim) return; let dx = p.x - s.base.x, dy = p.y - s.base.y; const l = Math.hypot(dx, dy); if (l > 70){ dx *= 70 / l; dy *= 70 / l; } s.pull = { dx, dy }; s.ball.x = s.base.x + dx; s.ball.y = s.base.y + dy; place(s.ball); s.band.el.firstChild.setAttribute('d', `M${s.base.x - 10},${s.base.y} L${f1(s.ball.x)},${f1(s.ball.y)} L${s.base.x + 10},${s.base.y}`);
+      const vx = -dx * 6.2, vy = -dy * 6.2, nd = [8, 6, 3, 0][s.d]; let g = ''; for (let k = 1; k <= nd; k++){ const t = k * .09; g += `<circle cx="${f1(s.base.x + vx * t)}" cy="${f1(s.base.y + vy * t + 210 * t * t)}" r="3" fill="#fff" opacity="${f1(1 - k / 10)}"/>`; } s.dots.el.firstChild.innerHTML = g; },
+    up(s){ if (!s.aim) return; s.aim = false; s.band.el.firstChild.setAttribute('d', ''); s.dots.el.firstChild.innerHTML = ''; const pl = s.pull; s.pull = null; if (!pl || Math.hypot(pl.dx, pl.dy) < 14){ s.ball.x = s.base.x; s.ball.y = s.base.y; place(s.ball); return; } s.fly = { vx: -pl.dx * 6.2, vy: -pl.dy * 6.2 }; s.shots--; MODES.slingshot.hudU(s); sfx('pop'); },
+    step(s, dt){
+      for (const o of s.tg){ if (o.bob && !o.hit){ o.y = 140 + Math.sin(s.t * 1.5) * 40; place(o); } if (o.hit){ o.vy += 600 * dt; o.y += o.vy * dt; o.r += 300 * dt; place(o); if (o.y > 300) kill(o); } }
+      const f = s.fly; if (!f) return; const b = s.ball; f.vy += 420 * dt; b.x += f.vx * dt; b.y += f.vy * dt; b.r += f.vx * dt; place(b);
+      for (const o of s.tg) if (!o.hit && Math.abs(o.x - b.x) < 20 && Math.abs(o.y - b.y) < 20){ o.hit = true; o.vy = -120; addScore(s, 1, o.x, o.y - 18); }
+      if (b.y > 262 || b.x > 380 || b.x < -20){ s.fly = null; b.x = s.base.x; b.y = s.base.y; b.r = 0; place(b);
+        if (s.tg.every(o => o.hit)){ addScore(s, 3, 260, 120); pop(s, 260, 100, 'All down!', '#3EC46B'); s.shots += 3; MODES.slingshot.hudU(s); setTimeout(() => { if (s.on) MODES.slingshot.targets(s); }, 700); }
+        else if (s.shots <= 0) arcEnd(s); }
+    }
+  },
+  // PIPE PUZZLE: turn the pipes so the water reaches the fountain
+  pipes: {
+    start(s){ s.size = [[4, 3], [5, 4], [6, 4], [7, 5]][s.d]; MODES.pipes.build(s); },
+    rot: m => ((m << 1) | (m >> 3)) & 15,
+    build(s){
+      s.objs.forEach(o => kill(o)); s.objs = []; const [C, R] = s.size; s.C = C; s.R = R; s.cz = Math.min(300 / (C + 1), 200 / R); s.ox = 180 - C * s.cz / 2; s.oy = 40 + (210 - R * s.cz) / 2;
+      const r0 = RI(0, R - 1), r1 = RI(0, R - 1), start = r0 * C, end = r1 * C + C - 1; let path = null;
+      const dfs = (c, seen, acc) => { if (c === end){ path = acc.slice(); return true; } const x = c % C, y = Math.floor(c / C); for (const [dx, dy] of shuffle([[1, 0], [0, 1], [0, -1], [-1, 0], [1, 0]])){ const nx = x + dx, ny = y + dy, n = ny * C + nx; if (nx < 0 || ny < 0 || nx >= C || ny >= R || seen.has(n)) continue; seen.add(n); acc.push(n); if (dfs(n, seen, acc)) return true; acc.pop(); seen.delete(n); } return false; };
+      dfs(start, new Set([start]), [start]);
+      const bit = (a, b) => { const dx = (b % C) - (a % C), dy = Math.floor(b / C) - Math.floor(a / C); return dx === 1 ? 2 : dx === -1 ? 8 : dy === 1 ? 4 : 1; };
+      s.m = [...Array(C * R)].map(() => pick([5, 10, 3, 6, 9, 12, ...(s.d >= 2 ? [7, 11, 13, 14] : [])]));
+      path.forEach((c, i) => { let m = 0; m |= i === 0 ? 8 : bit(c, path[i - 1]); m |= i === path.length - 1 ? 2 : bit(c, path[i + 1]); s.m[c] = m; });
+      s.m = s.m.map(m => { let r = m; for (let k = RI(0, 3); k > 0; k--) r = MODES.pipes.rot(r); return r; });
+      s.src = start; s.dst = end;
+      s.objs.push(mk(s, `<rect x="${f1(s.ox - s.cz * .7)}" y="${f1(s.oy + (r0 + .2) * s.cz)}" width="${f1(s.cz * .7)}" height="${f1(s.cz * .6)}" rx="8" fill="#34B2F0"/><text x="${f1(s.ox - s.cz * .35)}" y="${f1(s.oy + (r0 + .65) * s.cz)}" text-anchor="middle" font-size="16">💧</text><text x="${f1(s.ox + C * s.cz + s.cz * .4)}" y="${f1(s.oy + (r1 + .7) * s.cz)}" text-anchor="middle" font-size="${f1(s.cz * .7)}">⛲</text>`, 0, 0));
+      s.tiles = s.m.map((m, c) => { const o = mk(s, '', s.ox + (c % C + .5) * s.cz, s.oy + (Math.floor(c / C) + .5) * s.cz); o.c = c; return o; }); s.solved = false; MODES.pipes.draw(s);
+    },
+    flow(s){ const C = s.C, wet = new Set(); if (!(s.m[s.src] & 8)) return wet; const q = [s.src]; wet.add(s.src); while (q.length){ const c = q.shift(), x = c % C, y = Math.floor(c / C), m = s.m[c]; for (const [b, dx, dy, ob] of [[1, 0, -1, 4], [2, 1, 0, 8], [4, 0, 1, 1], [8, -1, 0, 2]]){ if (!(m & b)) continue; const nx = x + dx, ny = y + dy, n = ny * C + nx; if (nx < 0 || ny < 0 || nx >= C || ny >= s.R || wet.has(n) || !(s.m[n] & ob)) continue; wet.add(n); q.push(n); } } return wet; },
+    draw(s){ const wet = MODES.pipes.flow(s), h = s.cz / 2; s.tiles.forEach(o => { const m = s.m[o.c], col = wet.has(o.c) ? '#34B2F0' : '#9AA3B8'; let g = `<rect x="${f1(-h + 2)}" y="${f1(-h + 2)}" width="${f1(s.cz - 4)}" height="${f1(s.cz - 4)}" rx="8" fill="#fff" opacity=".85"/>`; [[1, 0, -h], [2, h, 0], [4, 0, h], [8, -h, 0]].forEach(([b, x, y]) => { if (m & b) g += `<path d="M0,0 L${f1(x)},${f1(y)}" stroke="${col}" stroke-width="${f1(s.cz * .26)}" stroke-linecap="round"/>`; }); g += `<circle r="${f1(s.cz * .13)}" fill="${col}"/>`; o.el.innerHTML = g; });
+      if (!s.solved && wet.has(s.dst) && (s.m[s.dst] & 2)){ s.solved = true; addScore(s, 5, 180, 130); burst(s, s.ox + s.C * s.cz, s.oy + 20, '#34B2F0'); pop(s, 180, 110, 'Water flows!', '#34B2F0'); setTimeout(() => { if (s.on){ if (s.size[0] < 8) s.size = [s.size[0] + 1, Math.min(6, s.size[1] + (s.size[0] % 2))]; MODES.pipes.build(s); } }, 1200); } },
+    down(s, p){ if (s.solved) return; const x = Math.floor((p.x - s.ox) / s.cz), y = Math.floor((p.y - s.oy) / s.cz); if (x < 0 || y < 0 || x >= s.C || y >= s.R) return; const c = y * s.C + x; s.m[c] = MODES.pipes.rot(s.m[c]); sfx('pop'); MODES.pipes.draw(s); },
+    step(){}
+  },
+  // LILY HOP: hop on the lily pad with the next number
+  lilyhop: {
+    start(s){ s.rows = [3, 4, 4, 5][s.d]; s.seqI = 0; s.sq = MODES.lilyhop.seq(GR()); MODES.lilyhop.build(s); s.hud = ruleHud(s, `Hop in order: ${s.sq.rule}`); },
+    seq(g){ if (g === 0) return { f: i => String(i + 1), rule: 'count by 1s' }; if (g === 1) return { f: i => String((i + 1) * 2), rule: 'count by 2s' }; if (g === 2) return { f: i => String((i + 1) * 5), rule: 'count by 5s' }; if (g === 3) return { f: i => String((i + 1) * 3), rule: 'count by 3s' }; if (g === 4) return { f: i => String((i + 1) * 6), rule: 'count by 6s' }; if (g === 5) return { f: i => ((i + 1) / 4).toString(), rule: 'count by quarters (0.25)' }; if (g <= 7) return { f: i => String(i - 4).replace('-', '−'), rule: 'count up from −4' }; return { f: i => String((i + 1) ** 2), rule: 'perfect squares' }; },
+    build(s){ s.objs.forEach(o => kill(o)); s.objs = []; s.row = -1; s.ys = [...Array(s.rows)].map((_, k) => 214 - k * (150 / (s.rows - .5)));
+      s.pads = []; s.ys.forEach((y, r) => { const n = s.d === 0 ? 3 : 4, dir = r % 2 ? -1 : 1, sp = (22 + s.d * 9 + r * 4) * dir, gap = 380 / n, good = RI(0, n - 1), val = s.sq.f(s.seqI + r);
+        for (let k = 0; k < n; k++){ const v = k === good ? val : MODES.lilyhop.wrong(s, s.seqI + r); const w = s.d === 0 ? 34 : 29; const o = mk(s, `<ellipse rx="${w}" ry="11" fill="#4CBF58"/><path d="M0,0 L${w},-3" stroke="#3E9E4F" stroke-width="2"/><g transform="translate(0,-1)">${pill(v, { fs: 11 })}</g>`, k * gap + rf(0, 20), y); o.r0 = r; o.sp = sp; o.w = w; o.v = v; o.good = k === good; s.pads.push(o); s.objs.push(o); } });
+      s.frog = mk(s, `<g transform="translate(0,-8)">${SPR.frog}</g>`, 180, 246); s.objs.push(s.frog); s.on2 = null; },
+    wrong(s, i){ let v; do { v = s.sq.f(Math.max(0, i + RI(-2, 3))); if (Math.random() < .3) v = String(RI(1, 30)); } while (v === s.sq.f(i)); return v; },
+    down(s){ if (s.jumping) return; const nr = s.row + 1; if (nr >= s.rows){ s.jumping = true; MODES.lilyhop.hop(s, s.frog.x, 26, () => { s.jumping = false; addScore(s, 3, 180, 40); s.seqI += s.rows; MODES.lilyhop.build(s); }); return; }
+      s.jumping = true; const ty = s.ys[nr]; MODES.lilyhop.hop(s, s.frog.x, ty - 4, () => { s.jumping = false; const pad = s.pads.find(o => o.r0 === nr && Math.abs(o.x - s.frog.x) < o.w);
+        if (!pad){ pop(s, s.frog.x, ty - 20, 'Splash!', '#34B2F0'); burst(s, s.frog.x, ty, '#6EC6FF'); if (hurt(s)) return; MODES.lilyhop.back(s); return; }
+        if (!pad.good){ pop(s, s.frog.x, ty - 24, `We need ${s.sq.f(s.seqI + nr)}!`, '#E8414F'); if (hurt(s)) return; MODES.lilyhop.back(s); return; }
+        s.row = nr; s.on2 = pad; addScore(s, 1, s.frog.x, ty - 24); }); },
+    back(s){ s.row = -1; s.on2 = null; s.frog.x = 180; s.frog.y = 246; place(s.frog); },
+    hop(s, tx, ty, done){ const x0 = s.frog.x, y0 = s.frog.y; let t = 0; sfx('pop'); const st = () => { t += .08; const u = Math.min(1, t); s.frog.x = x0 + (tx - x0) * u; s.frog.y = y0 + (ty - y0) * u - Math.sin(u * Math.PI) * 18; s.frog.s = 1 + Math.sin(u * Math.PI) * .25; place(s.frog); if (u < 1 && ARC.s === s) requestAnimationFrame(st); else { s.frog.s = 1; place(s.frog); done(); } }; requestAnimationFrame(st); },
+    step(s, dt){ for (const o of s.pads){ o.x += o.sp * dt; if (o.x > 400) o.x -= 440; if (o.x < -40) o.x += 440; place(o); }
+      if (s.on2 && !s.jumping){ s.frog.x = s.on2.x; place(s.frog); if (s.frog.x < 4 || s.frog.x > 356){ pop(s, 180, s.frog.y - 20, 'Whoa! Off the edge!', '#34B2F0'); if (hurt(s)) return; MODES.lilyhop.back(s); } } }
+  },
+  // POND PATTERNS: what comes next?
+  patterns: {
+    start(s){ MODES.patterns.next(s); },
+    gen(g){ const E = [['🐸', '🦆', '🐟'], ['🍎', '🍌', '🍇'], ['🔴', '🔵', '🟡'], ['⭐', '🌙', '☀️']];
+      if (g === 0){ const [a, b, c] = pick(E), t = pick(['AB', 'AAB', 'ABB', 'ABC']), map = { A: a, B: b, C: c }, seq = [...Array(7)].map((_, i) => map[t[i % t.length]]); return { show: seq.slice(0, 6), ans: seq[6], opts: [a, b, c], rule: `The pattern repeats ${t.split('').map(k => map[k]).join(' ')}.` }; }
+      if (g <= 2){ if (Math.random() < .4){ const [a, b, c] = pick(E), t = pick(['AABB', 'ABC', 'ABAC']), map = { A: a, B: b, C: c }, seq = [...Array(9)].map((_, i) => map[t[i % t.length]]); return { show: seq.slice(0, 8), ans: seq[8], opts: [a, b, c], rule: `The pattern repeats ${t.split('').map(k => map[k]).join(' ')}.` }; } const st = RI(1, 10), by = g === 1 ? pick([1, 2, 10]) : pick([2, 5, 10, 3]); const seq = [...Array(5)].map((_, i) => st + i * by); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: `Each number goes up by ${by}.` }; }
+      if (g <= 5){ const k = RI(0, 3); if (k === 0){ const st = RI(1, 5); const seq = [...Array(5)].map((_, i) => st * 2 ** i); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: 'Each number doubles (× 2).' }; } if (k === 1){ const st = RI(40, 80), by = RI(3, 9); const seq = [...Array(5)].map((_, i) => st - i * by); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: `Each number goes down by ${by}.` }; } if (k === 2){ const by = pick([6, 7, 8, 9, 11, 12, 25]); const seq = [...Array(5)].map((_, i) => by * (i + 1)); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: `These are multiples of ${by}.` }; } const st = RI(1, 6); const seq = [st]; for (let i = 1; i < 6; i++) seq.push(seq[i - 1] + (i % 2 ? 3 : -1)); return { show: seq.slice(0, 5).map(String), ans: String(seq[5]), rule: 'The rule is +3, then −1, again and again.' }; }
+      const k = RI(0, 3); if (k === 0){ const seq = [1, 2, 3, 4, 5, 6].map(i => i * i); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: 'These are square numbers: 1², 2², 3², 4², 5².' }; } if (k === 1){ const seq = [1, 3, 6, 10, 15]; return { show: seq.slice(0, 4).map(String), ans: '15', rule: 'Triangle numbers: add 2, then 3, then 4, then 5.' }; } if (k === 2){ const seq = [1, 1, 2, 3, 5, 8, 13]; return { show: seq.slice(0, 6).map(String), ans: '13', rule: 'Fibonacci: each number is the sum of the two before it.' }; } const st = RI(2, 5); const seq = [...Array(5)].map((_, i) => st * 3 ** i); return { show: seq.slice(0, 4).map(String), ans: String(seq[4]), rule: 'Each number is multiplied by 3.' }; },
+    next(s){ s.objs.forEach(o => kill(o)); s.objs = []; const P = MODES.patterns.gen(GR()); s.P = P; const opts = P.opts ? shuffle(P.opts.slice()) : shuffle([P.ans, ...near(+P.ans, 2, -999).map(String)]); s.opts = opts;
+      const n = P.show.length + 1, w = Math.min(46, 330 / n); P.show.forEach((v, i) => s.objs.push(mk(s, emojiOnly(v) ? `<text y="10" text-anchor="middle" font-size="28">${v}</text>` : pill(v, { fs: 15 }), 180 + (i - (n - 1) / 2) * w, 100)));
+      s.q = mk(s, `<rect x="-20" y="-20" width="40" height="40" rx="10" fill="#FFF6C9" stroke="#FFC63A" stroke-width="3" class="glowb"/><text y="9" text-anchor="middle" ${FONT} font-size="24" fill="#C98A00">?</text>`, 180 + (n - 1 - (n - 1) / 2) * w, 100); s.objs.push(s.q);
+      s.ob = opts.map((v, k) => { const o = mk(s, `<rect x="-38" y="-28" width="76" height="56" rx="16" fill="#fff" stroke="#B9C8E2" stroke-width="2"/>${emojiOnly(v) ? `<text y="11" text-anchor="middle" font-size="32">${v}</text>` : `<text y="9" text-anchor="middle" ${FONT} font-size="22" fill="#2B2550">${esc(v)}</text>`}`, 90 + k * 90, 196); o.v = v; return o; }); s.objs.push(...s.ob);
+      s.hud = `<g transform="translate(180,40)">${pill('What comes next?', { fs: 13, bg: '#FFF6C9' })}</g>`; },
+    down(s, p){ const o = s.ob.find(o => Math.abs(o.x - p.x) < 40 && Math.abs(o.y - p.y) < 30); if (!o) return;
+      if (o.v === s.P.ans){ s.lastLearn = s.P.rule; addScore(s, 1, o.x, o.y - 30); o.x = s.q.x; o.y = s.q.y; place(o); setTimeout(() => { if (s.on) MODES.patterns.next(s); }, 600); }
+      else { pop(s, o.x, o.y - 34, 'Look again!', '#E8414F'); rmSay(s.P.rule); if (hurt(s)) return; } },
+    step(){}
+  },
+  // PARK BOWLING: swipe up to bowl, then count what is left
+  bowling: {
+    start(s){ s.frames = [3, 5, 5, 5][s.d]; s.f = 0; s.roll = 0; mk(s, `<path d="M110,270 L140,40 H220 L250,270z" fill="#E9C29A"/><path d="M110,270 L140,40 M250,270 L220,40" stroke="#C98A55" stroke-width="3"/>${s.d === 0 ? '<path d="M114,270 L143,40 M246,270 L217,40" stroke="#FF8FB8" stroke-width="7" stroke-linecap="round"/>' : ''}`, 0, 0); MODES.bowling.rack(s); },
+    rack(s){ (s.pins || []).forEach(o => kill(o)); s.pins = []; const rows = [[180], [170, 190], [160, 180, 200], [150, 170, 190, 210]]; rows.forEach((r, i) => r.forEach(x => { const o = mk(s, `<ellipse cy="12" rx="6" ry="2" fill="#000" opacity=".2"/><path d="M0,-12 q5,0 4,6 q-2,4 1,9 q2,6 -5,8 q-7,-2 -5,-8 q3,-5 1,-9 q-1,-6 4,-6z" fill="#fff" stroke="#C9D3E6"/><rect x="-3" y="-6" width="6" height="2" fill="#E8414F"/>`, x, 112 - i * 18, .9); o.up = true; s.pins.push(o); })); MODES.bowling.newBall(s); s.roll = 0; },
+    newBall(s){ if (s.ball) kill(s.ball); s.ball = mk(s, `<circle r="12" fill="#7B5CFA"/><circle cx="-3" cy="-4" r="2" fill="#2B2550"/><circle cx="3" cy="-5" r="2" fill="#2B2550"/><circle cx="1" cy="1" r="2" fill="#2B2550"/>`, 180, 244); s.moving = false; s.hud = `<g transform="translate(180,24)">${pill(`Frame ${s.f + 1} of ${s.frames} · swipe up to bowl`, { fs: 12, bg: '#FFF6C9' })}</g>`; },
+    down(s, p){ if (s.moving || s.wait) return; s.sw = { x: p.x, y: p.y, t: performance.now() }; },
+    up(s, p){ if (s.moving || !s.sw) return; const dx = p.x - s.sw.x, dy = p.y - s.sw.y, dtm = Math.max(60, performance.now() - s.sw.t); s.sw = null; if (dy > -25) return; const sp = clamp(Math.hypot(dx, dy) / dtm * 900, 260, 620); const a = Math.atan2(dy, dx); s.vx = Math.cos(a) * sp * .55; s.vy = Math.sin(a) * sp; s.moving = true; s.before = s.pins.filter(o => o.up).length; sfx('pop'); },
+    step(s, dt){
+      for (const o of s.pins) if (!o.up && o.vx != null){ o.x += o.vx * dt; o.y += o.vy * dt; o.r += o.vx * dt * 4; o.a = Math.max(.15, o.a - dt * .8); place(o); }
+      if (!s.moving) return; const b = s.ball; b.x += s.vx * dt; b.y += s.vy * dt; const half = 70 - (250 - b.y) * .17; if (s.d === 0) b.x = clamp(b.x, 180 - half + 8, 180 + half - 8); place(b);
+      for (const o of s.pins) if (o.up && Math.hypot(o.x - b.x, o.y - b.y) < 17){ o.up = false; o.vx = (o.x - b.x) * 6 + rf(-30, 30); o.vy = -rf(40, 120); MODES.bowling.chain(s, o); }
+      if (b.y < 30 || b.x < 90 || b.x > 270){ s.moving = false; s.wait = true; const down = s.before - s.pins.filter(o => o.up).length, left = s.pins.filter(o => o.up).length; s.score += down; sfx(down ? 'coin' : 'boop');
+        const strike = s.roll === 0 && left === 0, spare = s.roll === 1 && left === 0; pop(s, 180, 150, strike ? 'STRIKE! 🎳' : spare ? 'Spare!' : `${s.before} − ${down} = ${left} left`, strike || spare ? '#7B5CFA' : '#2B2550');
+        if (strike || spare) s.score += 5; s.lastLearn = `${s.before} pins take away ${down} knocked down leaves ${left}. Subtracting tells how many are left!`;
+        setTimeout(() => { if (!s.on) return; s.wait = false; if (left === 0 || s.roll === 1){ s.f++; if (s.f >= s.frames) return arcEnd(s); MODES.bowling.rack(s); } else { s.roll = 1; MODES.bowling.newBall(s); } }, 1300); }
+    },
+    chain(s, o){ for (const q of s.pins) if (q.up && Math.hypot(q.x - o.x, q.y - o.y) < 24 && Math.random() < .55){ q.up = false; q.vx = (q.x - o.x) * 5; q.vy = -rf(30, 90); MODES.bowling.chain(s, q); } }
+  }
+});
+
+// ---------- 9. ENGINE: learning rule up front, "What you learned" at the end ----------
+ARC.next = {};
+function arcLearn(s){ const d = s.def; return (typeof d.learn === 'function' ? d.learn(s) : d.learn) || (s.set && s.set.learn) || ''; }
+function arcRule(def, set){ return set ? `${def.verb || 'Find'}: ${set.a}` : ''; }
+function arcHTML(key){
+  const def = ARCADE[key], b = arcBest(key), d = AGE_D();
+  if (def.content) ARC.next[key] = pickSet(K(), def.content);
+  return `<div class="rm-scene interactive arc" id="arcScene"><svg viewBox="0 0 360 270" class="rm-svg" id="arcSvg">${arcBg(def.th)}<g id="arcL"></g><g id="arcFx"></g><g id="arcHud"></g></svg>${arcCard(key, 'start')}</div>
+  ${def.extra ? def.extra(d) : ''}${sayBox(def.how)}
+  <p class="note-s center">${def.kind} · ${esc(gradeLabel(K()))} · Best: <b>${b.best}</b> · Goal: ${def.goal[d]}${def.unit ? ' ' + def.unit : ''}</p>`;
+}
+function arcCard(key, kind, o = {}){
+  const def = ARCADE[key], b = arcBest(key);
+  if (kind === 'start'){ const set = ARC.next[key], rule = arcRule(def, set); return `<div class="arc-card" id="arcCard"><b>${esc(def.name)}</b><small>${esc(def.tip)}</small>${rule ? `<span class="arc-rule">${esc(rule)} <button class="hearbtn" data-act="speak" data-v="${esc(rule + '. ' + def.tip)}" aria-label="Hear it">🔊</button></span>` : ''}${b.best ? `<span class="arc-best">Best: ${b.best}</span>` : ''}<button class="btn big sun" data-act="arcPlay" data-v="${key}">▶ Play</button></div>`; }
+  return `<div class="arc-card end" id="arcCard">${o.newBest ? '<span class="arc-new">New best!</span>' : ''}<b>${o.score} ${esc(def.unit || 'points')}</b><small>${o.msg || ''}</small>${o.learn ? `<div class="arc-learn"><span>🎓 What you learned</span><p>${esc(o.learn)}</p><button class="hearbtn" data-act="speak" data-v="${esc('What you learned. ' + o.learn)}" aria-label="Hear it">🔊</button></div>` : ''}<span class="arc-best">Best: ${b.best}</span><button class="btn big sun" data-act="arcPlay" data-v="${key}">↻ Play again</button></div>`;
+}
+function arcEnd(s){
+  if (!s.on) return; s.on = false; cancelAnimationFrame(G.raf);
+  const kid = K(), b = arcBest(s.key), nb = s.score > b.best; b.plays++; if (nb) b.best = s.score; save();
+  addXP(kid, Math.min(25, 4 + Math.round(s.score / 3))); sfx(nb || s.goalHit ? 'win' : 'lose');
+  const learn = arcLearn(s), msg = s.goalHit ? 'You reached the goal! Can you beat your best?' : `Goal: ${s.def.goal[s.d]}. Try again, you can do it!`;
+  if (s.def.content) ARC.next[s.key] = pickSet(kid, s.def.content);
+  const sc = $('#arcScene'); if (sc) sc.insertAdjacentHTML('beforeend', arcCard(s.key, 'end', { score: s.score, newBest: nb && s.score > 0, msg, learn }));
+  rmSay(nb && s.score > 0 ? `New best! ${s.score}! ${learn}` : s.goalHit ? `Great job! ${learn}` : `Nice try! ${learn}`);
+}
+const _arcPlayV = A.arcPlay;
+A.arcPlay = function(el){ const key = el.dataset.v, def = ARCADE[key]; if (def.content && !ARC.next[key]) ARC.next[key] = pickSet(K(), def.content); const set = ARC.next[key]; const st0 = MODES[def.mode].start; MODES[def.mode].start = s => { s.set = set; st0(s); }; try { _arcPlayV(el); } finally { MODES[def.mode].start = st0; } };
+// typing keys for Word Race
+A.wrKey = el => { const s = ARC.s; if (s && s.on && s.mode === 'wordrace') MODES.wordrace.key(s, el.dataset.v); };
+document.addEventListener('keydown', e => { const s = ARC.s; if (!s || !s.on || s.mode !== 'wordrace' || s.tiles) return; if (/^[a-z]$/i.test(e.key)){ e.preventDefault(); MODES.wordrace.key(s, e.key.toLowerCase()); } else if (e.key === 'Backspace'){ e.preventDefault(); MODES.wordrace.key(s, '⌫'); } });
+const kbdHTML = d => d < 2 ? '' : `<div class="kbd">${['qwertyuiop', 'asdfghjkl', 'zxcvbnm⌫'].map(r => `<div>${[...r].map(c => `<button data-act="wrKey" data-v="${c}" aria-label="${c === '⌫' ? 'Delete' : c}">${c}</button>`).join('')}</div>`).join('')}</div>`;
+
+// ---------- 10. OLD GAME KINDS NOW TEACH TOO ----------
+// catch: the donuts carry answers
+const _catchStep = MODES.catch.step;
+MODES.catch.step = function(s, dt){
+  if (!s.set) return _catchStep(s, dt);
+  const d = s.d, sp = (60 + d * 22) * (1 + s.t * .016), pl = s.pl; pl.x += (clamp(s.tx, 24, 336) - pl.x) * Math.min(1, dt * 14); place(pl);
+  if ((s.next -= dt) <= 0){ s.next = Math.max(.45, (1.15 - d * .13) - s.t * .007) * rf(.75, 1.2); const gold = Math.random() > .94, it = setItem(s);
+    const o = mk(s, gold ? (s.th.gold || SPR.star) : `<g transform="translate(0,-10)">${SPR[pick(s.th.good)]}</g><g transform="translate(0,14)">${pill(it.label, { fs: 11 })}</g>`, rf(30, 330), -20, 1.05); o.kind = gold ? 'gold' : it.good ? 'good' : 'bad'; o.vy = sp * rf(.85, 1.15); s.objs.push(o); }
+  for (const o of s.objs){ o.y += o.vy * dt; place(o); if (o.y > 214 && o.y < 248 && Math.abs(o.x - pl.x) < 30){ kill(o); if (o.kind === 'bad'){ if (hurt(s, o.x, o.y)) return; } else addScore(s, o.kind === 'gold' ? 3 : 1, o.x, o.y - 10); } else if (o.y > 290){ kill(o); if (o.kind === 'good') s.combo = 0; } }
+  s.objs = s.objs.filter(o => !o.dead);
+};
+const _catchStart = MODES.catch.start; MODES.catch.start = s => { _catchStart(s); if (s.set) s.hud = ruleHud(s, `Catch: ${s.set.a}`); };
+// runner: grab the goodies that match
+const _runStart = MODES.runner.start; MODES.runner.start = s => { _runStart(s); if (s.set) s.hud = ruleHud(s, `Grab: ${s.set.a}`); };
+const _runStep = MODES.runner.step;
+MODES.runner.step = function(s, dt){
+  if (s.set && s.nextC <= dt){ s.nextC = rf(.9, 1.6); const it = setItem(s), hy = s.gy - rf(40, 110); const o = mk(s, `<g transform="translate(0,-12)">${SPR[pick(s.th.good)]}</g><g transform="translate(0,12)">${pill(it.label, { fs: 11 })}</g>`, 390, hy); o.kind = it.good ? 'good' : 'wrong'; s.objs.push(o); }
+  _runStep(s, dt); if (!s.on || !s.set) return;
+  const pl = s.pl, body = { x: pl.x, y: pl.y - 22 };
+  for (const o of s.objs){ if (o.kind === 'wrong' && !o.dead){ if (hit(o, body, 26)){ kill(o); pop(s, o.x, o.y - 14, 'Oops!', '#E8414F'); s.combo = 0; s.score = Math.max(0, s.score - 1); sfx('boop'); } else if (o.x < -30) kill(o); else { o.x -= 0; } } }
+  s.objs = s.objs.filter(o => !o.dead);
+};
+// runner step moves only good/bad; move "wrong" ones too
+const _runStep2 = MODES.runner.step; MODES.runner.step = function(s, dt){ if (s.set) for (const o of s.objs) if (o.kind === 'wrong'){ o.x -= s.speed * dt; place(o); } _runStep2(s, dt); };
+// sort: two bins from the plan’s groups
+const _sortStart = MODES.sort.start;
+MODES.sort.start = function(s){ if (!s.set) return _sortStart(s); const st = s.set; s.bins = [{ n: st.a, col: '#3EC46B', good: true, x: 95 }, { n: st.b, col: '#FF8A3D', good: false, x: 265 }];
+  s.bins.forEach(b => mk(s, `${rr(-78, -24, 156, 48, 14, b.col)}${rr(-78, -24, 156, 48, 14, 'url(#fsR)')}${TX(0, 6, b.n.length > 18 ? b.n.slice(0, 17) + '…' : b.n, 13, '#fff')}`, b.x, 240)); s.cur = null; s.wait = .3; s.hud = ruleHud(s, 'Slide each one into the right box'); };
+const _sortStep = MODES.sort.step;
+MODES.sort.step = function(s, dt){ if (!s.set) return _sortStep(s, dt);
+  if (!s.cur){ if ((s.wait -= dt) > 0) return; const it = setItem(s); const o = mk(s, `<g transform="scale(1.25)">${pill(it.label, { fs: 13 })}</g>`, 180, 40); o.bin = it.good ? s.bins[0] : s.bins[1]; o.tx = 180; o.vy = (26 + s.d * 9) * (1 + s.t * .02); s.cur = o; }
+  const c = s.cur; c.y += (c.fast ? 420 : c.vy) * dt; c.x += (c.tx - c.x) * Math.min(1, dt * 12); place(c);
+  if (c.y >= 212){ const b = c.x < 180 ? s.bins[0] : s.bins[1]; kill(c); s.cur = null; s.wait = .15; if (b === c.bin) addScore(s, 1, b.x, 200); else if (hurt(s, b.x, 200)) return; } };
+// number bubbles follow the math plan
+TASKS.math = function(d, s){
+  const plan = planOf(K()), g = GR(); const ok = Object.keys(PROB).filter(t => (plan.math || []).includes(t) && !['evenodd', 'prime', 'shapes'].includes(t));
+  const t = ok.length ? pick(ok) : (g === 0 ? pick(['count', 'add']) : g <= 2 ? pick(['add', 'sub']) : g <= 5 ? pick(['mult', 'div']) : pick(['neg', 'alg']));
+  const p = PROB[t](g, s && s.score > 4); const ans = String(p.ans); const pool = (p.wrong || []).map(String).concat(near(+p.ans || 0, 5, p.neg ? -99 : 0).map(String)).filter(v => v !== ans && v !== 'NaN');
+  s.lastWhy = p.why;
+  return { say: p.q.length > 34 ? p.q.slice(0, 34) + '…' : p.q, once: true, ok: v => String(v) === ans, gen: good => good ? ans : pick(pool.length ? pool : [String(+ans + 1)]) };
+};
+const _bubNew = MODES.bubbles.newTask; MODES.bubbles.newTask = function(s){ if (s.task && s.task.say && s.th.task === 'math') s.lastLearn = s.lastWhy; _bubNew(s); };
+
+// ---------- 11. THE GAMES, PLACE BY PLACE (no game kind repeats) ----------
+const KEEP = ['pizzadash', 'numpop', 'bugbop', 'tidy', 'donutdrop', 'splash', 'juggle', 'rocket'];
+Object.keys(ARCADE).forEach(k => { if (!KEEP.includes(k)){ const R2 = ROOMS[ARCADE[k].room]; if (R2) R2.tabs = R2.tabs.filter(t => t[0] !== k); delete ARCADE[k]; } });
+Object.assign(ARCADE.pizzadash, { content: ['math'], verb: 'Grab', how: 'Tap to jump over the cones. Grab only the pizza slices that match the rule at the top!', learn: null });
+Object.assign(ARCADE.numpop, { learn: s => s.lastLearn ? `${s.lastLearn} Practicing math facts makes them fast and easy.` : 'Practicing math facts makes them fast and easy.' });
+Object.assign(ARCADE.bugbop, { learn: 'Ladybugs and bees help gardens. Ladybugs eat the green aphids, and bees carry pollen so flowers can make fruit and seeds.' });
+Object.assign(ARCADE.tidy, { content: ['sci', 'read', 'math', 'world'], verb: 'Sort', how: 'Slide each card into the box where it belongs, or tap a box!', tip: 'Sort into the right box!' });
+Object.assign(ARCADE.donutdrop, { content: ['math'], verb: 'Catch', how: 'Slide to catch the donuts that match the rule at the top. Golden donuts are worth 3!', tip: 'Catch the right donuts!', th: { ...ARCADE.donutdrop.th, bad: ['broccoli'] } });
+Object.assign(ARCADE.splash, { learn: 'Remembering patterns grows your working memory, the brain power you use for reading and math.' });
+Object.assign(ARCADE.juggle, { learn: 'Gravity pulls the ball back down. A stronger tap pushes it higher before gravity brings it back.' });
+Object.assign(ARCADE.rocket, { learn: 'Gravity pulls everything down. A rocket pushes hot gas down so it can zoom up!' });
+const NEWG = {
+  chop: { room: 'restaurant', label: 'Fruit Chop', name: 'Fruit Chop', kind: 'Exciting', mode: 'slice', time: 45, lives: [3, 3, 3, 3], goal: [8, 12, 16, 20], content: ['math', 'read', 'sci'], verb: 'Slice', th: { wall: '#FFF1DE', floor: '#E9C29A', deco: bunting }, how: 'Swipe your finger through the fruit that matches the rule. Leave the others!', tip: 'Swipe to slice!' },
+  dance: { room: 'boutique', label: 'Dance Party', name: 'Dance Party', kind: 'Super fun', mode: 'rhythm', time: 40, lives: null, goal: [12, 20, 30, 40], th: { wall: '#2A1F5C', floor: '#3B2C7A', deco: nightDeco + `<circle cx="180" cy="30" r="16" fill="#fff" opacity=".2"/>` }, how: 'Tap each lane when the star, heart or gem lands on its circle. Keep the beat!', tip: 'Tap on the beat!', learn: 'Music has a steady beat. Counting 1, 2, 3, 4 keeps you on time, just like counting in math.' },
+  words: { room: 'school', label: 'Word Builder', name: 'Word Builder', kind: 'Learning', mode: 'wordrace', time: 75, lives: [3, 3, 3, 3], goal: [4, 6, 8, 10], unit: 'words', th: { wall: '#E9F4FF', floor: '#C9A27A' }, extra: kbdHTML, how: 'Little kids: tap the letters to spell the picture. Big kids: type each falling word before it lands!', tip: 'Spell the words!', learn: s => s.tiles ? 'You built words one sound at a time, like c-a-t makes cat!' : 'Typing words fast helps you remember how to spell them.' },
+  maze: { room: 'greenhouse', label: 'Garden Maze', name: 'Garden Maze', kind: 'Super fun', mode: 'maze', time: 90, lives: null, goal: [8, 10, 12, 14], th: { wall: '#E6F7EA', floor: '#C9A27A' }, how: 'Drag the water drop through the maze to the thirsty flower. Grab the coins on the way!', tip: 'Guide the drop to the flower!', learn: 'Plants need water to grow. Planning your path before you move is called problem solving.' },
+  lanes: { room: 'hotel', label: 'Luggage Lanes', name: 'Luggage Lanes', kind: 'Exciting', mode: 'lanes', time: 50, lives: [3, 3, 3, 3], goal: [8, 12, 16, 20], content: ['read', 'sci', 'world'], verb: 'Grab', th: { wall: '#7A3A55', floor: '#7A3A55', deco: `<rect width="360" height="270" fill="#8E4566"/><rect x="60" width="240" height="270" fill="#B25A80"/>` }, how: 'Tap left or right (or swipe) to switch lanes. Grab the suitcases that match the rule!', tip: 'Switch lanes to grab!' },
+  breakout: { room: 'hotel', label: 'Pool Breakout', name: 'Pool Party Breakout', kind: 'Super fun', mode: 'breakout', lives: [3, 3, 2, 2], goal: [16, 24, 32, 40], th: { out: true, hz: 120, deco: `<rect y="0" width="360" height="270" fill="#9FDDFF"/><path d="M0,30 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>` }, how: 'Slide the paddle to bounce the ball and pop all the pool floaties!', tip: 'Slide the paddle!', learn: 'A ball bounces off at the same angle it hits. Scientists call that reflection.' },
+  puzzle: { room: 'home', label: 'Picture Puzzle', name: 'Picture Puzzle', kind: 'Super fun', mode: 'puzzle', time: 120, lives: null, goal: [5, 10, 10, 15], th: { wall: '#FFF4E0', floor: '#E2B98C' }, how: 'Tap a piece, then tap another piece to swap them. Fix the picture!', tip: 'Swap pieces to fix it!', learn: 'Matching shapes and edges builds spatial thinking, which helps with geometry and maps.' },
+  dots: { room: 'bakery', label: 'Connect the Dots', name: 'Connect the Dots', kind: 'Exciting', mode: 'dots', time: 90, lives: null, goal: [6, 9, 9, 12], th: { wall: '#FFE9F2', floor: '#F6D3B5' }, how: 'Tap the dots in counting order to draw a surprise picture!', tip: 'Tap the dots in order!', learn: s => `You practiced: ${s.sqRule || 'counting in order'}. Counting patterns make adding and multiplying easier.` },
+  snake: { room: 'icecream', label: 'Sprinkle Snake', name: 'Sprinkle Snake', kind: 'Super fun', mode: 'snake', time: 70, lives: [3, 3, 3, 2], goal: [5, 8, 10, 12], content: ['read', 'sci', 'math'], verb: 'Eat', th: { wall: '#EFFBF7', floor: '#F6D3B5' }, how: 'Swipe or tap to steer the snake. Eat only the scoops that match the rule and watch it grow!', tip: 'Steer to the right scoops!' },
+  mixer: { room: 'icecream', label: 'Shake Mixer', name: 'Milkshake Mixer', kind: 'Exciting', mode: 'mixer', time: 120, lives: [3, 3, 3, 3], goal: [3, 4, 5, 6], unit: 'shakes', th: { wall: '#FFF0F6', floor: '#F6D3B5' }, how: 'Read the recipe, tap the ingredients the right number of times, then press Blend!', tip: 'Follow the recipe!', learn: s => s.lastLearn || 'Recipes use counting, fractions and ratios, so cooking is math!' },
+  detective: { room: 'library', label: 'Word Detective', name: 'Word Detective', kind: 'Super fun', mode: 'hidden', time: 60, lives: [3, 3, 3, 3], goal: [6, 8, 10, 12], th: { wall: '#F3EEFF', floor: '#C9A27A' }, how: 'Read (or hear) the clue at the top and tap the thing it describes!', tip: 'Find what the clue says!', learn: 'Reading clues and sorting things into groups, like fruits or vehicles, is called classifying.' },
+  four: { room: 'toyshop', label: 'Four in a Row', name: 'Four in a Row', kind: 'Exciting', mode: 'connect4', lives: [3, 3, 3, 3], goal: [6, 6, 6, 9], th: { wall: '#FFF6D8', floor: '#E2B98C' }, how: 'Tap a column to drop your pink piece. Line up a row before the toy robot does!', tip: 'Make a line, block the robot!', learn: 'Thinking ahead and blocking your opponent is called strategy. It is a big part of math and science.' },
+  candyswap: { room: 'gingerbread', label: 'Candy Swap', name: 'Candy Swap', kind: 'Super fun', mode: 'match3', time: 60, lives: null, goal: [24, 36, 45, 60], unit: 'candies', th: { wall: '#FFF0F6', floor: '#C98A55' }, how: 'Swipe a candy into its neighbor to make a line of 3 or more of the same!', tip: 'Make lines of 3!', learn: 'Lines of 3 are groups. Three groups of 3 make 9, which is 3 × 3!' },
+  launch: { room: 'gingerbread', label: 'Gumdrop Launch', name: 'Gumdrop Launch', kind: 'Exciting', mode: 'slingshot', lives: null, goal: [6, 8, 10, 12], th: { out: true, hz: 170 }, how: 'Pull the gumdrop back, aim, and let go to knock down the cookies!', tip: 'Pull back and let go!', learn: 'How far something flies depends on the angle and the force. About halfway between flat and straight up flies farthest!' },
+  pipes: { room: 'fountain', label: 'Pipe Puzzle', name: 'Pipe Puzzle', kind: 'Super fun', mode: 'pipes', time: 120, lives: null, goal: [10, 15, 15, 20], th: { out: true, hz: 150 }, how: 'Tap the pipes to turn them. Connect the water to the fountain!', tip: 'Turn pipes to connect!', learn: 'Water can only flow through connected pipes. Engineers plan paths like this for real towns.' },
+  lilyhop: { room: 'pond', label: 'Lily Hop', name: 'Lily Hop', kind: 'Exciting', mode: 'lilyhop', lives: [5, 4, 3, 3], goal: [8, 12, 14, 16], th: { out: true, hz: 40, deco: `<rect y="40" width="360" height="190" fill="url(#water)"/><rect y="228" width="360" height="42" fill="#7FB86E"/><rect y="0" width="360" height="40" fill="#7FB86E"/>` }, how: 'Tap to hop when the lily pad with the next number is right above the frog!', tip: 'Hop on the next number!', learn: s => `Skip counting: ${s.sq ? s.sq.rule : 'counting in order'}. It is the secret to fast multiplying!` },
+  patterns: { room: 'pond', label: 'Pond Patterns', name: 'Pond Patterns', kind: 'Super fun', mode: 'patterns', time: 60, lives: [3, 3, 3, 3], goal: [6, 8, 10, 12], th: { out: true, hz: 150 }, how: 'Look at the pattern. What comes next? Tap the right answer!', tip: 'What comes next?', learn: s => s.lastLearn ? `${s.lastLearn} Finding the rule in a pattern is how mathematicians think.` : 'Patterns follow a rule. Finding the rule is how mathematicians think.' },
+  bowling: { room: 'playground', label: 'Park Bowling', name: 'Park Bowling', kind: 'Super fun', mode: 'bowling', lives: null, goal: [15, 25, 30, 35], unit: 'pins', th: { out: true, hz: 120 }, how: 'Swipe up on the ball to bowl! Then count how many pins are left.', tip: 'Swipe up to bowl!', learn: s => s.lastLearn || 'Pins left = pins before − pins knocked down. That is subtraction!' }
+};
+Object.assign(ARCADE, NEWG);
+Object.entries(NEWG).forEach(([key, def]) => { const R2 = ROOMS[def.room]; if (R2 && !R2.tabs.some(t => t[0] === key)) R2.tabs.push([key, def.label, () => arcHTML(key), () => arcInit(key)]); });
+// order the school: learning games first
+ROOMS.school.tabs.sort((a, b) => ['mem', 'trace', 'numpop', 'words', 'sayit'].indexOf(a[0]) - ['mem', 'trace', 'numpop', 'words', 'sayit'].indexOf(b[0]));
+
+// ---------- 12. SAY IT! speaking practice (English or the chosen language) ----------
+const SAY_EN = [[['🐱', 'cat'], ['🐶', 'dog'], ['☀️', 'sun'], ['🍎', 'apple'], ['🐟', 'fish'], ['🌙', 'moon'], ['⭐', 'star'], ['🏠', 'house']], [['🦋', 'butterfly'], ['🐘', 'elephant'], ['🌈', 'rainbow'], ['🦒', 'giraffe'], ['🍕', 'pizza'], ['🚲', 'bicycle'], ['🐢', 'turtle']], [['📚', 'library'], ['🐿️', 'squirrel'], ['🥦', 'vegetable'], ['📅', 'February'], ['💡', 'thought'], ['🌋', 'volcano'], ['🔭', 'telescope']], [['🧪', 'chemistry'], ['🌍', 'environment'], ['🏛️', 'government'], ['🧬', 'photosynthesis'], ['🎭', 'enthusiastic'], ['📐', 'perpendicular']]];
+const normW = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\p{L}\p{N} ]/gu, '').trim();
+function lev(a, b){ const m = a.length, n = b.length, d = [...Array(n + 1).keys()]; for (let i = 1; i <= m; i++){ let p = d[0]; d[0] = i; for (let j = 1; j <= n; j++){ const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, p + (a[i - 1] === b[j - 1] ? 0 : 1)); p = t; } } return d[n]; }
+function sayItWord(){ const kid = K(), plan = planOf(kid), si = G.sayit; if (plan.langs.length){ const L = plan.langs[si.n % plan.langs.length], row = pick(LWORDS.filter(r => r[1] !== si.last)); si.last = row[1]; const w = lword(row, L); return { e: row[0], show: w.nat, rom: w.rom !== w.nat ? w.rom : '', mean: row[1], lang: L, target: w.nat }; }
+  const row = pick(SAY_EN[AGE_D()].filter(r => r[1] !== si.last)); si.last = row[1]; return { e: row[0], show: row[1], rom: '', mean: '', lang: 'en', target: row[1] }; }
+function sayitHTML(){
+  G.sayit = G.sayit || { n: 0, stars: 0, done: [] }; const si = G.sayit; if (!si.w) si.w = sayItWord(); const w = si.w, plan = planOf(K()), L = w.lang !== 'en' ? LANGS[w.lang][0] : 'English';
+  return `<div class="sayit"><div class="sayit-card"><div class="sayit-e">${w.e}</div><b>${esc(w.show)}</b>${w.rom ? `<small>${esc(w.rom)}</small>` : ''}${w.mean ? `<em>means “${esc(w.mean)}”</em>` : ''}<span class="sayit-l">${L}</span></div>
+  <div class="actions"><button class="btn sea big" data-act="sayitHear">🔊 Hear it</button>${MIC && plan.speak !== false ? `<button class="btn grape big ${si.listen ? 'on' : ''}" data-act="sayitMic">${si.listen ? '👂 Listening…' : '🎤 Say it!'}</button>` : `<button class="btn grape big" data-act="sayitSelf">⭐ I said it!</button>`}</div>
+  ${si.heard != null ? `<p class="sayit-heard">${si.heard ? `I heard: “${esc(si.heard)}”` : 'I didn’t hear anything. Try again a little louder!'}</p><div class="sayit-stars">${[1, 2, 3].map(k => `<span class="${k <= si.got ? 'on' : ''}">★</span>`).join('')}</div><p class="note-s center">${si.got >= 3 ? 'Perfect! You said it just right!' : si.got === 2 ? 'Very close! Listen once more and try again.' : si.got === 1 ? 'Good try! Hear it again and copy the sounds.' : ''}</p>` : ''}
+  <button class="btn ghost" data-act="sayitNext">Next word →</button>
+  <div class="field"><span class="flabel">Words this round · ${si.done.length} of 5</span><div class="chips">${si.done.map(d => `<span class="chip">${d.e} ${esc(d.show)}${d.mean ? ' = ' + esc(d.mean) : ''}</span>`).join('') || '<span class="note-s">Say 5 words to finish a round!</span>'}</div></div>
+  ${si.round ? `<div class="arc-learn"><span>🎓 What you learned</span><p>${esc(si.round)}</p><button class="hearbtn" data-act="speak" data-v="${esc(si.round)}" aria-label="Hear it">🔊</button></div>` : ''}</div>${sayBox(plan.langs.length ? `Listen, then say the ${L} word out loud. I will listen and help you sound just right!` : 'Listen, then say the word out loud. I will listen and help you say it clearly!')}`;
+}
+function sayitRe(){ reBody(sayitHTML()); }
+function sayitScore(got){ const si = G.sayit; si.got = got; if (got >= 2 && !si.done.some(d => d.show === si.w.show)){ if (!si.done.length) si.round = ''; si.done.push(si.w); si.stars += got; addXP(K(), 3); sfx(got >= 3 ? 'win' : 'pop');
+    if (si.done.length >= 5){ si.round = si.w.lang !== 'en' ? `You learned 5 ${LANGS[si.w.lang][0]} words: ${si.done.map(d => `${d.show} (${d.mean})`).join(', ')}.` : `You practiced saying 5 words clearly: ${si.done.map(d => d.show).join(', ')}. Speaking slowly and clearly helps everyone understand you.`; playReward(1, 'Speaking practice at Bright School'); si.done = []; } } else if (got < 2) sfx('boop'); sayitRe(); }
+let sayRec = null;
+Object.assign(A, {
+  sayitHear(){ const w = G.sayit.w; if (w.lang === 'en') say(w.show, { force: true }); else sayLang(w.target, w.lang); },
+  sayitNext(){ const si = G.sayit; si.w = sayItWord(); si.heard = null; si.got = 0; si.n++; sayitRe(); },
+  sayitSelf(){ G.sayit.heard = ''; sayitScore(2); },
+  sayitMic(){ const si = G.sayit, w = si.w; if (si.listen){ try { sayRec && sayRec.stop(); } catch (e) {} return; }
+    try { stopSpeech(); sayRec = new MIC(); sayRec.lang = w.lang === 'en' ? 'en-US' : LANGS[w.lang][1]; sayRec.interimResults = false; sayRec.maxAlternatives = 5; let best = ''; let bestS = 0;
+      sayRec.onresult = ev => { const alts = [...ev.results[0]].map(a => a.transcript); for (const a of alts){ const A1 = normW(a), T = normW(w.target), R1 = normW(w.rom); const sc = Math.max(...[T, R1].filter(Boolean).map(t => A1.includes(t) ? 1 : 1 - lev(A1, t) / Math.max(A1.length, t.length, 1))); if (sc > bestS){ bestS = sc; best = a; } } };
+      sayRec.onerror = ev => { si.listen = false; sayRec = null; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ toast('The microphone is off. A grown-up can turn it on, or tap ⭐ I said it!'); si.heard = null; sayitRe(); } else { si.heard = ''; sayitScore(0); } };
+      sayRec.onend = () => { if (!si.listen) return; si.listen = false; sayRec = null; si.heard = best; sayitScore(!best ? 0 : bestS >= .8 ? 3 : bestS >= .55 ? 2 : 1); };
+      sayRec.start(); si.listen = true; sayitRe(); } catch (e) { toast('The microphone isn’t available here. Tap ⭐ I said it!'); }
+  }
+});
+if (!ROOMS.school.tabs.some(t => t[0] === 'sayit')) ROOMS.school.tabs.push(['sayit', 'Say It!', sayitHTML]);
+
+// ---------- 13. "WHAT YOU LEARNED" for the level games too ----------
+const LEVEL_LEARN = { cook: 'Following steps in the right order is how recipes and science experiments work.', mem: 'Memory games train your brain to hold on to information, which helps with reading and math.', stack: 'Stacking things in the middle keeps their weight balanced, so the tower stays up.', duck: 'Fast eyes and hands working together is called coordination.', swing: 'Pumping your legs at the right moment adds energy, and that is how swings go higher.', fish: 'Waiting for just the right moment takes patience and good timing.', catch: 'Watching where things fall and moving there takes planning and quick thinking.' };
+const _levelEndL = levelEnd;
+levelEnd = function(game, win, stars, host, loseMsg){ _levelEndL(game, win, stars, host, loseMsg); const t = LEVEL_LEARN[game]; const card = document.querySelector('.lvdone:last-of-type .lvcard'); if (t && card && !card.querySelector('.arc-learn')) card.insertAdjacentHTML('beforeend', `<div class="arc-learn"><span>🎓 What you learned</span><p>${esc(t)}</p><button class="hearbtn" data-act="speak" data-v="${esc(t)}" aria-label="Hear it">🔊</button></div>`); };
+
+// ---------- 14. A BETTER CLAW MACHINE ----------
+// golden plushies, mystery capsules, a moving prize belt for big kids, an aim shadow, and lucky streaks
+const CAPS = ['🦄', '🐉', '🦖', '🧁', '🍩', '🌈', '⚡', '👑', '💎', '🚀', '🎈', '🪐'];
+function clawNewPile(){ return [...Array(6)].map((_, k) => { const r = Math.random(); return { t: r < .14 ? 'cap' : pick(Object.keys(BUDDIES)), gold: r > .92, x: 138 + k * 17 + Math.random() * 6, cc: pick(['#FF5A8C', '#34B2F0', '#FFC63A', '#3EC46B', '#B58CFF']) }; }); }
+const clawItem = p => p.t === 'cap' ? `<g><circle cy="-14" r="14" fill="${p.cc}"/><path d="M-14,-14 A14,14 0 0 0 14,-14z" fill="#fff" opacity=".85"/><circle cx="-5" cy="-20" r="3" fill="#fff" opacity=".7"/><text y="-8" text-anchor="middle" font-size="12" ${FONT} fill="#2B2550">?</text></g>` : `${p.gold ? '<circle cy="-26" r="34" fill="#FFE36B" opacity=".55"/>' : ''}${buddySVG(p.t, p.gold ? { cheer: 1 } : {})}`;
+clawScene = function(){
+  const c = G.claw; if (c.pile.some(p => typeof p !== 'object')) c.pile = clawNewPile();
+  let s = roomShell({ wall: '#FFE9C7', wp: 'stars', floor: '#BFD9F2', fp: 'check' });
+  s += IP.shelf(40, 70, 62, `${sph(52, 60, 9, '#E8414F')}${rr(66, 52, 16, 18, 3, '#FFC63A')}${rr(84, 58, 12, 12, 2, '#34B2F0')}`) + IP.shelf(40, 130, 62, `${grp(58, 130, .35, buddySVG('bao'))}${grp(86, 130, .3, buddySVG('luna'))}`);
+  s += IP.shelf(260, 70, 62, `<path d="M276,70 l6,-26 l6,26z" fill="#FF5A8C"/>${rr(290, 52, 14, 18, 3, '#3EC46B')}${sph(312, 62, 7, '#B58CFF')}`) + IP.shelf(260, 130, 62, `${grp(280, 130, .32, robotSVG('cosmo'))}${grp(306, 130, .3, buddySVG('fizz'))}`);
+  s += rrS(108, 18, 144, 248, 18, '#FF6F9F') + rr(112, 22, 136, 26, 12, '#FF8FB8') + TX(180, 41, 'CLAW-O-MATIC', 13, '#fff');
+  for (let k = 0; k < 9; k++) s += `<circle class="glowb" style="animation-delay:-${k * .2}s" cx="${118 + k * 15.5}" cy="50" r="2.6" fill="#FFE36B"/>`;
+  s += rr(120, 56, 120, 138, 8, '#D9F2FF') + rr(120, 56, 120, 138, 8, '#fff', 'opacity=".25"') + rr(122, 160, 26, 32, 3, '#C9D3E6');
+  if (GR() >= 2) s += `<rect x="146" y="186" width="92" height="7" rx="3" fill="#9AA3B8"/>${[0, 1, 2, 3, 4, 5].map(k => `<circle cx="${152 + k * 16}" cy="189.5" r="2" fill="#5F6A86"/>`).join('')}`;
+  if (!c.busy) s += `<path d="M${f1(c.x)},${f1(c.y + 10)} V182" stroke="#7B5CFA" stroke-width="1.5" stroke-dasharray="3 4" opacity=".6"/><ellipse cx="${f1(c.x)}" cy="190" rx="10" ry="3" fill="#7B5CFA" opacity=".35"/>`;
+  c.pile.forEach(p => s += grp(p.x, 190, .34, clawItem(p)));
+  s += rr(120, 62, 120, 4, 2, '#9AA3B8');
+  const cx = c.x, cy = c.y, open = c.open ? 9 : 3;
+  s += `<path d="M${f1(cx)},64 V${f1(cy - 8)}" stroke="#7A84A0" stroke-width="2"/>${rr(cx - 9, cy - 10, 18, 8, 3, '#9AA3B8')}<path d="M${f1(cx - 5)},${f1(cy - 2)} q-${open},8 -2,16 M${f1(cx + 5)},${f1(cy - 2)} q${open},8 2,16" stroke="#7A84A0" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  if (c.held && typeof c.held === 'object') s += grp(cx, cy + 22, .34, clawItem(c.held));
+  s += `<path d="M130,60 l26,-2 M134,70 l14,-1" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>`;
+  s += rr(120, 200, 120, 54, 8, '#E8416F') + rr(124, 204, 30, 30, 4, '#2B2550') + `<circle cx="196" cy="226" r="9" fill="#2B2550"/><circle cx="196" cy="218" r="6" fill="#FFC63A"/>${rr(194, 218, 4, 10, 2, '#2B2550')}<circle cx="224" cy="224" r="8" fill="#3EC46B"/><circle cx="224" cy="222" r="8" fill="#5CD87F"/>`;
+  if (c.prizeO) s += grp(139, 232, .3, clawItem(c.prizeO), 'class="jump"');
+  if (G.clawStreak >= 2) s += `<g transform="translate(180,12)">${pill(`Lucky streak ×${G.clawStreak}!`, { fs: 10, bg: '#FFF6C9' })}</g>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+};
+function clawHTML(){
+  G.claw = G.claw || { x: 180, y: 76, open: true, busy: false, pile: clawNewPile(), held: null, prize: null };
+  const kid = K(), pl = kid.plushies || {}, gp = kid.goldPlush || {}, caps = kid.capsules || [];
+  return `<div class="rm-scene" id="clawScene">${clawScene()}</div>${sayBox(GR() >= 2 ? 'The prizes ride a moving belt! Move the claw, wait for the right moment, then press Grab!' : 'Move the claw so the purple shadow is on a prize, then press Grab!')}
+  <div class="clawpad"><button class="padbtn" data-hold="-1" aria-label="Move left">◀</button><button class="btn berry big" data-act="clawGrab">Grab!</button><button class="padbtn" data-hold="1" aria-label="Move right">▶</button></div>
+  <div class="field"><span class="flabel">My plushies · golden ones are rare!</span><div class="plushrow">${Object.keys(BUDDIES).map(k => `<span class="plush ${pl[k] ? '' : 'locked'} ${gp[k] ? 'goldp' : ''}">${budBox(k)}<b>${pl[k] ? '×' + pl[k] : '?'}${gp[k] ? ' ✨' + gp[k] : ''}</b></span>`).join('')}</div></div>
+  <div class="field"><span class="flabel">Mystery capsules · ${caps.length} of ${CAPS.length} found</span><div class="chips">${CAPS.map(e => `<span class="chip capchip ${caps.includes(e) ? '' : 'locked'}">${caps.includes(e) ? e : '?'}</span>`).join('')}</div></div>`;
+}
+function clawInit(){
+  let dir = 0;
+  document.querySelectorAll('.padbtn').forEach(b => { b.addEventListener('pointerdown', e => { e.preventDefault(); dir = +b.dataset.hold; }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => { dir = 0; })); });
+  const belt = [0, 0, .5, .8, 1, 1.2, 1.4, 1.6, 1.8][GR()];
+  G.every(() => { const c = G.claw; let ch = false; if (dir && !c.busy){ c.x = clamp(c.x + dir * 3, 136, 228); ch = true; } if (belt && !(c.busy && c.y > 150)){ c.pile.forEach(p => { p.x += belt; if (p.x > 232) p.x -= 100; }); ch = true; } if (ch) clawRedraw(); }, 30);
+}
+A.clawGrab = function(){
+  const c = G.claw; if (c.busy) return; c.busy = true; c.prize = null; c.prizeO = null; rmSay('Here it goes…');
+  tween(700, p => { c.y = 76 + p * 92; clawRedraw(); }, () => {
+    c.open = false; clawRedraw();
+    const near = c.pile.map((p, i) => ({ p, i, d: Math.abs(p.x - c.x) })).sort((a, b) => a.d - b.d)[0];
+    const got = near && near.d < (GR() === 0 ? 15 : 12) && Math.random() < (GR() === 0 ? .95 : .85);
+    if (got){ c.held = near.p; c.pile.splice(near.i, 1); }
+    setTimeout(() => tween(700, p => { c.y = 168 - p * 92; clawRedraw(); }, () => {
+      if (c.held && Math.random() < .1){ c.pile.push({ ...c.held, x: c.x }); c.held = null; G.clawStreak = 0; clawRedraw(); rmSay('Oh no, it slipped! Try again!'); c.open = true; c.busy = false; return; }
+      const x0 = c.x;
+      tween(600, p => { c.x = x0 + (136 - x0) * p; clawRedraw(); }, () => {
+        c.open = true; const kid = K();
+        if (c.held){ const it = c.held; c.held = null; c.prizeO = it; G.clawStreak = (G.clawStreak || 0) + 1;
+          if (it.t === 'cap'){ const e = pick(CAPS); kid.capsules = kid.capsules || []; const isNew = !kid.capsules.includes(e); if (isNew) kid.capsules.push(e); rmSay(isNew ? `A mystery capsule! Inside is a new ${e} charm!` : `A mystery capsule with a ${e} charm! You found a bonus coin too!`); if (!isNew) kid.coins++; }
+          else { kid.plushies = kid.plushies || {}; kid.plushies[it.t] = (kid.plushies[it.t] || 0) + 1; if (it.gold){ kid.goldPlush = kid.goldPlush || {}; kid.goldPlush[it.t] = (kid.goldPlush[it.t] || 0) + 1; } rmSay(it.gold ? `WOW! A rare GOLDEN ${BUDDIES[it.t].name}! ✨` : `You won a ${BUDDIES[it.t].name} plushie! 🎉`); }
+          save(); playReward(it.gold ? 2 : 1, it.gold ? 'Won a golden plushie' : 'Won a prize at the Toy Shop');
+          if (G.clawStreak === 3){ playReward(1, 'Lucky streak at the claw machine'); rmSay('Lucky streak! 3 in a row! Bonus coin!'); }
+          if (c.pile.length < 4) c.pile.push(...clawNewPile().slice(0, 3)); reBody(clawHTML()); clawInit(); }
+        else { G.clawStreak = 0; clawRedraw(); rmSay(near && near.d < 13 ? 'So close! It wiggled away.' : 'Missed! Put the purple shadow right on a prize.'); }
+        c.busy = false;
+      });
+    }), 250);
+  });
+};
+ROOMS.toyshop.tabs[0][2] = clawHTML; ROOMS.toyshop.tabs[0][3] = clawInit;
 
 
 injectDefs();
