@@ -1070,6 +1070,9 @@ body{background:linear-gradient(165deg,#FFF0F7 0%,#F1F0FF 32%,#EAF7FF 58%,#EFFFF
 @keyframes sheen{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 @media (max-width:560px){.howbtn small{display:none}.howbtn{padding:6px}.rm-title h2{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rm-title small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rm-back{padding-inline:10px 12px}}
 .zflat [stroke-width=".6"]{stroke:none}
+#readme{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 10px 6px;border-radius:22px;background:linear-gradient(180deg,#8FD0FF,#5A9BFF);color:#fff;box-shadow:0 5px 0 #3C74D6,0 10px 20px -8px rgba(43,37,80,.5);font-weight:900}
+#readme span{font-size:24px;line-height:1}#readme small{font-size:10px;line-height:1}
+#readme:active{transform:translateY(3px);box-shadow:0 2px 0 #3C74D6}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -10512,7 +10515,7 @@ function zClothes(c, T, B){
   }
   // seams and folds where cloth ends
   if (!T.one || T.sl !== 'none'){
-    if (sleeveY != null && !T.overalls) inB += [-1, 1].map(sd => LINE(`M${sd * 12.4},${sleeveY} L${sd * 19},${sleeveY}`, shade(col, -.28), .9, .6) + (T.sl === 'long' ? LINE(`M${sd * 14.6},-39.6 q${sd * 1.2},.8 ${sd * 2.2},.2`, shade(col, -.3), .5, .5) : '')).join('');
+    if (sleeveY != null && !T.overalls) inB += [-1, 1].map(sd => LINE(`M${sd * 12.4},${sleeveY} L${sd * 21.5},${sleeveY}`, shade(col, -.28), .9, .6) + (T.sl === 'long' ? LINE(`M${sd * 14.6},-39.6 q${sd * 1.2},.8 ${sd * 2.2},.2`, shade(col, -.3), .5, .5) : '')).join('');
     if (!T.one) inB += LINE(`M-12.6,${T.len === 'coat' ? -29.6 : -27.6} H12.6`, shade(col, -.3), .8, .55);
     if (T.sl !== 'none') inB += LINE('M-4.8,-57.2 Q0,-52.4 4.8,-57.2', shade(col, -.3), .7, .5);
   }
@@ -10543,6 +10546,58 @@ function zChar(c, o = {}){
 const _zFaceV25 = zFace;
 zFace = function(c, o){ let s = _zFaceV25(c, o); s = s.replace(/filter="url\(#blur1\)"/g, 'filter="url(#zSoftBlur)"'); s = s.replace(/rx="3\.2" ry="2\.1" fill="(#[0-9A-Fa-f]{6})" opacity="([\d.]+)"\/>/g, (m, col, op) => `rx="3.9" ry="2.6" fill="${col}" opacity="${op}" filter="url(#zSoftBlur)"/>`); return s; };
 charSVG = function(c, o = {}){ return zChar(c, o); };
+
+// ---------- v27 CUTE KIDS: bigger head, soft chubby arms and legs (no sticks) ----------
+const ZBODY_R2 = [[0, -61], [3.8, -61], [4, -56], [7.2, -53.8], [11.2, -52.6], [14.4, -51], [16.6, -47.6], [18.2, -43], [19, -38.6], [19.4, -34], [19.5, -31], [20.2, -29], [20.2, -26.2], [19, -24.2], [17, -24], [15.6, -25.4], [15.1, -27.8], [15.1, -30.8], [14.7, -35], [14, -39.4], [13.2, -43], [12.4, -46.2], [11.8, -42.6], [11, -37.6], [11.8, -32], [12, -28], [11.6, -22], [11, -16.4], [10.2, -12.8], [10.4, -9], [9.2, -4.6], [9, -2.8], [3, -2.8], [2.8, -4.6], [2.3, -9], [2.2, -12.8], [1.6, -18], [1, -23], [0, -25.4]];
+const BODY_D2 = zSpline([...ZBODY_R2.slice(1, -1), [0, -25.4], ...ZBODY_R2.slice(1, -1).reverse().map(([x, y]) => [-x, y]), [0, -61]]);
+const _injDefsZ12 = injectDefsZ; injectDefsZ = function(){ _injDefsZ12(); const d = $('#defs defs'); if (d && !d.querySelector('#zBodyClip2')) d.insertAdjacentHTML('beforeend', `<clipPath id="zBodyClip2"><path d="${BODY_D2}"/></clipPath>`); };
+function zChar(c, o = {}){
+  c = c || {}; const sk = c.skin || '#FFE0C7', work = o.work || '';
+  const tid = c.top || 'tee', T = ZTOPS[tid] || ZTOPS.tee, bid = c.bottom || 'pants', B = ZBOTS[bid] || ZBOTS.pants;
+  const acc = work === 'restaurant' ? 'chef' : work === 'boutique' ? 'shades' : c.acc, full = HAT_FULL.has(acc);
+  const HT = 'translate(0,-57) scale(1.06) translate(0,57)', cl = zClothes(c, T, B);
+  let s = `<g class="zch zflat"><ellipse cx="0" cy="0" rx="14" ry="3.6" fill="#1d3b12" opacity=".16" filter="url(#blur2)"/>`;
+  const backHair = zHair(c, 'back', acc);
+  s += zBack(c) + `<g transform="${HT}">${full ? `<g clip-path="url(#zHatClip)">${backHair}</g>` : backHair}</g>` + cl.back;
+  if (work === 'school') s += `<path d="M-11,-50 h22 v19 q-11,4 -22,0Z" fill="#FF8A3D"/>`;
+  // the body and everything it wears, cut to the body outline
+  s += `<path d="${BODY_D2}" fill="${sk}"/><g clip-path="url(#zBodyClip2)">${cl.inB}<path d="${BODY_D2}" fill="url(#zBodyShade)"/>${[-1, 1].map(sd => `<path d="M${sd * 3.8},-14 q${sd * 1.6},.9 ${sd * 3},0" stroke="${shade(sk, -.18)}" stroke-width=".45" fill="none" opacity=".5"/>`).join('')}</g>`;
+  s += cl.over + zShoes(c);
+  if (work && WORKPROP[work]) s += `<g transform="translate(17.6,-26.4)"><g>${zWorkAnim(work).replace(/ 13 -49/g, ' 0 0')}${WORKPROP[work]}</g></g>`;
+  let h = [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74.6" rx="2.5" ry="3.6" fill="${shade(sk, -.04)}"/><path d="M${sd * 15.4},-76 q${sd * .9},1.4 0,2.8" stroke="${shade(sk, -.16)}" stroke-width=".5" fill="none"/>`).join('');
+  if (c.earrings) h += [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-70.4" r="1.2" fill="${c.earrings}"/>`).join('');
+  h += `<path d="${FACE4}" fill="${sk}"/><path d="${FACE4}" fill="url(#zSkinG)" opacity=".7"/>` + zFace(c, o);
+  const fh = zHair(c, 'front', acc);
+  h += (full ? `<g clip-path="url(#zHatClip)">${fh}</g>` : fh) + zAcc(acc);
+  return s + `<g transform="${HT}">${h}</g></g>`;
+}
+
+charSVG = function(c, o = {}){ return zChar(c, o); };
+
+// ---------- HEAR EVERYTHING: tap any button to hear it, plus a big "Read to me" button ----------
+document.addEventListener('click', e => {
+  if (!S || !RA()) return; const t0 = e.target; if (!t0.closest) return;
+  if (t0.closest('.hearbtn, .hearmini, [data-act="hear"], [data-act="speak"], .rm-scene, #arcBox, .arc, input, textarea, #readme')) return;
+  const b = t0.closest('button, .chip, .tool, .item, .furbtn, [role="tab"], .card[data-act]'); if (!b) return;
+  if (b.matches('.sw')) return;
+  let t = (b.getAttribute('aria-label') && !/^(Back|Close)$/i.test(b.getAttribute('aria-label')) ? b.getAttribute('aria-label') : '') || (b.querySelector('b, h3, h4, .nm, small') || {}).textContent || b.textContent || '';
+  t = t.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}★✨↺◀▶➕➖⬆️⬇️]/gu, ' ').replace(/\s+/g, ' ').trim();
+  if (t && t.length < 120) setTimeout(() => { try { tapSay(t); } catch (er) {} }, 40);
+}, true);
+function readScreen(){
+  const say1 = document.querySelector('#room #rmSay') || document.querySelector('#rmSay');
+  let t = say1 && say1.offsetParent ? say1.textContent : '';
+  if (!t){ const sh = document.querySelector('#sheet .sheet'); if (sh && sh.offsetParent) t = [...sh.querySelectorAll('h2, h3, p')].slice(0, 4).map(x => x.textContent).join('. '); }
+  if (!t){ const v = document.querySelector('#view'); if (v) t = [...v.querySelectorAll('h1, h2, .say, .talk, p')].filter(x => x.offsetParent).slice(0, 4).map(x => x.textContent).join('. '); }
+  t = (t || '').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, ' ').replace(/\s+/g, ' ').trim();
+  if (t) tapSay(t);
+}
+A.readScreen = () => readScreen();
+function readmeSync(){ let b = document.getElementById('readme'); const want = !!(S && isKid() && RA()); if (!want){ if (b) b.remove(); return; } if (!b){ b = document.createElement('button'); b.id = 'readme'; b.setAttribute('aria-label', 'Read to me'); b.dataset.act = 'readScreen'; b.innerHTML = '<span>🔊</span><small>Read to me</small>'; document.body.appendChild(b); } }
+const _renderReadme = render; render = function(){ const r = _renderReadme.apply(this, arguments); try { readmeSync(); } catch (e) {} return r; };
+// the runway reads its theme out loud as soon as it opens
+const _drawRoomRun = drawRoom;
+drawRoom = function(){ const r = _drawRoomRun.apply(this, arguments); try { const u = ui.room; if (u && u.tab === 'runway' && RA() && G.run && G.run.theme && G._runSaid !== G.run.theme.name){ G._runSaid = G.run.theme.name; setTimeout(() => tapSay(`Today's theme is ${G.run.theme.name}! Pick clothes that match ${G.run.theme.name}, then walk the runway.`), 500); } } catch (e) {} try { readmeSync(); } catch (e) {} return r; };
 
 injectDefs();
 injectDefs2();
