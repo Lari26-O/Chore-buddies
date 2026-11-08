@@ -9792,7 +9792,7 @@ function zcDefs(){
 }
 const _injDefsZ4 = injectDefsZ; injectDefsZ = function(){ _injDefsZ4(); zcDefs(); };
 // wrap a shape with cloth shading and a soft outline
-const zC = (d, c, ex = '') => `<path d="${d}" fill="${c}" stroke="${zsh(c, -.25)}" stroke-width=".9" stroke-linejoin="round" ${ex}/><path d="${d}" fill="url(#zCloth)" pointer-events="none"/>`;
+const zC = (d, c, ex = '') => `<path d="${d}" fill="${c}" stroke="${zsh(c, -.17)}" stroke-width=".6" stroke-linejoin="round" ${ex}/><path d="${d}" fill="url(#zCloth)" pointer-events="none"/>`;
 const zPat = (d, id, op = 1) => `<path d="${d}" fill="url(#${id})" opacity="${op}" pointer-events="none"/>`;
 
 // ---- body shapes ----
@@ -9859,14 +9859,14 @@ function zTop(c, T, armsUp){
   const col = T.col || c.shirt || '#34B2F0', dk = zsh(col, -.12), sk = c.skin; let back = '', s = '', armL = '', armR = '';
   // arms
   const arm = (sd, up) => { const [hx, hy] = HAND(sd, up); let a = '';
-    if (T.sl === 'long') a += `<path d="${ARM(sd, up)}" stroke="${dk}" stroke-width="6.8" stroke-linecap="round" fill="none"/><path d="${ARM(sd, up)}" stroke="#fff" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".18" transform="translate(${-sd * 1.2},0)"/>` + (T.puffy ? `<path d="${ARM(sd, up)}" stroke="${zsh(col, -.2)}" stroke-width="6.8" stroke-dasharray=".7 5" fill="none"/>` : '') + (T.armor ? `<path d="${ARM(sd, up)}" stroke="#8A93AA" stroke-width="6.8" stroke-dasharray="1 4" fill="none"/>` : '');
-    else { a += `<path d="${ARM(sd, up)}" stroke="${sk}" stroke-width="5.4" stroke-linecap="round" fill="none"/><path d="${ARM(sd, up)}" stroke="${zsh(sk, -.15)}" stroke-width="5.4" stroke-linecap="round" fill="none" opacity=".25" transform="translate(${sd * .6},.4)"/>`; if (T.sl === 'short') a += `<path d="${ARMMID(sd, up)}" stroke="${dk}" stroke-width="7.6" stroke-linecap="round" fill="none"/>`; if (T.sl === 'puff') a += `<ellipse cx="${sd * 14.6}" cy="${up ? -51 : -47}" rx="5" ry="4.6" fill="${zsh(col, .1)}" stroke="${zsh(col, -.25)}" stroke-width=".7"/>`; }
-    if (T.sl === 'long' && !T.hero) a += `<circle cx="${hx}" cy="${hy + (up ? 1.6 : -1.6)}" r="3.4" fill="${zsh(col, -.22)}"/>`;
-    a += `<circle cx="${hx}" cy="${hy}" r="3" fill="${T.hero && T.sl === 'long' ? '#FFD23F' : T.astro ? '#FFFFFF' : sk}" stroke="${zsh(T.astro ? '#FFFFFF' : sk, -.2)}" stroke-width=".6"/>`;
+    if (T.sl === 'long') a += `<path d="${ARM(sd, up)}" stroke="${dk}" stroke-width="5.8" stroke-linecap="round" fill="none"/><path d="${ARM(sd, up)}" stroke="#fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".18" transform="translate(${-sd * 1.2},0)"/>` + (T.puffy ? `<path d="${ARM(sd, up)}" stroke="${zsh(col, -.2)}" stroke-width="6.8" stroke-dasharray=".7 5" fill="none"/>` : '') + (T.armor ? `<path d="${ARM(sd, up)}" stroke="#8A93AA" stroke-width="6.8" stroke-dasharray="1 4" fill="none"/>` : '');
+    else { a += `<path d="${ARM(sd, up)}" stroke="${sk}" stroke-width="4.5" stroke-linecap="round" fill="none"/><path d="${ARM(sd, up)}" stroke="${zsh(sk, -.15)}" stroke-width="4.5" stroke-linecap="round" fill="none" opacity=".25" transform="translate(${sd * .6},.4)"/>`; if (T.sl === 'short') a += `<path d="${ARMMID(sd, up)}" stroke="${dk}" stroke-width="6.6" stroke-linecap="round" fill="none"/>`; if (T.sl === 'puff') a += `<ellipse cx="${sd * 14.6}" cy="${up ? -51 : -47}" rx="5" ry="4.6" fill="${zsh(col, .1)}" stroke="${zsh(col, -.25)}" stroke-width=".7"/>`; }
+    if (T.sl === 'long' && !T.hero) a += `<circle cx="${hx}" cy="${hy + (up ? 1.4 : -1.4)}" r="2.9" fill="${zsh(col, -.22)}"/>`;
+    a += `<ellipse cx="${hx}" cy="${hy + (up ? -.4 : .4)}" rx="2.3" ry="2.7" fill="${T.hero && T.sl === 'long' ? '#FFD23F' : T.astro ? '#FFFFFF' : sk}" stroke="${zsh(T.astro ? '#FFFFFF' : sk, -.15)}" stroke-width=".45"/>`;
     return a; };
   armL = arm(-1, false); armR = arm(1, armsUp);
   // hood behind head
-  if (T.hood) back += zC('M-13.4,-50.6 Q-17,-58 -11,-62.6 Q0,-65.6 11,-62.6 Q17,-58 13.4,-50.6Z', zsh(col, -.1)) + `<path d="M-9,-60 Q0,-62.4 9,-60" stroke="${zsh(col, -.3)}" stroke-width=".8" fill="none"/>`;
+  if (T.hood) back += zC('M-11.2,-51.4 Q-13,-56.6 -8.4,-59.4 Q0,-61.2 8.4,-59.4 Q13,-56.6 11.2,-51.4Z', zsh(col, -.1)) + `<path d="M-9,-60 Q0,-62.4 9,-60" stroke="${zsh(col, -.3)}" stroke-width=".8" fill="none"/>`;
   const len = T.len === 'coat' ? TORSO_LONG : TORSO;
   if (T.one){ s += zOnePiece(c, T, col); }
   else if (T.overalls){ s += zC(TORSO, c.shirt || '#FFFFFF') + zC('M-9.5,-44 H9.5 L11.6,-28.5 Q0,-26 -11.6,-28.5Z', '#4A78C8') + `<path d="M-9.5,-44 L-11,-52 M9.5,-44 L11,-52" stroke="#4A78C8" stroke-width="2.6" stroke-linecap="round"/><circle cx="-8.6" cy="-43" r="1.2" fill="#FFD23F"/><circle cx="8.6" cy="-43" r="1.2" fill="#FFD23F"/>` + zC('M-4,-40 h8 v6 h-8Z', zsh('#4A78C8', .1)); }
@@ -9957,7 +9957,7 @@ function zFace(c, o){
 const HAT_FULL = new Set(['cap', 'backcap', 'beanie', 'chef', 'santa', 'santahat', 'witch', 'wizard', 'cowboy', 'sunhat', 'bucket', 'pirate', 'helmet', 'dinohood', 'leprechaun', 'acornhat']);
 function zHair(c, part, hat){
   const hr = c.hair || '#5B3A29', hs = c.hairStyle || 'bob', hl = zsh(hr, .28), dk = zsh(hr, -.22), full = HAT_FULL.has(hat);
-  const P = d => `<path d="${d}" fill="${hr}" stroke="${dk}" stroke-width=".8" stroke-linejoin="round"/>`;
+  const P = d => `<path d="${d}" fill="${hr}" stroke="${dk}" stroke-width=".55" stroke-linejoin="round"/>`;
   if (part === 'back'){
     if (hs === 'bob') return P('M-19.2,-77 C-21,-97 -10,-99.6 0,-99.6 C10,-99.6 21,-97 19.2,-77 L19.6,-63 Q15.4,-59 11,-62.6 L-11,-62.6 Q-15.4,-59 -19.6,-63Z');
     if (hs === 'long') return P('M-19.4,-78 C-21.4,-97.6 -10,-100.4 0,-100.4 C10,-100.4 21.4,-97.6 19.4,-78 L22.4,-41 Q18.4,-35.6 12.4,-39.4 Q6.2,-35.4 0,-39.2 Q-6.2,-35.4 -12.4,-39.4 Q-18.4,-35.6 -22.4,-41Z') + `<path d="M-15,-50 Q-16,-44 -14,-40 M15,-50 Q16,-44 14,-40 M-8,-46 Q-9,-42 -7.6,-39" stroke="${dk}" stroke-width=".8" fill="none" opacity=".6"/>`;
@@ -10100,7 +10100,7 @@ function makeupScene(){
   const ty = MK_CY - CHX.HY * MK_S, acc = c.acc;
   s += `<g transform="translate(${MK_CX},${f1(ty)}) scale(${MK_S})">${zHair(c, 'back', acc)}${zC('M-14,-46 Q-12,-53 -5,-53.6 Q0,-50 5,-53.6 Q12,-53 14,-46 L16,-30 H-16Z', '#FF8FB8')}</g>`;
   s += zBigFace(c, st.rub ? 'cheer' : 'happy', MK_S, MK_CX, MK_CY);
-  s += `<g transform="translate(${MK_CX},${f1(ty)}) scale(${MK_S})">${zHair(c, 'front', acc)}${(m.stk || []).map(k => `<text x="${f1(k.x)}" y="${f1(k.y + 1.6)}" font-size="5" text-anchor="middle">${k.e}</text>`).join('')}</g>`;
+  s += `<g transform="translate(${MK_CX},${f1(ty)}) scale(${MK_S})">${zHair(c, 'front', acc)}</g>`;
   s += st.fx.map(f => `<path d="${starPath(f.x, f.y, f.r, f.r * .42)}" fill="${f.c}" opacity="${f1(f.a)}"/>`).join('');
   if (st.cur){ const T = MK[st.tool]; s += `<g transform="translate(${f1(st.cur.x + 14)},${f1(st.cur.y - 14)}) rotate(30)" pointer-events="none"><rect x="-3" y="-2" width="6" height="22" rx="3" fill="#B58CFF"/><rect x="-3.6" y="-8" width="7.2" height="8" rx="2" fill="#E3E9F2"/><path d="M-4,-8 Q0,-22 4,-8Z" fill="${st.col || '#FF8FB8'}"/></g>`; }
   return `<svg viewBox="0 0 360 270" class="rm-svg" id="mkSvg">${s}</svg>`;
@@ -10173,6 +10173,86 @@ function strandSVG2(st, pass){ if (st.L < 2) return ''; const P = strandPts2(st)
 })();
 const _floatCoinJ = floatCoin;
 floatCoin = function(t){ _floatCoinJ(t); document.querySelectorAll('.wallet').forEach(w => { w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); }); };
+
+// ---------- v23 PRETTIER, MORE NATURAL CHARACTERS: smaller eyes, oval face, soft lines, smaller head ----------
+const FACE2 = 'M-15.4,-78.4 C-15.4,-90.2 -8.4,-93.6 0,-93.6 C8.4,-93.6 15.4,-90.2 15.4,-78.4 C15.4,-67.6 10.8,-58.4 0,-57.2 C-10.8,-58.4 -15.4,-67.6 -15.4,-78.4Z';
+const EYE2 = x => `M${x - 3.9},-74.3 Q${x - 2},-77.7 ${x + .5},-77.5 Q${x + 3},-77.2 ${x + 3.9},-74.6 Q${x + 1.8},-72 ${x - .3},-72.1 Q${x - 2.8},-72.3 ${x - 3.9},-74.3Z`;
+function zcDefs2(){ const d = $('#defs defs'); if (!d || d.querySelector('#zEyeL2')) return; d.insertAdjacentHTML('beforeend', `<clipPath id="zEyeL2"><path d="${EYE2(-6)}"/></clipPath><clipPath id="zEyeR2"><path d="${EYE2(6)}"/></clipPath><radialGradient id="zIris" cx=".5" cy=".38" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient><radialGradient id="zCheek"><stop offset="0" stop-color="#FF8FA3" stop-opacity=".55"/><stop offset="1" stop-color="#FF8FA3" stop-opacity="0"/></radialGradient>`); }
+const _injDefsZ7 = injectDefsZ; injectDefsZ = function(){ _injDefsZ7(); zcDefs2(); };
+function zEyes(c, mood){
+  const ic = c.eyeCol || (['#FFE0C7', '#FFE5D2'].includes(c.skin) ? '#4F86C9' : '#6B4A2E'), lash = c.lashes, m = c.mk || {};
+  if (mood === 'tired') return [-6, 6].map(x => `<path d="M${x - 3.6},-74 Q${x},-71.8 ${x + 3.6},-74" stroke="#4A3438" stroke-width="1.1" fill="none" stroke-linecap="round"/>`).join('');
+  let s = '';
+  if (m.shadow) s += [-6, 6].map(x => `<path d="M${x - 4.6},-74 Q${x - 1},-81.6 ${x + 4.8},-74.6 Q${x + .4},-78 ${x - 4.6},-74Z" fill="${m.shadow}" opacity="${f1(.9 * (m.shadowA == null ? 1 : m.shadowA))}" filter="url(#blur1)"/>`).join('');
+  s += `<g class="blink">`;
+  [[-6, 'zEyeL2'], [6, 'zEyeR2']].forEach(([x, cl], i) => {
+    const sd = i ? 1 : -1, eye = EYE2(x);
+    s += `<path d="${eye}" fill="#FFFDFB"/><g clip-path="url(#${cl})"><circle cx="${x + .2}" cy="-74.8" r="2.45" fill="${ic}"/><circle cx="${x + .2}" cy="-74.8" r="2.45" fill="url(#zIris)"/><circle cx="${x + .2}" cy="-74.7" r="1.15" fill="#1A1220"/><circle cx="${x + 1}" cy="-75.7" r=".7" fill="#fff"/><circle cx="${x - .5}" cy="-73.9" r=".32" fill="#fff" opacity=".85"/><path d="${eye}" fill="none" stroke="#7a5060" stroke-opacity=".18" stroke-width="1.6"/></g>`;
+    s += `<path d="M${x - 4.1},-74.1 Q${x - 2},-78 ${x + .5},-77.8 Q${x + 3.1},-77.5 ${x + 4.1},-74.7" stroke="#3A2830" stroke-width="${lash || m.liner ? 1.05 : .8}" fill="none" stroke-linecap="round"/><path d="M${x - 3.4},-73.4 Q${x},-71.5 ${x + 3.4},-73.8" stroke="#8a6670" stroke-width=".35" fill="none" opacity=".6"/>`;
+    s += `<path d="M${x - 3.4},-78.6 Q${x},-79.8 ${x + 3.6},-78.7" stroke="${shade(c.skin || '#FFE0C7', -.14)}" stroke-width=".45" fill="none" opacity=".7"/>`;
+    if (lash || m.lash) s += `<path d="M${x + sd * 3.9},-74.8 l${sd * 1.5},-.9 M${x + sd * 3.1},-76.5 l${sd * 1.1},-1.2 M${x + sd * 1.6},-77.5 l${sd * .5},-1.2" stroke="#3A2830" stroke-width=".55" stroke-linecap="round"/>`;
+    if (m.liner) s += `<path d="M${x + sd * 4},-74.8 l${sd * 2},-1" stroke="#2A1E24" stroke-width="1" stroke-linecap="round"/>`;
+  });
+  return s + `</g>`;
+}
+function zFace(c, o){
+  const mood = o.mood || 'happy', sk = c.skin || '#FFE0C7', hr = c.hair || '#5B3A29', m = c.mk || {}; let s = '';
+  s += zEyes(c, mood);
+  const bc = shade(hr, -.12);
+  s += `<path d="M-9.6,-80.2 Q-6.6,-81.9 -3,-80.7 Q-6.4,-81.1 -9.6,-80.2Z M3,-80.7 Q6.6,-81.9 9.6,-80.2 Q6.4,-81.1 3,-80.7Z" fill="${bc}" stroke="${bc}" stroke-width=".7" stroke-linejoin="round" opacity=".85"/>`;
+  s += `<path d="M.4,-72.6 Q1.3,-70 .9,-68.4" stroke="${shade(sk, -.16)}" stroke-width=".6" fill="none" opacity=".7"/><path d="M-1.6,-67.9 Q0,-66.9 1.6,-67.9" stroke="${shade(sk, -.24)}" stroke-width=".7" fill="none" stroke-linecap="round"/><ellipse cx="-.3" cy="-70.4" rx=".55" ry="1.1" fill="#fff" opacity=".4"/>`;
+  const bl = m.blush ? `opacity="${f1(.4 + .5 * (m.blushA == null ? 1 : m.blushA))}"` : 'opacity=".75"';
+  s += [-1, 1].map(sd => m.blush ? `<ellipse cx="${sd * 9.8}" cy="-67.8" rx="3.6" ry="2.2" fill="${m.blush}" ${bl} filter="url(#blur1)"/>` : `<ellipse cx="${sd * 9.8}" cy="-67.8" rx="3.8" ry="2.4" fill="url(#zCheek)" ${bl}/>`).join('');
+  const lip = m.lip || (c.lashes ? '#E27A8E' : '#C77C80'), la = m.lip ? f1(.45 + .55 * (m.lipA == null ? 1 : m.lipA)) : 1;
+  if (mood === 'cheer') s += `<path d="M-3.6,-64.6 Q0,-59.8 3.6,-64.6 Q0,-63.6 -3.6,-64.6Z" fill="#9C3A4E"/><path d="M-3,-64.3 Q0,-63.5 3,-64.3 L2.4,-63.6 Q0,-63 -2.4,-63.6Z" fill="#fff"/><path d="M-1.8,-61.9 Q0,-63 1.8,-61.9 Q0,-60.9 -1.8,-61.9Z" fill="#F08AA0"/><path d="M-3.6,-64.6 Q0,-59.8 3.6,-64.6" stroke="${lip}" stroke-width=".8" fill="none" opacity="${la}"/>`;
+  else if (mood === 'tired' || mood === 'wow') s += `<ellipse cx="0" cy="-63.6" rx="1.5" ry="${mood === 'wow' ? 2 : 1}" fill="#9C3A4E"/>`;
+  else if (mood === 'sad') s += `<path d="M-2.8,-62.8 Q0,-64.8 2.8,-62.8" stroke="${lip}" stroke-width="1" fill="none" stroke-linecap="round"/>`;
+  else s += `<path d="M-3.2,-64.5 Q-1.4,-65.4 0,-64.8 Q1.4,-65.4 3.2,-64.5 Q0,-63.9 -3.2,-64.5Z" fill="${lip}" opacity="${la}"/><path d="M-3.2,-64.5 Q0,-61.6 3.2,-64.5 Q0,-63.9 -3.2,-64.5Z" fill="${shade(lip, .12)}" opacity="${la}"/><path d="M-3.4,-64.4 Q0,-63.6 3.4,-64.4" stroke="${shade(lip, -.3)}" stroke-width=".45" fill="none" stroke-linecap="round"/><ellipse cx=".6" cy="-63.2" rx="1" ry=".35" fill="#fff" opacity=".45"/>`;
+  if (m.glitter) s += [[-11, -70], [-8.4, -66.6], [-12, -65.8], [10.4, -70], [12, -66], [8.6, -65.6]].map(([x, y], k) => `<path class="${k % 2 ? 'twinkle' : ''}" d="${starPath(x, y, 1, .4)}" fill="${m.glitter}"/>`).join('');
+  if (m.sticker === 'heart') s += `<path transform="translate(10.8,-71.6) scale(.28)" d="M0,6 C-9,0 -9,-8 -3,-8 C-1,-8 0,-6.5 0,-5 C0,-6.5 1,-8 3,-8 C9,-8 9,0 0,6Z" fill="#FF5A8C"/>`;
+  if (m.freckles) s += [[-8.4, -69.4], [-10.6, -68.8], [-9.4, -67.4], [8.4, -69.4], [10.6, -68.8], [9.4, -67.4]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".4" fill="${shade(sk, -.35)}"/>`).join('');
+  (m.stk || []).forEach(k => { s += `<text x="${f1(k.x)}" y="${f1(k.y + 1.6)}" font-size="5" text-anchor="middle">${k.e}</text>`; });
+  return s;
+}
+// head is drawn a little smaller, so the body looks like a real kid
+const HEADT = 'translate(0,-56) scale(.84) translate(0,56)';
+function zHairTex(c){ const hs = c.hairStyle || 'bob'; if (hs === 'curly' || hs === 'puffs') return ''; const dk = shade(c.hair || '#5B3A29', -.2), hl = shade(c.hair || '#5B3A29', .32);
+  let s = `<g fill="none" stroke-linecap="round"><path d="M-3,-96 Q-10,-91 -14,-80 M3,-96 Q11,-91 14.4,-81 M-1,-96.6 Q-4,-90 -6,-85 M1.6,-96.6 Q6,-90 8.4,-85.4" stroke="${dk}" stroke-width=".45" opacity=".55"/><path d="M-9,-92.4 Q-3,-95.8 4,-95" stroke="${hl}" stroke-width="1.6" opacity=".55"/><path d="M-6.4,-90.6 Q-2,-92.6 2.6,-92.2" stroke="#fff" stroke-width=".7" opacity=".4"/>`;
+  if (hs === 'long') s += `<path d="M-17,-70 Q-19,-58 -16.4,-48 M17,-70 Q19,-58 16.4,-48 M-15,-66 Q-16,-56 -14.6,-50" stroke="${dk}" stroke-width=".45" opacity=".5"/>`;
+  return s + `</g>`; }
+function zBigFace(c, mood, S, cx, cy, withEars = true){
+  const sk = c.skin || '#FFE0C7', ty = cy - CHX.HY * S;
+  let s = `<g transform="translate(${cx},${f1(ty)}) scale(${S})"><path d="M-4.4,-61 H4.4 V-50 Q0,-48 -4.4,-50Z" fill="${shade(sk, -.08)}"/>`;
+  if (withEars) s += [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74" rx="2.6" ry="3.8" fill="${shade(sk, -.05)}"/>`).join('') + (c.earrings ? [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-69.6" r="1.2" fill="${c.earrings}" stroke="#fff" stroke-width=".3"/>`).join('') : '');
+  s += `<path d="${FACE2}" fill="${sk}" stroke="${shade(sk, -.12)}" stroke-width=".35"/><path d="${FACE2}" fill="url(#zSkinG)"/><path d="M-12,-66 Q-8,-58.6 0,-57.6 Q8,-58.6 12,-66" stroke="${shade(sk, -.1)}" stroke-width="1.6" fill="none" opacity=".25"/>` + zFace(c, { mood }) + `</g>`;
+  return s;
+}
+function zChar(c, o = {}){
+  c = c || {}; const sk = c.skin || '#FFE0C7', work = o.work || '', up = !!work;
+  const tid = c.top || 'tee', T = ZTOPS[tid] || ZTOPS.tee, bid = c.bottom || 'pants', B = ZBOTS[bid] || ZBOTS.pants;
+  const acc = work === 'restaurant' ? 'chef' : work === 'boutique' ? 'shades' : c.acc, full = HAT_FULL.has(acc);
+  let s = `<g class="zch"><ellipse cx="0" cy="0" rx="15" ry="4" fill="#1d3b12" opacity=".18" filter="url(#blur2)"/>`;
+  const top = zTop(c, T, up);
+  const backHair = zHair(c, 'back', acc);
+  s += zBack(c) + `<g transform="${HEADT}" class="zh">${full ? `<g clip-path="url(#zHatClip)">${backHair}</g>` : backHair}</g>` + top.back;
+  if (work === 'school') s += zC('M-12,-50 h24 v20 q-12,4 -24,0Z', '#FF8A3D');
+  if (!T.one && !T.overalls) s += zBottom(c, B);
+  if (T.overalls) s += [-1, 1].map(sd => zC(LEG(sd), '#4A78C8')).join('') + [-1, 1].map(sd => `<rect x="${sd > 0 ? 1.6 : -9.9}" y="-6.8" width="8.3" height="3" rx="1.2" fill="#6F97DB"/>`).join('');
+  s += zShoes(c) + top.armL;
+  s += `<path d="M-3.8,-60 H3.8 V-51.4 Q0,-49.8 -3.8,-51.4Z" fill="${shade(sk, -.07)}"/><path d="M-3.8,-56.6 Q0,-54.6 3.8,-56.6" stroke="${shade(sk, -.2)}" stroke-width=".6" fill="none" opacity=".5"/>`;
+  s += top.body;
+  if (work === 'restaurant') s += zC('M-9,-46 h18 v17 q-9,3 -18,0Z', '#FFFFFF');
+  s += up ? `<g>${zWorkAnim(work)}${top.armR}${WORKPROP[work] ? `<g transform="translate(22,-64)">${WORKPROP[work]}</g>` : ''}</g>` : top.armR;
+  let h = [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74" rx="2.6" ry="3.8" fill="${shade(sk, -.05)}" stroke="${shade(sk, -.14)}" stroke-width=".4"/><path d="M${sd * 15.4},-75.6 q${sd * 1},1.4 0,3" stroke="${shade(sk, -.22)}" stroke-width=".5" fill="none"/>`).join('');
+  if (c.earrings) h += [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-69.6" r="1.2" fill="${c.earrings}"/>`).join('');
+  h += `<path d="${FACE2}" fill="${sk}" stroke="${shade(sk, -.13)}" stroke-width=".5"/><path d="${FACE2}" fill="url(#zSkinG)"/><path d="M-12,-66 Q-8,-58.8 0,-57.8 Q8,-58.8 12,-66" stroke="${shade(sk, -.1)}" stroke-width="1.6" fill="none" opacity=".22"/>`;
+  h += zFace(c, o);
+  const fh = zHair(c, 'front', acc) + (full ? '' : zHairTex(c));
+  h += (full ? `<g clip-path="url(#zHatClip)">${fh}</g>` : fh) + zAcc(acc);
+  s += `<g transform="${HEADT}" class="zh">${h}</g></g>`;
+  return s;
+}
+charSVG = function(c, o = {}){ return zChar(c, o); };
 
 injectDefs();
 injectDefs2();
