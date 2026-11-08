@@ -1073,6 +1073,13 @@ body{background:linear-gradient(165deg,#FFF0F7 0%,#F1F0FF 32%,#EAF7FF 58%,#EFFFF
 #readme{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 10px 6px;border-radius:22px;background:linear-gradient(180deg,#8FD0FF,#5A9BFF);color:#fff;box-shadow:0 5px 0 #3C74D6,0 10px 20px -8px rgba(43,37,80,.5);font-weight:900}
 #readme span{font-size:24px;line-height:1}#readme small{font-size:10px;line-height:1}
 #readme:active{transform:translateY(3px);box-shadow:0 2px 0 #3C74D6}
+.ordrow{display:flex;gap:8px;flex-wrap:wrap}
+.ordbtn{flex:1 1 0;min-width:64px;display:flex;flex-direction:column;align-items:center;padding:6px 4px 4px;border-radius:18px;background:#fff;box-shadow:0 3px 0 var(--line);touch-action:manipulation}
+.ordbtn svg{width:52px;height:56px}
+.ordbtn small{font-weight:800;font-size:12px;text-transform:capitalize}
+.ordbtn.on{box-shadow:0 0 0 3px #FF5A8C,0 3px 0 var(--line);background:#FFF0F6}
+.endcard{text-align:center;background:linear-gradient(135deg,#FFF0F7,#F1ECFF)}
+.tray2 .tool,.tray2{touch-action:none}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -10609,6 +10616,132 @@ function zEyes(c, mood){
     return `<ellipse cx="${x}" cy="-73.6" rx="1.65" ry="2.25" fill="#2B2230"/><circle cx="${x + .6}" cy="-74.4" r=".58" fill="#fff"/>` + (c.lashes || m.lash ? `<path d="M${x + sd * 1.3},-75.4 l${sd * 1.2},-.9 M${x + sd * 1.7},-74.4 l${sd * 1.2},-.2" stroke="#2B2230" stroke-width=".55" stroke-linecap="round"/>` : '') + (m.liner ? `<path d="M${x - sd * 1.4},-75.6 Q${x},-76.4 ${x + sd * 2},-75.2 l${sd * 1.2},-.7" stroke="#1E1620" stroke-width=".7" fill="none" stroke-linecap="round"/>` : ''); }).join('') + `</g>`;
   return s;
 }
+
+// ---------- v30 BAKERY: frosting that always works + two new games (Bake Shop Orders, Pancake Flip) ----------
+// frosting: rub right on the cupcake, or tap the tools
+function cupApply(k, o){ const c = G.cup; if (!c) return;
+  if (k === 'bag' && c.frostP < 1){ c.linerSet = true; c.frostP = Math.min(1, c.frostP + .07); if (c.frostP >= 1){ sfx('pop'); confetti(20); rmSay('Swirly! Now add some sprinkles.'); } cupRefresh(); }
+  else if (k === 'shaker'){ if (c.frostP < .6) return rmSay('Pipe the frosting first!'); if (c.sprPts.length < 46){ for (let n = 0; n < 3; n++) c.sprPts.push([clamp((o ? o[0] : 0) + (Math.random() - .5) * 26, -26, 26), clamp((o ? o[1] : -56) + (Math.random() - .5) * 18, -76, -38)]); cupRefresh(); } } }
+DRAG.bake.tap = k => { const c = G.cup; if (k === 'bag'){ for (let i = 0; i < 4; i++) cupApply('bag'); sfx('pop'); if (c.frostP < 1) rmSay('Swirl! Tap again, or rub your finger on the cupcake!'); }
+  else if (k === 'shaker'){ for (let i = 0; i < 4; i++) cupApply('shaker'); sfx('pop'); }
+  else { if (c.frostP < .6) return rmSay('Pipe the frosting first!'); c.top = k.slice(4); sfx('pop'); rmSay('Ta-da! What a cupcake!'); cupRefresh(); } };
+DRAG.bake.move = function(k, x, y){ const o = overCup(x, y); if (o && (k === 'bag' || k === 'shaker')) cupApply(k, o); };
+const _bakeryInitZ = () => { const sc = $('#cupScene'); if (!sc) return; let down = false;
+  const go = e => { const c = G.cup; if (!c) return; const o = overCup(e.clientX, e.clientY); if (!o) return; const k = c.frostP < 1 ? 'bag' : (c.sprPts || []).length < 30 ? 'shaker' : null; if (k) cupApply(k, o); };
+  sc.addEventListener('pointerdown', e => { e.preventDefault(); down = true; try { sc.setPointerCapture(e.pointerId); } catch (er) {} go(e); });
+  sc.addEventListener('pointermove', e => { if (down) go(e); });
+  const up = () => { down = false; }; sc.addEventListener('pointerup', up); sc.addEventListener('pointercancel', up); };
+ROOMS.bakery.tabs.forEach(t => { if (t[0] === 'cup'){ t[2] = () => bakeryHTML(); t[3] = _bakeryInitZ; } });
+const _bakeryHTMLZ = bakeryHTML;
+bakeryHTML = function(){ setTimeout(_bakeryInitZ, 0); return _bakeryHTMLZ().replace('Pick a frosting color, then drag the piping bag around the cupcake to pipe it on!', 'Pick a frosting color, then rub your finger on the cupcake to pipe it on! You can also tap the piping bag.'); };
+
+// remove the old bakery games
+['donutdrop', 'dots', 'bakeorder'].forEach(k => { ROOMS.bakery.tabs = ROOMS.bakery.tabs.filter(t => t[0] !== k); delete ARCADE[k]; });
+
+// ---- shared treat drawing ----
+const TFROST = { pink: '#FF9EC0', chocolate: '#8A5634', vanilla: '#FFF1D6', blue: '#8FD0FF', mint: '#9FE3C9' };
+const TTOPS = ['sprinkles', 'cherry', 'star', 'plain'];
+function treatSVG(o, s = 1){
+  const f = TFROST[o.frost] || '#FFF1D6'; let g = '';
+  if (o.base === 'cupcake'){ g += `<path d="M-15,0 L-19,-22 H19 L15,0Z" fill="#FFB86B"/>${[-10, -4, 2, 8].map(x => `<path d="M${x},0 L${x * 1.2},-22" stroke="#E59A4A" stroke-width="1.4"/>`).join('')}<ellipse cx="0" cy="-26" rx="21" ry="8" fill="${f}"/><ellipse cx="0" cy="-34" rx="15" ry="7" fill="${shade(f, .06)}"/><ellipse cx="0" cy="-40" rx="8" ry="5" fill="${f}"/>`; }
+  else if (o.base === 'donut'){ g += `<ellipse cx="0" cy="-12" rx="22" ry="12" fill="#E8B070"/><path d="M-20,-14 Q-22,-24 -10,-26 Q0,-29 10,-26 Q22,-24 20,-14 Q14,-8 6,-11 Q0,-9 -6,-11 Q-14,-8 -20,-14Z" fill="${f}"/><ellipse cx="0" cy="-17" rx="7" ry="3.6" fill="#C98A55"/><ellipse cx="0" cy="-17.6" rx="6" ry="2.6" fill="#FFF7EC"/>`; }
+  else { g += `<ellipse cx="0" cy="-10" rx="21" ry="10" fill="#D9A06A"/><ellipse cx="0" cy="-13" rx="20" ry="9" fill="#E8B87A"/><ellipse cx="0" cy="-14" rx="14.6" ry="6" fill="${f}"/>${[[-14, -9], [12, -8], [-4, -6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#6B3F22"/>`).join('')}`; }
+  const ty = o.base === 'cupcake' ? -44 : o.base === 'donut' ? -24 : -17;
+  if (o.top === 'sprinkles') g += [...Array(9)].map((_, k) => `<rect x="${-12 + (k % 5) * 6}" y="${ty + 6 + Math.floor(k / 5) * 5 - (k % 2) * 2}" width="4" height="1.6" rx=".8" fill="${['#FF5A8C', '#FFC63A', '#3EC46B', '#34B2F0', '#B58CFF'][k % 5]}" transform="rotate(${k * 40} ${-10 + (k % 5) * 6} ${ty + 7})"/>`).join('');
+  if (o.top === 'cherry') g += `<path d="M0,${ty - 4} q2,-8 7,-11" stroke="#3C8A3F" stroke-width="1.8" fill="none"/><circle cx="0" cy="${ty - 1}" r="5.6" fill="#E8414F"/><circle cx="-1.8" cy="${ty - 3}" r="1.6" fill="#fff" opacity=".6"/>`;
+  if (o.top === 'star') g += `<path d="${starPath(0, ty - 2, 7.4, 3.2)}" fill="#FFD23F" stroke="#E9A400" stroke-width="1"/>`;
+  return `<g transform="scale(${s})">${g}</g>`;
+}
+const treatName = o => `${o.frost === 'vanilla' ? 'a vanilla' : 'a ' + o.frost} ${o.base}${o.top && o.top !== 'plain' ? ' with ' + (o.top === 'sprinkles' ? 'sprinkles' : o.top === 'cherry' ? 'a cherry' : 'a star') : ''}`;
+
+// ---- GAME 1: BAKE SHOP ORDERS ----
+function ordLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, bases: d === 0 ? ['cupcake', 'donut'] : ['cupcake', 'donut', 'cookie'], frosts: Object.keys(TFROST).slice(0, d === 0 ? 3 : d === 1 ? 4 : 5), tops: d === 0 ? null : TTOPS.slice(0, d === 1 ? 3 : 4), n: [6, 8, 10, 12][d], patience: d <= 1 ? 0 : [0, 0, 22, 16][d] }; }
+function ordNewCustomer(){ const O = G.ord, L = O.L; O.want = { base: pick(L.bases), frost: pick(L.frosts), top: L.tops ? pick(L.tops) : 'plain' }; O.make = { base: null, frost: null, top: L.tops ? null : 'plain' }; O.who = pick(Object.keys(BUDDIES)); O.mood = 'wait'; O.pat = L.patience; O.slide = 0;
+  const line = `I would like ${treatName(O.want)}, please!`; rmSay(line); try { if (RA()) setTimeout(() => tapSay(line), 300); } catch (e) {} }
+function ordScene(){
+  const O = G.ord; let s = `<rect width="360" height="270" fill="#FFE9F2"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="170" fill="#fff" opacity=".35"/>`).join('')}` + IP.bunting(20, 340, 6);
+  s += ZR(20, 30, 90, 60, 8, '#FFFFFF') + `<text x="65" y="56" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="14" fill="#E8417A">Sweet</text><text x="65" y="74" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="14" fill="#7B5CFA">Treats</text>`;
+  if (O && O.want){ const x = 90 - (1 - Math.min(1, O.slide)) * 140;
+    s += `<g transform="translate(${f1(x)},170)">${O.mood === 'happy' ? `<g class="jump">${grp(0, 0, .95, buddySVG(O.who, { cheer: 1 }))}</g>` : grp(0, 0, .95, buddySVG(O.who, { cheer: O.mood !== 'sad' ? 1 : 0 }))}</g>`;
+    s += `<g transform="translate(${f1(x + 70)},62)">${ZR(-42, -40, 84, 72, 18, '#FFFFFF')}<path d="M-30,30 l-14,16 l26,-14Z" fill="#fff"/><g transform="translate(0,22)">${treatSVG(O.want, 1.05)}</g>${O.mood === 'happy' ? `<path d="M0,-30 C-12,-38 -10,-50 -3,-50 C-1,-50 0,-47 0,-46 C0,-47 1,-50 3,-50 C10,-50 12,-38 0,-30Z" fill="#FF5A8C" class="rise"/>` : ''}</g>`;
+    if (O.pat) s += `<g transform="translate(${f1(x - 30)},92)">${ZR(0, 0, 60, 8, 4, '#FFFFFF')}<rect x="1" y="1" width="${f1(58 * Math.max(0, O.patLeft / O.pat))}" height="6" rx="3" fill="${O.patLeft / O.pat > .4 ? '#3EC46B' : '#FF8A3D'}"/></g>`; }
+  s += ZR(0, 196, 360, 74, 0, '#F6D3B5') + ZR(-4, 190, 368, 12, 4, '#FFFFFF');
+  s += `<ellipse cx="248" cy="194" rx="46" ry="9" fill="#fff" stroke="#E3E9F2" stroke-width="1.4"/>`;
+  if (O && O.make && O.make.base) s += `<g transform="translate(248,192)">${treatSVG({ base: O.make.base, frost: O.make.frost || '__none', top: O.make.top }, 1.35).replace(/fill="#FFF1D6"/g, O.make.frost ? 'fill="#FFF1D6"' : 'fill="#FFF1D6" opacity="0"')}</g>`;
+  else s += `<text x="248" y="186" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="12" fill="#C9B6CF">your treat</text>`;
+  s += `<g transform="translate(300,24)">${ZR(0, 0, 52, 26, 13, '#FFFFFF')}<text x="26" y="18" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="14" fill="#7B5CFA">${O ? O.served : 0}/${O ? O.L.n : 0}</text></g>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function ordHTML(){
+  const O = G.ord;
+  if (!O || O.over) return `<div class="rm-scene" id="ordScene">${(G.ord = G.ord || { L: ordLevel(), served: 0 }) && ordScene()}</div>${O && O.over ? `<div class="card endcard"><h3>🎉 ${O.served} happy customers!</h3><p>${O.earned ? `+${O.earned} coins! ` : ''}<b>What you learned:</b> Looking carefully at every detail, like the shape, the color and the topping, is called attention to detail. It helps with reading and math too!</p></div>` : ''}${sayBox('Customers come to the bakery and show the treat they want. Make the same treat: pick the shape, the frosting and the topping!')}<div class="actions"><button class="btn berry big" style="flex:2" data-act="ordStart">🧁 ${O && O.over ? 'Play again' : 'Open the shop!'}</button></div>`;
+  const L = O.L, row = (lbl, key, opts, draw) => `<div class="field"><span class="flabel">${lbl}</span><div class="ordrow">${opts.map(v => `<button class="ordbtn ${O.make[key] === v ? 'on' : ''}" data-act="ordPick" data-f="${key}" data-v="${v}" aria-label="${v}"><svg viewBox="-26 -52 52 58">${draw(v)}</svg><small>${v}</small></button>`).join('')}</div></div>`;
+  return `<div class="rm-scene" id="ordScene">${ordScene()}</div>${sayBox(`I would like ${treatName(O.want)}, please!`)}
+  ${row('1. Shape', 'base', L.bases, v => treatSVG({ base: v, frost: 'vanilla', top: 'plain' }))}
+  ${row('2. Frosting', 'frost', L.frosts, v => treatSVG({ base: O.make.base || 'cupcake', frost: v, top: 'plain' }))}
+  ${L.tops ? row('3. Topping', 'top', L.tops, v => treatSVG({ base: O.make.base || 'cupcake', frost: O.make.frost || 'vanilla', top: v })) : ''}`;
+}
+function ordInit(){ const O = G.ord; if (!O || O.over || !O.want) return; clearInterval(G._ordIv); G._ordIv = setInterval(() => { const O2 = G.ord; if (!O2 || O2.over) return; let ch = false; if (O2.slide < 1){ O2.slide = Math.min(1, O2.slide + .12); ch = true; } if (O2.pat && O2.mood === 'wait'){ O2.patLeft -= .05; ch = true; if (O2.patLeft <= 0){ O2.mood = 'sad'; rmSay('Oh no, that customer got tired of waiting!'); sfx('boop'); setTimeout(ordNext, 900); } } if (ch) sceneRedraw('ordScene', ordScene); }, 50); G.t.push(G._ordIv); }
+function ordNext(){ const O = G.ord; if (!O) return; if (O.served >= O.L.n || O.custN >= O.L.n + 3){ O.over = true; O.earned = playReward(Math.min(6, 2 + Math.floor(O.served / 2)), 'Bake Shop Orders') || 0; confetti(60); sfx('win'); reBody(ordHTML()); return; } O.custN = (O.custN || 0) + 1; ordNewCustomer(); O.patLeft = O.pat; reBody(ordHTML()); ordInit(); }
+Object.assign(A, {
+  ordStart(){ G.ord = { L: ordLevel(), served: 0, custN: 0 }; ordNext(); },
+  ordPick(el){ const O = G.ord; if (!O || O.mood !== 'wait') return; O.make[el.dataset.f] = el.dataset.v; sfx('pop');
+    const done = O.make.base && O.make.frost && O.make.top;
+    if (done){ const ok = O.make.base === O.want.base && O.make.frost === O.want.frost && O.make.top === O.want.top;
+      if (ok){ O.mood = 'happy'; O.served++; sfx('coin'); confetti(25); rmSay(pick(['Yummy! Thank you!', 'Perfect! Just what I wanted!', 'Wow, it looks delicious!'])); reBody(ordHTML()); setTimeout(ordNext, 1300); return; }
+      const wrong = ['base', 'frost', 'top'].find(k => O.make[k] !== O.want[k]); O.make[wrong] = O.L.tops || wrong !== 'top' ? null : 'plain'; rmSay(`Hmm, not quite! Look at the ${wrong === 'base' ? 'shape' : wrong === 'frost' ? 'frosting color' : 'topping'} again.`); sfx('boop'); }
+    reBody(ordHTML()); ordInit(); }
+});
+
+// ---- GAME 2: PANCAKE FLIP ----
+function pcLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, pans: d === 0 ? 2 : 3, speed: [.42, .55, .7, .85][d], time: 60, goal: [6, 8, 10, 12][d] }; }
+const PC_X = { 2: [110, 230], 3: [80, 180, 280] };
+function pcCol(t){ const k = clamp(t / 1.15, 0, 1); if (t <= 1.15){ const a = [255, 243, 214], b = [244, 196, 120]; return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`; } if (t <= 1.75) return '#E9A85A'; if (t <= 2.3) return '#B9733A'; return '#4A3328'; }
+function pcScene(){
+  const P = G.pc; let s = `<rect width="360" height="270" fill="#FFF2DC"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="150" fill="#fff" opacity=".35"/>`).join('')}`;
+  s += ZR(0, 150, 360, 120, 0, '#E9EEF5') + ZR(10, 140, 340, 18, 6, '#C9D2E3') + ZR(14, 158, 332, 100, 10, '#F7F9FC');
+  if (P){
+    const xs = PC_X[P.L.pans];
+    P.pans.forEach((pn, i) => { const x = xs[i], y = 132;
+      s += `<path d="M${x + 40},${y} L${x + 78},${y - 6}" stroke="#454B63" stroke-width="7" stroke-linecap="round"/><ellipse cx="${x}" cy="${y + 3}" rx="44" ry="15" fill="#2E3246"/><ellipse cx="${x}" cy="${y}" rx="40" ry="13" fill="#454B63"/>`;
+      if (pn.st === 'cook' || pn.st === 'flip'){ const sy = pn.st === 'flip' ? Math.cos(pn.ft * Math.PI) : 1, lift = pn.st === 'flip' ? -Math.sin(pn.ft * Math.PI) * 46 : 0;
+        const col = pn.st === 'flip' && pn.ft > .5 ? '#E9A85A' : pcCol(pn.t);
+        s += `<g transform="translate(${x},${f1(y - 2 + lift)}) scale(1,${f1(Math.abs(sy) < .08 ? .08 : sy)})"><ellipse rx="30" ry="9.5" fill="${col}"/><ellipse rx="30" ry="9.5" fill="url(#zSoft)"/>${pn.t < 1 && pn.st === 'cook' ? [[-12, -2], [6, 1], [14, -3], [-2, 3]].map(([bx, by]) => `<circle cx="${bx}" cy="${by}" r="1.6" fill="#fff" opacity=".7"/>`).join('') : ''}</g>`;
+        if (pn.st === 'cook' && pn.t > 1.15 && pn.t <= 1.75) s += [0, 1, 2, 3].map(k => `<path class="twinkle ${['', 'd2', 'd3', ''][k]}" d="${starPath(x + [-34, 34, -18, 20][k], y - 16 - (k % 2) * 8, 5, 2)}" fill="#FFD23F"/>`).join('') + `<text x="${x}" y="${y - 30}" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="15" fill="#E8417A" stroke="#fff" stroke-width="4" paint-order="stroke">FLIP!</text>`;
+        if (pn.st === 'cook' && pn.t > 2.3) s += [0, 1, 2].map(k => `<circle class="smoke s${k + 1}" cx="${x - 10 + k * 10}" cy="${y - 18}" r="7" fill="#9AA3B8" opacity=".7"/>`).join('');
+        if (pn.st === 'cook' && pn.t > 1.75 && pn.t <= 2.3) s += [0, 1].map(k => `<circle class="smoke s${k + 1}" cx="${x - 6 + k * 12}" cy="${y - 16}" r="4" fill="#fff" opacity=".7"/>`).join(''); }
+      if (pn.st === 'empty') s += `<text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="12" fill="#9AA3B8">…</text>`;
+      if (pn.msg){ s += `<text x="${x}" y="${y - 40 - pn.mt * 20}" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="15" fill="${pn.mc}" stroke="#fff" stroke-width="4" paint-order="stroke" opacity="${f1(1 - pn.mt)}">${pn.msg}</text>`; } });
+    // the stack
+    const sx = 180, sy = 240; s += `<ellipse cx="${sx}" cy="${sy + 4}" rx="56" ry="11" fill="#FFFFFF" stroke="#E3E9F2" stroke-width="1.6"/>`;
+    for (let k = 0; k < Math.min(P.stack, 16); k++) s += `<ellipse cx="${sx + Math.sin(k * 1.7) * 2}" cy="${sy - k * 6}" rx="40" ry="9" fill="#C98A4A"/><ellipse cx="${sx + Math.sin(k * 1.7) * 2}" cy="${sy - 2 - k * 6}" rx="40" ry="8.4" fill="#E9A85A"/>`;
+    if (P.stack) s += `<path d="M${sx - 12},${sy - 4 - Math.min(P.stack, 16) * 6} q12,-6 24,0 q4,8 -2,14 q-3,-6 -6,0 q-3,-8 -8,-2 q-6,-4 -8,-12Z" fill="#B5651D" opacity=".85"/>${ZR(sx - 7, sy - 12 - Math.min(P.stack, 16) * 6, 14, 8, 2, '#FFE680')}`;
+    s += `<g transform="translate(12,10)">${ZR(0, 0, 86, 28, 14, '#FFFFFF')}<text x="43" y="19" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="14" fill="#7B5CFA">🥞 ${P.stack}/${P.L.goal}</text></g><g transform="translate(262,10)">${ZR(0, 0, 86, 28, 14, '#FFFFFF')}<text x="43" y="19" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="800" font-size="14" fill="${P.left < 10 ? '#E8414F' : '#2B2550'}">⏱ ${Math.ceil(P.left)}</text></g>`;
+  }
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+function pcHTML(){
+  const P = G.pc;
+  if (!P || P.over) return `<div class="rm-scene" id="pcScene">${pcScene()}</div>${P && P.over ? `<div class="card endcard"><h3>🥞 You stacked ${P.stack} pancakes!</h3><p>${P.earned ? `+${P.earned} coins! ` : ''}<b>What you learned:</b> Heat turns runny batter into a fluffy pancake. That is called a chemical change! Waiting for just the right moment is called timing.</p></div>` : ''}${sayBox('Pancakes cook on the stove. When one turns golden and says FLIP, tap it fast! Stack them high before the time runs out. Don’t let them burn!')}<div class="actions"><button class="btn berry big" style="flex:2" data-act="pcStart">🥞 ${P && P.over ? 'Play again' : 'Start cooking!'}</button></div>`;
+  return `<div class="rm-scene interactive" id="pcScene">${pcScene()}</div>${sayBox('Tap a pancake when it turns golden and says FLIP!')}`;
+}
+function pcInit(){ const sc = $('#pcScene'), P = G.pc; if (!sc || !P || P.over) return;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#pcScene', e.clientX, e.clientY); if (!p) return; e.preventDefault(); const xs = PC_X[P.L.pans]; const i = xs.findIndex(x => Math.abs(p.x - x) < 52 && p.y > 80 && p.y < 170); if (i < 0) return; const pn = P.pans[i]; if (pn.st !== 'cook') return;
+    if (pn.t < 1.15){ pn.msg = 'Too soon!'; pn.mc = '#FF8A3D'; pn.mt = 0; sfx('boop'); }
+    else if (pn.t <= 2.3){ const perfect = pn.t <= 1.75; pn.st = 'flip'; pn.ft = 0; pn.good = perfect ? 2 : 1; pn.msg = perfect ? 'Perfect!' : 'OK!'; pn.mc = perfect ? '#3EC46B' : '#B9733A'; pn.mt = 0; sfx('pop'); }
+    else { pn.st = 'empty'; pn.wait = .8; pn.msg = 'Burnt!'; pn.mc = '#4A3328'; pn.mt = 0; sfx('boop'); } });
+  G.every(() => { const P2 = G.pc; if (!P2 || P2.over) return; const dt = .05; P2.left -= dt;
+    P2.pans.forEach(pn => { if (pn.msg){ pn.mt += dt * 1.4; if (pn.mt >= 1) pn.msg = ''; }
+      if (pn.st === 'empty'){ pn.wait -= dt; if (pn.wait <= 0){ pn.st = 'cook'; pn.t = 0; pn.sp = P2.L.speed * rf(.85, 1.2); sfx('pop'); } }
+      else if (pn.st === 'cook'){ pn.t += dt * pn.sp; if (pn.t > 3.2){ pn.st = 'empty'; pn.wait = .6; pn.msg = 'Burnt!'; pn.mc = '#4A3328'; pn.mt = 0; } }
+      else if (pn.st === 'flip'){ pn.ft += dt * 1.8; if (pn.ft >= 1){ P2.stack++; pn.st = 'empty'; pn.wait = rf(.4, 1); if (P2.stack === P2.L.goal){ confetti(40); sfx('win'); rmSay('You reached the goal! Keep stacking!'); } } } });
+    if (P2.left <= 0){ P2.over = true; P2.earned = playReward(Math.min(6, 1 + Math.floor(P2.stack / 2)), 'Pancake Flip') || 0; confetti(60); sfx('win'); reBody(pcHTML()); return; }
+    sceneRedraw('pcScene', pcScene); }, 50); }
+A.pcStart = () => { const L = pcLevel(); G.pc = { L, left: L.time, stack: 0, pans: [...Array(L.pans)].map((_, i) => ({ st: 'empty', wait: .3 + i * .7, t: 0 })) }; reBody(pcHTML()); pcInit(); };
+
+ROOMS.bakery.tabs.push(['orders', 'Bake Shop Orders', () => ordHTML(), () => ordInit()], ['pancake', 'Pancake Flip', () => pcHTML(), () => pcInit()]);
+ROOMS.bakery.sub = 'Cupcakes, orders and pancakes';
+Object.assign(HOWTO, { orders: 'A customer shows the treat they want in a bubble. Make the same treat: tap the right shape, the right frosting color and the right topping. Happy customers give you coins!', pancake: 'Pancakes cook on the stove. When a pancake turns golden and says FLIP, tap it quickly! If you wait too long it burns. Stack as many as you can before the timer ends.', cup: 'Pick a liner color. Then rub your finger on the cupcake to put the frosting on. Then rub again to add sprinkles, and tap a topper to put it on top!' });
 
 injectDefs();
 injectDefs2();
