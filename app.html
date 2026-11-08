@@ -1078,6 +1078,10 @@ body{background:linear-gradient(165deg,#FFF0F7 0%,#F1F0FF 32%,#EAF7FF 58%,#EFFFF
 .ordbtn.on{box-shadow:0 0 0 3px #FF5A8C,0 3px 0 var(--line);background:#FFF0F6}
 .endcard{text-align:center;background:linear-gradient(135deg,#FFF0F7,#F1ECFF)}
 .tray2 .tool,.tray2{touch-action:none}
+.helpviz{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0;padding:10px;border-radius:16px;background:#FFF8E6}
+.hdot{width:22px;height:22px;border-radius:50%;background:#FF8FB8;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.hdot.b{background:#7FD3FF}.hdot.gone{opacity:.35;position:relative}.hdot.gone::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#E8414F;font-weight:900}
+.hplus{font-size:22px;color:#7B5CFA;margin:0 4px}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -8512,15 +8516,15 @@ Object.assign(MODES, {
     pos(s, k){ return 180 + (k - (s.n - 1) / 2) * (300 / s.n); },
     newRound(s){ s.objs.forEach(o => kill(o)); s.objs = []; s.ball = Math.floor(Math.random() * s.n); s.order = [...Array(s.n).keys()];
       s.mm = mk(s, `<g transform="translate(0,-4) scale(1.45)"><ellipse cx="0" cy="9" rx="14" ry="3" fill="#3a2048" opacity=".18"/><path d="M-12,-6 Q-12,-11 0,-11 Q12,-11 12,-6 V5 Q12,10 0,10 Q-12,10 -12,5Z" fill="#FFFFFF" stroke="#F0CFDD" stroke-width="1.2"/><ellipse cx="0" cy="-6" rx="12" ry="5" fill="#FFF4F8" stroke="#F0CFDD" stroke-width="1"/><path d="M-6,-6 q3,-3 6,0 t6,0" stroke="#FF9EC0" stroke-width="1.6" fill="none"/><path d="M-9,-2 v8" stroke="#fff" stroke-width="2" opacity=".9" stroke-linecap="round"/><circle cx="-4" cy="1" r="1" fill="#2B2550"/><circle cx="4" cy="1" r="1" fill="#2B2550"/><path d="M-2,4 q2,2 4,0" stroke="#2B2550" stroke-width=".9" fill="none"/><circle cx="-7" cy="3" r="1.6" fill="#FFB3CC" opacity=".8"/><circle cx="7" cy="3" r="1.6" fill="#FFB3CC" opacity=".8"/></g>`, MODES.cups.pos(s, s.ball), 190); s.objs.push(s.mm);
-      s.cupsO = s.order.map(k => { const cc = ['#FF7FA8', '#5CC2F2', '#FFB347', '#9B8CFF', '#5CCF83'][k % 5]; const o = mk(s, `<ellipse cx="0" cy="12" rx="30" ry="5" fill="#3a2048" opacity=".18"/><path d="M27,-30 q17,0 15,15 q-2,13 -17,11" stroke="${shade(cc, -.15)}" stroke-width="6.5" fill="none" stroke-linecap="round"/><path d="M-28,-48 Q-30,-52 -24,-52 H24 Q30,-52 28,-48 L23,6 Q22,11 16,11 H-16 Q-22,11 -23,6Z" fill="${cc}" stroke="${shade(cc, -.22)}" stroke-width="1.2"/><path d="M-28,-48 Q-30,-52 -24,-52 H24 Q30,-52 28,-48 L23,6 Q22,11 16,11 H-16 Q-22,11 -23,6Z" fill="url(#zSoft)"/><rect x="-24" y="2" width="48" height="8" rx="4" fill="#fff" opacity=".85"/><path d="M0,-20 C-9,-26 -9,-34 -3,-34 C-1,-34 0,-32.5 0,-31 C0,-32.5 1,-34 3,-34 C9,-34 9,-26 0,-20Z" fill="#fff" opacity=".9"/><path d="M-19,-44 Q-21,-20 -16,0" stroke="#fff" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round"/>`, MODES.cups.pos(s, k), 196); o.k = k; o.slot = k; o.lift = 1; return o; }); s.objs.push(...s.cupsO);
-      s.phase = 'show'; s.tm = 1.2; s.swaps = 2 + s.d + s.round; s.swapT = 0; s.hud = `<g transform="translate(180,40)">${pill('Watch the marshmallow!', { fs: 13, bg: '#FFF6C9' })}</g>`; MODES.cups.layout(s); },
+      s.cupsO = s.order.map(k => { const cc = '#FF7FA8'; const o = mk(s, `<ellipse cx="0" cy="12" rx="30" ry="5" fill="#3a2048" opacity=".18"/><path d="M27,-30 q17,0 15,15 q-2,13 -17,11" stroke="${shade(cc, -.15)}" stroke-width="6.5" fill="none" stroke-linecap="round"/><path d="M-28,-48 Q-30,-52 -24,-52 H24 Q30,-52 28,-48 L23,6 Q22,11 16,11 H-16 Q-22,11 -23,6Z" fill="${cc}" stroke="${shade(cc, -.22)}" stroke-width="1.2"/><path d="M-28,-48 Q-30,-52 -24,-52 H24 Q30,-52 28,-48 L23,6 Q22,11 16,11 H-16 Q-22,11 -23,6Z" fill="url(#zSoft)"/><rect x="-24" y="2" width="48" height="8" rx="4" fill="#fff" opacity=".85"/><path d="M0,-20 C-9,-26 -9,-34 -3,-34 C-1,-34 0,-32.5 0,-31 C0,-32.5 1,-34 3,-34 C9,-34 9,-26 0,-20Z" fill="#fff" opacity=".9"/><path d="M-19,-44 Q-21,-20 -16,0" stroke="#fff" stroke-width="3" opacity=".45" fill="none" stroke-linecap="round"/>`, MODES.cups.pos(s, k), 196); o.k = k; o.slot = k; o.lift = 1; return o; }); s.objs.push(...s.cupsO);
+      s.phase = 'show'; s.tm = 1.2; s.swaps = [2, 3, 5, 7][s.d] + Math.min(s.round, [1, 2, 3, 4][s.d]); s.swapT = 0; s.hud = `<g transform="translate(180,40)">${pill('Watch the marshmallow!', { fs: 13, bg: '#FFF6C9' })}</g>`; MODES.cups.layout(s); },
     layout(s){ s.cupsO.forEach(o => { o.x = o.mx != null ? o.mx : MODES.cups.pos(s, o.slot); o.y = 196 - o.lift * 46; place(o); }); MODES.cups.sync(s); },
     sync(s){ const c = s.cupsO && s.cupsO.find(c => c.k === s.ball); if (!c || !s.mm) return; s.mm.x = c.x; s.mm.y = 196; place(s.mm); const up = c.lift > .15; s.mm.el.style.opacity = up ? 1 : 0; },
     down(s, p){ if (s.phase !== 'pick') return; const o = s.cupsO.find(o => Math.abs(o.x - p.x) < 32 && p.y > 120 && p.y < 230); if (!o) return; s.phase = 'reveal'; o.lift = 1; s.mm.x = MODES.cups.pos(s, s.cupsO.find(c => c.k === s.ball).slot); place(s.mm); s.cupsO.find(c => c.k === s.ball).lift = 1; MODES.cups.layout(s);
       if (o.k === s.ball){ s.round++; addScore(s, 1, o.x, 120); setTimeout(() => { if (s.on) MODES.cups.newRound(s); }, 1100); } else { if (hurt(s, o.x, 120)) return; setTimeout(() => { if (s.on) MODES.cups.newRound(s); }, 1300); } },
     step(s, dt){
       if (s.phase === 'show'){ s.tm -= dt; if (s.tm < .4){ s.cupsO.forEach(o => o.lift = Math.max(0, s.tm / .4)); MODES.cups.layout(s); } if (s.tm <= 0){ s.cupsO.forEach(o => o.lift = 0); MODES.cups.layout(s); s.phase = 'swap'; s.hud = `<g transform="translate(180,40)">${pill('Keep your eyes on the cup!', { fs: 13, bg: '#FFF6C9' })}</g>`; } return; }
-      if (s.phase === 'swap'){ const dur = Math.max(.22, [.75, .6, .45, .36][s.d] - s.round * .02);
+      if (s.phase === 'swap'){ const dur = Math.max(.22, [1.05, .7, .5, .38][s.d] - s.round * (s.d ? .02 : 0));
         if (!s.sw){ if (s.swaps <= 0){ s.phase = 'pick'; s.hud = `<g transform="translate(180,40)">${pill('Which cup has the marshmallow?', { fs: 13, bg: '#FFF6C9' })}</g>`; return; } const a = Math.floor(Math.random() * s.n); let b = Math.floor(Math.random() * (s.n - 1)); if (b >= a) b++; s.sw = { a: s.cupsO.find(o => o.slot === a), b: s.cupsO.find(o => o.slot === b), t: 0, xa: MODES.cups.pos(s, a), xb: MODES.cups.pos(s, b) }; s.swaps--; }
         const w = s.sw; w.t += dt / dur; const u = Math.min(1, w.t), e = u * u * (3 - 2 * u); w.a.mx = w.xa + (w.xb - w.xa) * e; w.b.mx = w.xb + (w.xa - w.xb) * e; w.a.y = 196 - Math.sin(u * Math.PI) * 14; w.b.y = 196 + Math.sin(u * Math.PI) * 10; place(w.a); place(w.b); w.a.x = w.a.mx; w.b.x = w.b.mx; place(w.a); place(w.b); MODES.cups.sync(s);
         if (u >= 1){ const sa = w.a.slot; w.a.slot = w.b.slot; w.b.slot = sa; w.a.mx = w.b.mx = null; s.sw = null; MODES.cups.layout(s); } }
@@ -9173,8 +9177,8 @@ const BUILD = {
 const bItems = k => (K().toys2 = K().toys2 || {}, K().toys2[k] = K().toys2[k] || []);
 const bDef = (k, id) => BUILD[k].items.find(x => x[0] === id);
 function bScene(k){ const B = BUILD[k], items = bItems(k), sel = G.bsel && G.bsel.k === k ? G.bsel.i : -1, tm = G.bT || 0; let s = B.bg();
-  items.forEach((o, i) => { const d = bDef(k, o.id); if (!d) return; let x = o.x, y = o.y; if (d[3] === 'swim'){ x += Math.sin(tm * .9 + i) * 10; y += Math.sin(tm * 1.7 + i * 2) * 4; if (G.food && G.food.length){ const f = G.food.reduce((a, b) => Math.hypot(b.x - o.x, b.y - o.y) < Math.hypot(a.x - o.x, a.y - o.y) ? b : a); x += clamp(f.x - x, -24, 24) * .6; y += clamp(f.y - y, -20, 20) * .6; } }
-    s += `<g data-ti="${i}" transform="translate(${f1(x)},${f1(y)}) scale(${o.f ? -o.s : o.s},${o.s})">${d[6]}${i === sel ? `<rect x="${-d[4] / 2 - 6}" y="${d[3] === 'stack' || d[3] === 'ground' ? -d[5] - 6 : -d[5] / 2 - 6}" width="${d[4] + 12}" height="${d[5] + 12}" rx="10" fill="none" stroke="#7B5CFA" stroke-width="${2 / o.s}" stroke-dasharray="5 4"/>` : ''}</g>`; });
+  items.forEach((o, i) => { const d = bDef(k, o.id); if (!d) return; let x = o.x, y = o.y; let fl = o.f; if (d[3] === 'swim'){ G.bpos = G.bpos || {}; const dragging = G.bdrag && G.bsel && G.bsel.i === i; if (!dragging){ const sp = 16 + (i * 7) % 14, dir = i % 2 ? -1 : 1, t = tm - (o.t0 || 0), W2 = 440; x = ((o.x + dir * t * sp * 1.6 + 50) % W2 + W2) % W2 - 50; y = o.y + Math.sin(tm * 1.2 + i * 2) * 7; fl = (dir < 0) !== !!o.f; if (G.food && G.food.length){ const f = G.food.reduce((a, b) => Math.hypot(b.x - x, b.y - y) < Math.hypot(a.x - x, a.y - y) ? b : a); x += clamp(f.x - x, -30, 30) * .7; y += clamp(f.y - y, -24, 24) * .7; } } G.bpos[i] = [x, y]; }
+    s += `<g data-ti="${i}" transform="translate(${f1(x)},${f1(y)}) scale(${fl ? -o.s : o.s},${o.s})">${d[6]}${i === sel ? `<rect x="${-d[4] / 2 - 6}" y="${d[3] === 'stack' || d[3] === 'ground' ? -d[5] - 6 : -d[5] / 2 - 6}" width="${d[4] + 12}" height="${d[5] + 12}" rx="10" fill="none" stroke="#7B5CFA" stroke-width="${2 / o.s}" stroke-dasharray="5 4"/>` : ''}</g>`; });
   (G.food || []).forEach(f => s += `<circle cx="${f1(f.x)}" cy="${f1(f.y)}" r="2.6" fill="#C98A55"/>`);
   s += `<g transform="translate(332,${k === 'tank' ? 238 : 248})" opacity="${G.bdrag ? 1 : .7}"><circle id="bTrash" r="17" fill="${G.btrash ? '#E8414F' : '#fff'}" opacity=".95"/><text y="7" text-anchor="middle" font-size="18">🗑️</text></g>`;
   return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
@@ -9204,9 +9208,9 @@ function bRe(k){ reBody(bHTML(k)); bInit(k); }
 function bInit(k){ const sc = $('#toyScene'); if (!sc) return; let drag = null;
   const pt = e => scenePt('#toyScene', e.clientX, e.clientY);
   sc.addEventListener('pointerdown', e => { if (drg) return; const p = pt(e); if (!p) return; const g = e.target.closest && e.target.closest('[data-ti]');
-    if (!g){ if (G.bsel){ G.bsel = null; bRe(k); } return; } e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} const i = +g.dataset.ti, o = bItems(k)[i]; drag = { i, dx: p.x - o.x, dy: p.y - o.y }; G.bsel = { k, i }; G.bdrag = true; sceneRedraw('toyScene', () => bScene(k)); });
+    if (!g){ if (G.bsel){ G.bsel = null; bRe(k); } return; } e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} const i = +g.dataset.ti, o = bItems(k)[i]; if (G.bpos && G.bpos[i] && (bDef(k, o.id) || [])[3] === 'swim'){ o.x = G.bpos[i][0]; o.y = G.bpos[i][1]; o.t0 = G.bT || 0; } drag = { i, dx: p.x - o.x, dy: p.y - o.y }; G.bsel = { k, i }; G.bdrag = true; sceneRedraw('toyScene', () => bScene(k)); });
   sc.addEventListener('pointermove', e => { if (!drag) return; const p = pt(e); if (!p) return; const o = bItems(k)[drag.i]; o.x = clamp(p.x - drag.dx, 10, 350); o.y = clamp(p.y - drag.dy, 20, 262); G.btrash = p.x > 312 && p.y > 226; const g = sc.querySelector(`[data-ti="${drag.i}"]`); if (g) g.setAttribute('transform', `translate(${f1(o.x)},${f1(o.y)}) scale(${o.f ? -o.s : o.s},${o.s})`); const tc = sc.querySelector('#bTrash'); if (tc) tc.setAttribute('fill', G.btrash ? '#E8414F' : '#fff'); });
-  const up = () => { if (!drag) return; const items = bItems(k), o = items[drag.i]; drag = null; G.bdrag = false; if (G.btrash){ items.splice(items.indexOf(o), 1); G.bsel = null; G.btrash = false; sfx('boop'); } else { bSnap(k, o); sfx('pop'); } save(); bRe(k); };
+  const up = () => { if (!drag) return; const items = bItems(k), o = items[drag.i]; if (o) o.t0 = G.bT || 0; drag = null; G.bdrag = false; if (G.btrash){ items.splice(items.indexOf(o), 1); G.bsel = null; G.btrash = false; sfx('boop'); } else { bSnap(k, o); sfx('pop'); } save(); bRe(k); };
   sc.addEventListener('pointerup', up); sc.addEventListener('pointercancel', up);
   if (k === 'tank') G.every(() => { G.bT = (G.bT || 0) + .05; (G.food || []).forEach(f => { f.y += 1.3; }); G.food = (G.food || []).filter(f => f.y < 214); if (!drag) sceneRedraw('toyScene', () => bScene(k)); }, 50); }
 Object.assign(A, {
@@ -10583,7 +10587,7 @@ charSVG = function(c, o = {}){ return zChar(c, o); };
 document.addEventListener('click', e => {
   if (!S || !RA()) return; const t0 = e.target; if (!t0.closest) return;
   if (t0.closest('.hearbtn, .hearmini, [data-act="hear"], [data-act="speak"], .rm-scene, #arcBox, .arc, input, textarea, #readme')) return;
-  const b = t0.closest('button, .chip, .tool, .item, .furbtn, [role="tab"], .card[data-act]'); if (!b) return;
+  const b = t0.closest('button, .chip, .tool, .item, .furbtn, [role="tab"], .card[data-act]'); if (!b) return; if (/hear|say|speak|listen|read|voice|sound|again|repeat|lang/i.test(b.dataset.act || '') || /🔊/.test(b.textContent)) return;
   if (b.matches('.sw')) return;
   let t = (b.getAttribute('aria-label') && !/^(Back|Close)$/i.test(b.getAttribute('aria-label')) ? b.getAttribute('aria-label') : '') || (b.querySelector('b, h3, h4, .nm, small') || {}).textContent || b.textContent || '';
   t = t.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}★✨↺◀▶➕➖⬆️⬇️]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -10653,7 +10657,7 @@ function treatSVG(o, s = 1){
 const treatName = o => `${o.frost === 'vanilla' ? 'a vanilla' : 'a ' + o.frost} ${o.base}${o.top && o.top !== 'plain' ? ' with ' + (o.top === 'sprinkles' ? 'sprinkles' : o.top === 'cherry' ? 'a cherry' : 'a star') : ''}`;
 
 // ---- GAME 1: BAKE SHOP ORDERS ----
-function ordLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, bases: d === 0 ? ['cupcake', 'donut'] : ['cupcake', 'donut', 'cookie'], frosts: Object.keys(TFROST).slice(0, d === 0 ? 3 : d === 1 ? 4 : 5), tops: d === 0 ? null : TTOPS.slice(0, d === 1 ? 3 : 4), n: [6, 8, 10, 12][d], patience: d <= 1 ? 0 : [0, 0, 22, 16][d] }; }
+function ordLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, bases: d === 0 ? ['cupcake', 'donut'] : ['cupcake', 'donut', 'cookie'], frosts: Object.keys(TFROST).slice(0, d === 0 ? 2 : d === 1 ? 4 : 5), tops: d === 0 ? null : TTOPS.slice(0, d === 1 ? 3 : 4), n: [5, 8, 10, 12][d], patience: d <= 1 ? 0 : [0, 0, 22, 16][d] }; }
 function ordNewCustomer(){ const O = G.ord, L = O.L; O.want = { base: pick(L.bases), frost: pick(L.frosts), top: L.tops ? pick(L.tops) : 'plain' }; O.make = { base: null, frost: null, top: L.tops ? null : 'plain' }; O.who = pick(Object.keys(BUDDIES)); O.mood = 'wait'; O.pat = L.patience; O.slide = 0;
   const line = `I would like ${treatName(O.want)}, please!`; rmSay(line); try { if (RA()) setTimeout(() => tapSay(line), 300); } catch (e) {} }
 function ordScene(){
@@ -10692,8 +10696,8 @@ Object.assign(A, {
 });
 
 // ---- GAME 2: PANCAKE FLIP ----
-function pcLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, pans: d === 0 ? 2 : 3, speed: [.42, .55, .7, .85][d], time: 60, goal: [6, 8, 10, 12][d] }; }
-const PC_X = { 2: [110, 230], 3: [80, 180, 280] };
+function pcLevel(){ const d = typeof AGE_D === 'function' ? AGE_D() : 0; return { d, pans: d === 0 ? 1 : d === 1 ? 2 : 3, speed: [.28, .45, .65, .8][d], time: d === 0 ? 80 : 60, goal: [5, 7, 10, 12][d] }; }
+const PC_X = { 1: [170], 2: [110, 230], 3: [80, 180, 280] };
 function pcCol(t){ const k = clamp(t / 1.15, 0, 1); if (t <= 1.15){ const a = [255, 243, 214], b = [244, 196, 120]; return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`; } if (t <= 1.75) return '#E9A85A'; if (t <= 2.3) return '#B9733A'; return '#4A3328'; }
 function pcScene(){
   const P = G.pc; let s = `<rect width="360" height="270" fill="#FFF2DC"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="150" fill="#fff" opacity=".35"/>`).join('')}`;
@@ -10740,6 +10744,157 @@ A.pcStart = () => { const L = pcLevel(); G.pc = { L, left: L.time, stack: 0, pan
 ROOMS.bakery.tabs.push(['orders', 'Bake Shop Orders', () => ordHTML(), () => ordInit()], ['pancake', 'Pancake Flip', () => pcHTML(), () => pcInit()]);
 ROOMS.bakery.sub = 'Cupcakes, orders and pancakes';
 Object.assign(HOWTO, { orders: 'A customer shows the treat they want in a bubble. Make the same treat: tap the right shape, the right frosting color and the right topping. Happy customers give you coins!', pancake: 'Pancakes cook on the stove. When a pancake turns golden and says FLIP, tap it quickly! If you wait too long it burns. Stack as many as you can before the timer ends.', cup: 'Pick a liner color. Then rub your finger on the cupcake to put the frosting on. Then rub again to add sprinkles, and tap a topper to put it on top!' });
+
+// ---------- v31 YOUNG-KID FRIENDLY: easy picture games for K-2, gentle builders, fair cups ----------
+// --- builders: things stay exactly where they are put; fish swim across and around ---
+function bSnap(k, o){ if (k === 'tank'){ o.x = clamp(o.x, 24, 336); o.y = clamp(o.y, 30, 216); } else { o.x = clamp(o.x, 14, 346); o.y = clamp(o.y, 34, 262); } }
+DRAG.bld.tap = function(key){ const [k, id] = key.split('|'), d = bDef(k, id), B = BUILD[k], its = bItems(k);
+  let x = 180, y = B.ground;
+  if (d[3] === 'stack'){ const last = [...its].reverse().find(o => (bDef(k, o.id) || [])[3] === 'stack'); if (last){ const ld = bDef(k, last.id); x = last.x; y = last.y - ld[5] * last.s + 4; } }
+  else if (d[3] === 'swim'){ x = 60 + Math.random() * 240; y = 60 + Math.random() * 120; }
+  else if (d[3] === 'free'){ const last = its[its.length - 1]; x = last ? clamp(last.x + 30, 40, 320) : 180; y = 140; }
+  else { const n = its.filter(o => (bDef(k, o.id) || [])[3] === 'ground').length; x = 60 + (n * 53) % 240; }
+  bAdd(k, id, x, Math.max(36, y)); bRe(k); };
+
+// --- cocoa cups: every cup looks the same; more cups, swaps and speed as grades go up ---
+// (patched in place: uniform cup color and grade-based swaps)
+
+// --- which games show for which grades ---
+const FASTG = ['pizzadash', 'chop', 'bugbop', 'lanes', 'breakout', 'snake', 'rocket', 'juggle', 'slalom', 'surf', 'numpop'];
+FASTG.forEach(k => { if (ARCADE[k]) ARCADE[k].minG = 3; });
+if (ARCADE.words) ARCADE.words.minG = 2;
+if (ARCADE.tidy) ARCADE.tidy.minG = 2;
+// the pizza dash and snowball toss are gone for everyone
+['pizzadash', 'snowtoss'].forEach(k => { Object.values(ROOMS).forEach(R => { R.tabs = R.tabs.filter(t => t[0] !== k); }); delete ARCADE[k]; });
+const TAB_MAXG = { fruitbasket: 2, shellsort: 2, colorsort: 1 };
+const _drawRoomG = drawRoom;
+drawRoom = function(){ const r = ui.room; if (!r || !ROOMS[r.t] || !S) return _drawRoomG.apply(this, arguments); const def = ROOMS[r.t], all = def.tabs, g = GR();
+  const vis = all.filter(t => !(TAB_MAXG[t[0]] != null && g > TAB_MAXG[t[0]]));
+  if (vis.length === all.length || !vis.length) return _drawRoomG.apply(this, arguments);
+  if (!vis.some(t => t[0] === r.tab)) r.tab = vis[0][0]; def.tabs = vis; try { return _drawRoomG.apply(this, arguments); } finally { def.tabs = all; } };
+
+// --- small helpers for the easy games ---
+const ESAY = t => { rmSay(t); try { if (RA()) setTimeout(() => tapSay(t), 250); } catch (e) {} };
+function eEnd(title, learn, coins, again){ confetti(60); sfx('win'); return `<div class="card endcard"><h3>${title}</h3><p>${coins ? `+${coins} coins! ` : ''}<b>What you learned:</b> ${learn}</p></div><div class="actions"><button class="btn berry big" style="flex:2" data-act="${again}">🔁 Play again</button></div>`; }
+const COLS6 = { red: '#F2474E', yellow: '#FFD23F', blue: '#3B8EF0', green: '#3EC46B', purple: '#9B6BF2', orange: '#FF8A3D', pink: '#FF7FB8' };
+const big = (t, s = 16, c = '#2B2550') => `<text text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="${s}" fill="${c}">${t}</text>`;
+
+// ===== PIZZA COUNT (pizza place, every grade) =====
+const PZTOP = { pepperoni: (x, y) => `<circle cx="${x}" cy="${y}" r="9" fill="#D9363E"/><circle cx="${x - 3}" cy="${y - 2}" r="1.6" fill="#B02A31"/><circle cx="${x + 3}" cy="${y + 3}" r="1.3" fill="#B02A31"/>`, mushroom: (x, y) => `<path d="M${x - 8},${y} Q${x},${y - 11} ${x + 8},${y}Z" fill="#E9D6C2"/><rect x="${x - 2.6}" y="${y - 1}" width="5.2" height="7" rx="2" fill="#F6EADD"/>`, olive: (x, y) => `<circle cx="${x}" cy="${y}" r="6.4" fill="#2B2B2B"/><circle cx="${x}" cy="${y}" r="2.6" fill="#E9C38E"/>`, pepper: (x, y) => `<path d="M${x - 8},${y} q8,-10 16,0 q-8,6 -16,0Z" fill="#3EC46B"/>` };
+function pzLevel(){ const g = GR(); return { g, max: g === 0 ? 5 : g <= 2 ? 10 : 15, rounds: g === 0 ? 5 : 6, two: g >= 3 }; }
+function pzNew(){ const P = G.pz, L = P.L; const kinds = Object.keys(PZTOP); const a = pick(kinds); P.need = { [a]: RI(L.g === 0 ? 1 : 2, L.max) }; if (L.two){ const b = pick(kinds.filter(k => k !== a)); P.need[b] = RI(1, 6); } P.on = []; P.kind = a; P.ok = false; P.who = pick(Object.keys(BUDDIES));
+  ESAY('Put ' + Object.entries(P.need).map(([k, n]) => `${n} ${k}${n > 1 ? (k === 'pepper' ? 's' : k === 'olive' ? 's' : k === 'mushroom' ? 's' : 's') : ''}`).join(' and ') + ' on the pizza!'); }
+function pzScene(){ const P = G.pz; let s = `<rect width="360" height="270" fill="#FFF1DE"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="270" fill="#fff" opacity=".35"/>`).join('')}`;
+  s += `<ellipse cx="180" cy="150" rx="104" ry="100" fill="#D49A55"/><ellipse cx="180" cy="148" rx="92" ry="88" fill="#E34A3A"/><ellipse cx="180" cy="148" rx="86" ry="82" fill="#FFD77A"/>${[[150, 110], [210, 120], [170, 190], [220, 175], [130, 160]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="12" ry="7" fill="#FFE7A6"/>`).join('')}`;
+  if (P && P.on) P.on.forEach(t => s += PZTOP[t.k](t.x, t.y));
+  if (P && P.need){ s += `<g transform="translate(14,12)">${ZR(0, 0, 112, 30 + Object.keys(P.need).length * 34, 14, '#FFFFFF')}${Object.entries(P.need).map(([k, n], i) => { const have = P.on.filter(t => t.k === k).length; return `<g transform="translate(26,${32 + i * 34})">${PZTOP[k](0, -6)}</g><g transform="translate(60,${36 + i * 34})">${big(`${have}/${n}`, 20, have === n ? '#3EC46B' : have > n ? '#E8414F' : '#2B2550')}</g>`; }).join('')}<g transform="translate(56,22)">${big('Put on:', 12, '#7B5CFA')}</g></g>`;
+    s += `<g transform="translate(310,236)">${grp(0, 0, .55, buddySVG(P.who, { cheer: P.ok ? 1 : 0 }))}</g>`; }
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
+function pzHTML(){ const P = G.pz; if (!P || !P.need) return `<div class="rm-scene" id="pzScene">${pzScene()}</div>${P && P.over ? eEnd(`🍕 ${P.done} yummy pizzas!`, 'Counting each topping one by one is how we count objects. Touch each one and say the number!', P.earned, 'pzStart') : sayBox('Customers want toppings on their pizza. Look at the picture and the number, then tap the pizza to put that many toppings on!') + `<div class="actions"><button class="btn berry big" style="flex:2" data-act="pzStart">🍕 Make pizzas!</button></div>`}`;
+  return `<div class="rm-scene interactive" id="pzScene">${pzScene()}</div><div class="ordrow">${Object.keys(P.need).map(k => `<button class="ordbtn ${P.kind === k ? 'on' : ''}" data-act="pzKind" data-v="${k}" aria-label="${k}"><svg viewBox="-14 -14 28 24">${PZTOP[k](0, -2)}</svg><small>${k}</small></button>`).join('')}</div>${sayBox('Tap the pizza to add a topping. Tap a topping to take it off. Count out loud!')}`; }
+function pzInit(){ const sc = $('#pzScene'), P = G.pz; if (!sc || !P || !P.need) return;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#pzScene', e.clientX, e.clientY); if (!p || P.ok) return; if (Math.hypot(p.x - 180, p.y - 148) > 86) return; e.preventDefault();
+    const hit = P.on.findIndex(t => Math.hypot(t.x - p.x, t.y - p.y) < 10); if (hit >= 0){ P.on.splice(hit, 1); sfx('boop'); }
+    else { P.on.push({ k: P.kind, x: p.x, y: p.y }); sfx('pop'); const n = P.on.filter(t => t.k === P.kind).length; try { if (RA()) tapSay(String(n)); } catch (er) {} }
+    const ok = Object.entries(P.need).every(([k, n]) => P.on.filter(t => t.k === k).length === n), over = Object.entries(P.need).some(([k, n]) => P.on.filter(t => t.k === k).length > n);
+    if (over) rmSay('Oops, too many! Tap one to take it off.');
+    if (ok){ P.ok = true; P.done++; sfx('coin'); confetti(25); ESAY(pick(['Yummy! Perfect pizza!', 'That is exactly right!', 'Delicious! Thank you!'])); setTimeout(() => { if (G.pz !== P) return; if (P.done >= P.L.rounds){ P.need = null; P.over = true; P.earned = playReward(Math.min(5, 1 + P.done), 'Pizza Count') || 0; reBody(pzHTML()); return; } pzNew(); reBody(pzHTML()); pzInit(); }, 1300); }
+    sceneRedraw('pzScene', pzScene); }); }
+A.pzStart = () => { G.pz = { L: pzLevel(), done: 0 }; pzNew(); reBody(pzHTML()); pzInit(); };
+A.pzKind = el => { if (G.pz){ G.pz.kind = el.dataset.v; reBody(pzHTML()); pzInit(); } };
+
+// ===== COLOR BASKET (fruit at the pizza place, shells at the surf shack) — K to 2nd =====
+const CB_THEMES = {
+  fruit: { title: 'Fruit Basket', items: { red: '🍎', yellow: '🍌', purple: '🍇', orange: '🍊', green: '🍐', blue: '🫐' }, bin: 'basket', learn: 'Sorting things by color is one of the first steps of science: noticing how things are the same and different!' },
+  shell: { title: 'Shell Collector', items: { pink: 'pink', blue: 'blue', yellow: 'yellow', purple: 'purple', orange: 'orange', green: 'green' }, bin: 'bucket', learn: 'Grouping things by color is called sorting. Scientists sort shells, rocks and leaves to learn about them!' }
+};
+const shellSVG = (c, s = 1) => `<g transform="scale(${s})"><path d="M0,-14 C10,-14 14,-2 0,12 C-14,-2 -10,-14 0,-14Z" fill="${COLS6[c]}" stroke="${shade(COLS6[c], -.25)}" stroke-width="1.2"/><path d="M0,-12 V10 M-6,-9 L0,10 L6,-9 M-10,-4 L0,10 L10,-4" stroke="${shade(COLS6[c], -.25)}" stroke-width="1" fill="none"/></g>`;
+function cbItem(th, col, x, y, s = 1){ return th === 'fruit' ? `<text x="${x}" y="${y + 12 * s}" font-size="${32 * s}" text-anchor="middle">${CB_THEMES.fruit.items[col]}</text>` : `<g transform="translate(${x},${y})">${shellSVG(col, 1.5 * s)}</g>`; }
+function cbNew(){ const C = G.cb, g = GR(), cols = Object.keys(CB_THEMES[C.th].items); C.want = pick(cols); const n = g === 0 ? 7 : 9; const others = cols.filter(c => c !== C.want);
+  const list = [...Array(g === 0 ? 3 : 4)].map(() => C.want).concat([...Array(n - (g === 0 ? 3 : 4))].map(() => pick(others.slice(0, g === 0 ? 2 : 4))));
+  C.items = shuffle(list).map((col, i) => ({ col, x: 50 + (i % 5) * 65 + (Math.floor(i / 5) % 2) * 30, y: 80 + Math.floor(i / 5) * 62, got: false }));
+  ESAY(`Put all the ${C.want.toUpperCase()} ${C.th === 'fruit' ? 'fruit' : 'shells'} in the ${CB_THEMES[C.th].bin}!`); }
+function cbScene(){ const C = G.cb; let s = C && C.th === 'shell' ? `<rect width="360" height="270" fill="#BFE8FF"/><path d="M0,60 Q180,40 360,62 V270 H0Z" fill="#F7DFA6"/>` : `<rect width="360" height="270" fill="#E9F8E4"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="270" fill="#fff" opacity=".4"/>`).join('')}`;
+  if (C && C.items){ s += `<g transform="translate(14,10)">${ZR(0, 0, 120, 44, 16, '#FFFFFF')}<circle cx="26" cy="22" r="15" fill="${COLS6[C.want]}"/>${cbItem(C.th, C.want, 26, 14, .5)}<g transform="translate(78,29)">${big(C.want.toUpperCase(), 15, shade(COLS6[C.want], -.2))}</g></g>`;
+    C.items.forEach((it, i) => { if (!it.got) s += `<g class="${it.wig ? 'hboing' : ''}">${cbItem(C.th, it.col, it.x, it.y)}</g>`; });
+    s += `<g transform="translate(290,234)"><path d="M-40,-24 H40 L32,14 H-32Z" fill="${C.th === 'fruit' ? '#C98A55' : '#3B8EF0'}"/><path d="M-40,-24 H40" stroke="${C.th === 'fruit' ? '#9A6340' : '#2B6CC0'}" stroke-width="5" stroke-linecap="round"/>${C.items.filter(i => i.got).slice(0, 6).map((it, k) => cbItem(C.th, it.col, -24 + k * 10, -30, .6)).join('')}</g>`; }
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
+function cbHTML(th){ const C = G.cb && G.cb.th === th ? G.cb : null, T = CB_THEMES[th]; if (!C || !C.items) return `<div class="rm-scene" id="cbScene">${(C ? cbScene() : `<svg viewBox="0 0 360 270" class="rm-svg"><rect width="360" height="270" fill="#E9F8E4"/>${Object.keys(T.items).slice(0, 5).map((c, i) => cbItem(th, c, 60 + i * 60, 130)).join('')}</svg>`)}</div>${C && C.over ? eEnd(`🎉 You sorted ${C.done} times!`, T.learn, C.earned, 'cbStart" data-v="' + th) : sayBox(`Your buddy says a color. Tap all the ${th === 'fruit' ? 'fruit' : 'shells'} with that color to put them in the ${T.bin}!`) + `<div class="actions"><button class="btn berry big" style="flex:2" data-act="cbStart" data-v="${th}">${th === 'fruit' ? '🍎' : '🐚'} Let’s go!</button></div>`}`;
+  return `<div class="rm-scene interactive" id="cbScene">${cbScene()}</div>${sayBox(`Put all the ${C.want.toUpperCase()} ones in the ${T.bin}!`)}`; }
+function cbInit(){ const sc = $('#cbScene'), C = G.cb; if (!sc || !C || !C.items) return;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#cbScene', e.clientX, e.clientY); if (!p) return; e.preventDefault(); const it = C.items.find(i => !i.got && Math.hypot(i.x - p.x, i.y - p.y) < 28); if (!it) return;
+    if (it.col === C.want){ it.got = true; sfx('pop'); } else { it.wig = true; sfx('boop'); ESAY(`That one is ${it.col}! Find ${C.want}.`); setTimeout(() => { it.wig = false; sceneRedraw('cbScene', cbScene); }, 500); }
+    sceneRedraw('cbScene', cbScene);
+    if (C.items.filter(i => i.col === C.want && !i.got).length === 0){ C.done++; sfx('coin'); confetti(20); ESAY('You found them all!'); setTimeout(() => { if (G.cb !== C) return; if (C.done >= 5){ C.items = null; C.over = true; C.earned = playReward(4, CB_THEMES[C.th].title) || 0; reBody(cbHTML(C.th)); return; } cbNew(); reBody(cbHTML(C.th)); cbInit(); }, 1100); } }); }
+A.cbStart = el => { const th = el.dataset.v || 'fruit'; G.cb = { th, done: 0 }; cbNew(); reBody(cbHTML(th)); cbInit(); };
+
+// ===== MITTEN MATCH (ski hill, every grade) =====
+const MPAT = ['dots', 'stripes', 'stars', 'hearts', 'plain'];
+function mittenSVG(m, s = 1){ const c = COLS6[m.col]; let pat = '';
+  if (m.pat === 'dots') pat = [[-6, -6], [5, -2], [-3, 6], [6, 8]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="#fff"/>`).join('');
+  if (m.pat === 'stripes') pat = [-6, 0, 6].map(y => `<rect x="-12" y="${y}" width="24" height="2.6" fill="#fff"/>`).join('');
+  if (m.pat === 'stars') pat = [[-4, -4], [5, 5]].map(([x, y]) => `<path d="${starPath(x, y, 3.6, 1.5)}" fill="#fff"/>`).join('');
+  if (m.pat === 'hearts') pat = [[-4, -4], [5, 5]].map(([x, y]) => `<path transform="translate(${x},${y}) scale(.4)" d="M0,6 C-9,0 -9,-8 -3,-8 C-1,-8 0,-6.5 0,-5 C0,-6.5 1,-8 3,-8 C9,-8 9,0 0,6Z" fill="#fff"/>`).join('');
+  return `<g transform="scale(${s})"><path d="M-12,18 V-6 C-12,-18 10,-20 11,-6 V-2 C14,-6 20,-4 18,2 L11,10 V18Z" fill="${c}" stroke="${shade(c, -.25)}" stroke-width="1.2"/><clipPath id="mc${m.col}${m.pat}"><path d="M-12,18 V-6 C-12,-18 10,-20 11,-6 V-2 C14,-6 20,-4 18,2 L11,10 V18Z"/></clipPath><g clip-path="url(#mc${m.col}${m.pat})">${pat}</g><rect x="-13" y="14" width="25" height="7" rx="3" fill="#fff" stroke="#E3E9F2"/></g>`; }
+function mmNew(){ const M = G.mm, g = GR(), cols = Object.keys(COLS6); const target = { col: pick(cols), pat: pick(MPAT) }; const n = g === 0 ? 3 : g <= 2 ? 4 : 6;
+  const opts = [target]; while (opts.length < n){ const o = g >= 3 && Math.random() < .6 ? (Math.random() < .5 ? { col: target.col, pat: pick(MPAT.filter(p => p !== target.pat)) } : { col: pick(cols.filter(c => c !== target.col)), pat: target.pat }) : { col: pick(cols.filter(c => c !== target.col)), pat: pick(MPAT) }; if (!opts.some(q => q.col === o.col && q.pat === o.pat)) opts.push(o); }
+  M.target = target; M.opts = shuffle(opts); M.got = false; ESAY('Find the mitten that is exactly the same!'); }
+function mmScene(){ const M = G.mm; let s = `<rect width="360" height="270" fill="#DDF0FF"/><path d="M0,200 Q90,180 180,198 T360,196 V270 H0Z" fill="#fff"/>${pineSnow(30, 214, .5)}${pineSnow(336, 210, .55)}<path d="M20,30 Q180,60 340,30" stroke="#9A6340" stroke-width="2.4" fill="none"/>`;
+  if (M && M.target){ s += `<g transform="translate(150,58)">${mittenSVG(M.target, 1.6)}</g><rect x="146" y="30" width="8" height="12" rx="2" fill="#C98A55"/>`;
+    if (M.got) s += `<g transform="translate(210,58)" class="jump">${mittenSVG(M.target, 1.6)}</g><rect x="206" y="30" width="8" height="12" rx="2" fill="#C98A55"/>`;
+    else s += `<g transform="translate(210,64)"><circle r="20" fill="#fff" opacity=".7"/>${big('?', 24, '#7B5CFA').replace('<text', '<text y="8"')}</g>`;
+    const n = M.opts.length; M.opts.forEach((o, i) => { const x = 180 + (i - (n - 1) / 2) * (n > 4 ? 52 : 72), y = n > 4 ? 170 : 170; if (!(M.got && o === M.target)) s += `<g transform="translate(${x},${y})" class="${o.wig ? 'hboing' : ''}">${mittenSVG(o, 1.5)}</g>`; }); }
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
+function mmHTML(){ const M = G.mm; if (!M || !M.target) return `<div class="rm-scene" id="mmScene">${mmScene()}</div>${M && M.over ? eEnd(`🧤 ${M.done} pairs found!`, 'Looking closely at colors and patterns to find what matches is called visual matching. It helps you read letters and numbers!', M.earned, 'mmStart') : sayBox('One mitten lost its twin! Look at the mitten on the line and find the one that is exactly the same: same color and same pattern.') + `<div class="actions"><button class="btn berry big" style="flex:2" data-act="mmStart">🧤 Find the twins!</button></div>`}`;
+  return `<div class="rm-scene interactive" id="mmScene">${mmScene()}</div>${sayBox('Find the mitten that is exactly the same!')}`; }
+function mmInit(){ const sc = $('#mmScene'), M = G.mm; if (!sc || !M || !M.target) return;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#mmScene', e.clientX, e.clientY); if (!p || M.got) return; e.preventDefault(); const n = M.opts.length; const i = M.opts.findIndex((o, k) => Math.abs(p.x - (180 + (k - (n - 1) / 2) * (n > 4 ? 52 : 72))) < 26 && Math.abs(p.y - 170) < 36); if (i < 0) return; const o = M.opts[i];
+    if (o === M.target){ M.got = true; M.done++; sfx('coin'); confetti(20); ESAY('You found the twin!'); sceneRedraw('mmScene', mmScene); setTimeout(() => { if (G.mm !== M) return; if (M.done >= 6){ M.target = null; M.over = true; M.earned = playReward(4, 'Mitten Match') || 0; reBody(mmHTML()); return; } mmNew(); reBody(mmHTML()); mmInit(); }, 1200); }
+    else { o.wig = true; sfx('boop'); ESAY(o.col !== M.target.col ? 'Look at the color!' : 'Look at the pattern!'); sceneRedraw('mmScene', mmScene); setTimeout(() => { o.wig = false; sceneRedraw('mmScene', mmScene); }, 500); } }); }
+A.mmStart = () => { G.mm = { done: 0 }; mmNew(); reBody(mmHTML()); mmInit(); };
+
+// ===== COLOR & SHAPE SORT (home, K and 1st, instead of Tidy Up) =====
+const CS_SHAPES = { circle: c => `<circle r="16" fill="${c}"/>`, square: c => `<rect x="-15" y="-15" width="30" height="30" rx="4" fill="${c}"/>`, triangle: c => `<path d="M0,-17 L17,14 H-17Z" fill="${c}"/>`, star: c => `<path d="${starPath(0, 0, 18, 8)}" fill="${c}"/>`, heart: c => `<path transform="scale(1.7)" d="M0,6 C-9,0 -9,-8 -3,-8 C-1,-8 0,-6.5 0,-5 C0,-6.5 1,-8 3,-8 C9,-8 9,0 0,6Z" fill="${c}"/>` };
+function csNew(){ const C = G.cs, g = GR(), byShape = C.done >= 4, nb = g === 0 ? 2 : 3; const cols = shuffle(Object.keys(COLS6)).slice(0, nb), shapes = shuffle(Object.keys(CS_SHAPES)).slice(0, nb);
+  C.mode = byShape ? 'shape' : 'color'; C.bins = byShape ? shapes.map(s => ({ shape: s })) : cols.map(c => ({ col: c }));
+  const b = pick(C.bins); C.toy = byShape ? { shape: b.shape, col: pick(Object.keys(COLS6)) } : { col: b.col, shape: pick(Object.keys(CS_SHAPES)) };
+  ESAY(byShape ? 'Put it in the box with the same SHAPE!' : 'Put it in the box with the same COLOR!'); }
+function csScene(){ const C = G.cs; let s = `<rect width="360" height="270" fill="#FFF4E6"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="270" fill="#fff" opacity=".4"/>`).join('')}`;
+  if (C && C.toy){ s += `<g transform="translate(180,${C.fly ? 150 : 70})" class="${C.wig ? 'hboing' : 'hover'}"><circle r="28" fill="#fff" opacity=".7"/>${CS_SHAPES[C.toy.shape](COLS6[C.toy.col])}</g>`;
+    const n = C.bins.length; C.bins.forEach((b, i) => { const x = 180 + (i - (n - 1) / 2) * 110; s += `<g transform="translate(${x},206)"><path d="M-46,-30 H46 L40,40 H-40Z" fill="${b.col ? COLS6[b.col] : '#C98A55'}"/><path d="M-50,-36 H50 V-28 H-50Z" fill="${b.col ? shade(COLS6[b.col], -.2) : '#9A6340'}"/>${b.shape ? `<g transform="translate(0,6) scale(.9)">${CS_SHAPES[b.shape]('#FFFFFF')}</g>` : `<g transform="translate(0,6) scale(.7)">${CS_SHAPES.circle('#ffffff55')}</g>`}</g>`; }); }
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
+function csHTML(){ const C = G.cs; if (!C || !C.toy) return `<div class="rm-scene" id="csScene">${csScene()}</div>${C && C.over ? eEnd('🧸 Everything is tidy!', 'Sorting by color and by shape is how we organize things. It is also early math!', C.earned, 'csStart') : sayBox('Help tidy up the toys! Put each toy in the box with the same color. Later, match the shapes!') + `<div class="actions"><button class="btn berry big" style="flex:2" data-act="csStart">🧸 Tidy up!</button></div>`}`;
+  return `<div class="rm-scene interactive" id="csScene">${csScene()}</div>${sayBox(C.mode === 'shape' ? 'Tap the box with the same SHAPE!' : 'Tap the box with the same COLOR!')}`; }
+function csInit(){ const sc = $('#csScene'), C = G.cs; if (!sc || !C || !C.toy) return;
+  sc.addEventListener('pointerdown', e => { const p = scenePt('#csScene', e.clientX, e.clientY); if (!p || C.fly) return; e.preventDefault(); const n = C.bins.length; const i = C.bins.findIndex((b, k) => Math.abs(p.x - (180 + (k - (n - 1) / 2) * 110)) < 52 && p.y > 160); if (i < 0) return; const b = C.bins[i];
+    const ok = C.mode === 'shape' ? b.shape === C.toy.shape : b.col === C.toy.col;
+    if (ok){ C.fly = true; C.done++; sfx('coin'); sceneRedraw('csScene', csScene); setTimeout(() => { if (G.cs !== C) return; C.fly = false; if (C.done >= 8){ C.toy = null; C.over = true; C.earned = playReward(4, 'Color and Shape Sort') || 0; reBody(csHTML()); return; } csNew(); reBody(csHTML()); csInit(); }, 700); }
+    else { C.wig = true; sfx('boop'); ESAY(C.mode === 'shape' ? `That box has a ${b.shape}. Find the ${C.toy.shape}!` : `That box is ${b.col}. Find ${C.toy.col}!`); sceneRedraw('csScene', csScene); setTimeout(() => { C.wig = false; sceneRedraw('csScene', csScene); }, 500); } }); }
+A.csStart = () => { G.cs = { done: 0 }; csNew(); reBody(csHTML()); csInit(); };
+
+// register the new games
+ROOMS.restaurant.tabs.splice(1, 0, ['pizzacount', 'Pizza Count', () => pzHTML(), () => pzInit()]);
+ROOMS.restaurant.tabs.push(['fruitbasket', 'Fruit Basket', () => cbHTML('fruit'), () => cbInit()]);
+ROOMS.skihill.tabs.push(['mittens', 'Mitten Match', () => mmHTML(), () => mmInit()]);
+ROOMS.surfshack.tabs.push(['shellsort', 'Shell Collector', () => cbHTML('shell'), () => cbInit()]);
+ROOMS.home.tabs.push(['colorsort', 'Color Sort', () => csHTML(), () => csInit()]);
+Object.assign(HOWTO, { pizzacount: 'A customer wants toppings on the pizza. Look at the picture and the number. Tap the pizza that many times and count out loud! Tap a topping to take it off.', fruitbasket: 'Your buddy says a color. Tap every fruit with that color to put it in the basket!', shellsort: 'Your buddy says a color. Tap every shell with that color to put it in the bucket!', mittens: 'Look at the mitten on the line. Find the mitten that has the same color and the same pattern, and tap it!', colorsort: 'Tap the box that has the same color as the toy. Later, tap the box with the same shape!' });
+
+// --- school: gentler subtraction for kindergarten, with a real minus sign ---
+const _probSubK = PROB.sub;
+PROB.sub = function(g, h){ if (g === 0){ if (Math.random() < .45 && PROB.add) return PROB.add(g, h); const r = _probSubK(g, h); const m = String(r.q).match(/^(.+?) take away (\d+) = \?$/u); if (m){ const b = +m[2], a = +r.ans + b; r.q = `${m[1]}   ${a} − ${b} = ?`; r.t = 'Count all the pictures, then take some away. How many are left?'; } return r; } return _probSubK(g, h); };
+// "I don't get it" explains it out loud, with a picture for take-away and adding
+function explainQ(q){ const m = String(q).match(/(\d+)\s*[−\-]\s*(\d+)/), a = String(q).match(/(\d+)\s*\+\s*(\d+)/);
+  if (m) return { say: `Start with ${m[1]}. Take away ${m[2]}. Hold up ${m[1]} fingers, put ${m[2]} fingers down, and count the fingers that are still up!`, viz: [+m[1], +m[2], '−'] };
+  if (a) return { say: `Start with ${a[1]}. Then count ${a[2]} more. Hold up ${a[1]} fingers, then ${a[2]} more, and count them all together!`, viz: [+a[1], +a[2], '+'] };
+  if (/how many|count/i.test(q)) return { say: 'Touch each picture with your finger and count out loud: one, two, three. The last number you say is the answer!' };
+  return { say: 'Let’s listen to the question again, and look at each answer. Which one fits best?' }; }
+const _helpOpenX = A.helpOpen;
+A.helpOpen = function(el, e){ const r = _helpOpenX ? _helpOpenX.apply(this, arguments) : null; try { const les = ui.lesson && ui.lesson.cur; if (les){ const ex = explainQ(les.q); setTimeout(() => tapSay(ex.say), 400); } } catch (er) {} return r; };
+const _helpSheetX2 = helpSheet;
+helpSheet = function(){ let h = _helpSheetX2(); try { const les = ui.lesson && ui.lesson.cur; if (!les) return h; const ex = explainQ(les.q); if (!ex.viz) return h; const [x, y, op] = ex.viz; if (x > 20 || y > 20) return h;
+  const dots = op === '−' ? [...Array(x)].map((_, i) => `<span class="hdot ${i >= x - y ? 'gone' : ''}"></span>`).join('') : [...Array(x)].map(() => '<span class="hdot"></span>').join('') + '<b class="hplus">+</b>' + [...Array(y)].map(() => '<span class="hdot b"></span>').join('');
+  return h.replace('<div class="helpchips">', `<div class="helpviz">${dots}</div><p class="note-s" style="text-align:center">${esc(ex.say)} <button class="hearbtn" data-act="hear" data-v="${esc(ex.say)}" aria-label="Hear it">${SPK}</button></p><div class="helpchips">`); } catch (er) { return h; } };
 
 injectDefs();
 injectDefs2();
