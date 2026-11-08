@@ -10302,7 +10302,7 @@ function zHair(c, part, hat){
   }
   let s = '';
   if (hs === 'bob' || hs === 'long'){
-    s += P('M-19.2,-73.6 C-21,-93.6 -10,-98.6 0,-98.6 C10,-98.6 21,-93.6 19.2,-73.6 C18,-82.4 14,-86.8 7,-85.6 C2,-90 -6,-90.6 -10.6,-84.6 C-15,-85 -18,-80.6 -19.2,-73.6Z');
+    s += P('M-19.2,-73.6 C-21,-93.6 -10,-98.6 0,-98.6 C10,-98.6 21,-93.6 19.2,-73.6 C18.6,-79.6 16.4,-84 12.4,-86.6 C6,-83.4 -2.4,-81.6 -9.6,-84 C-13.4,-81.8 -17,-78.6 -19.2,-73.6Z') + `<path d="M12.4,-86.6 C6,-83.4 -2.4,-81.6 -9.6,-84 C-2,-83.8 5,-85.2 12.4,-86.6Z" fill="${dk}" opacity=".35"/>`;
     s += P('M-18.8,-78 Q-20.8,-66.6 -17.4,-60 Q-15.8,-65.6 -16.2,-73Z') + P('M18.8,-78 Q20.8,-66.6 17.4,-60 Q15.8,-65.6 16.2,-73Z');
     
   }
@@ -10310,7 +10310,7 @@ function zHair(c, part, hat){
   if (hs === 'puffs') s += P('M-18.6,-75 C-19,-93.4 -9.4,-97.6 0,-97.6 C9.4,-97.6 19,-93.4 18.6,-75 C15,-86 6.4,-89 0,-85.6 C-6.4,-89 -15,-86 -18.6,-75Z') + [-1, 1].map(sd => `<rect x="${sd * (full ? 19.4 : 12.4) - 3.6}" y="${(full ? -80 : -97.4) + 5.6}" width="7.2" height="2.6" rx="1.3" fill="#FF6FA0"/>`).join('');
   if (hs === 'spiky') s += P('M-18.4,-73 Q-20,-82 -16.6,-88.6 Q-14,-96 -6,-98.4 Q-1,-102.6 5,-100 Q12,-99.6 15.6,-94 Q20.6,-89 19.4,-80 Q19,-76 18.4,-73 C15,-81.6 10.6,-84 4,-82.6 Q8,-86.6 6.4,-90.4 Q2,-85 -6,-83.6 C-11,-83.6 -15.6,-80 -18.4,-73Z') + `<path d="M-6,-83.6 Q2,-85 6.4,-90.4 Q8,-86.6 4,-82.6Z" fill="${dk}" opacity=".45"/>`;
   if (hs === 'curly') s += [[-15, -85], [-7.6, -89], [0, -90.4], [7.6, -89], [15, -85], [-18, -77.6], [18, -77.6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5.8" fill="${hr}"/><circle cx="${x - 1.6}" cy="${y - 1.8}" r="1.8" fill="${hl}" opacity=".5"/>`).join('');
-  if (hs !== 'curly' && !full) s += `<path d="M-12.6,-92.6 Q-4,-97.4 6,-96" stroke="${hl}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".7"/><path d="M-9.6,-90 Q-3,-92.6 3,-92.2" stroke="#fff" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".45"/>`;
+  if (hs !== 'curly' && !full) s += `<path d="M-11,-94.4 Q-3,-97.8 6.4,-96.4 Q-1,-95 -8.4,-92.2Z" fill="${hl}" opacity=".45"/>`;
   return s;
 }
 function zBigFace(c, mood, S, cx, cy, withEars = true){
@@ -10455,7 +10455,7 @@ const REG = {
   tank(hem){ return `M-10.6,-47.6 Q0,-42.6 10.6,-47.6 L12.5,-47.6 L12.5,${hem} L-12.5,${hem} L-12.5,-47.6Z M-8.6,-54.4 L-6.8,-54.4 L-6.2,-47 L-8.2,-47Z M8.6,-54.4 L6.8,-54.4 L6.2,-47 L8.2,-47Z`; },
   pants(end){ return `M-12.8,-32.4 H12.8 V${end} H-12.8Z`; }
 };
-const LINE = (d, c, w = .6, op = .55) => `<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`;
+const LINE = (d, c, w = .6, op = .55) => (op = op * .6, 0) || `<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`;
 function zClothes(c, T, B){
   const sk = c.skin || '#FFE0C7', col = T.col || c.shirt || '#34B2F0', dk = shade(col, -.18); let inB = '', over = '', back = '';
   const sleeveY = T.sl === 'long' ? -31.2 : T.sl === 'short' || T.sl === 'puff' ? -41.4 : null;
@@ -10553,13 +10553,13 @@ function zChar(c, o = {}){
   c = c || {}; const sk = c.skin || '#FFE0C7', work = o.work || '';
   const tid = c.top || 'tee', T = ZTOPS[tid] || ZTOPS.tee, bid = c.bottom || 'pants', B = ZBOTS[bid] || ZBOTS.pants;
   const acc = work === 'restaurant' ? 'chef' : work === 'boutique' ? 'shades' : c.acc, full = HAT_FULL.has(acc);
-  const HT = 'translate(0,-57) scale(1.06) translate(0,57)', cl = zClothes(c, T, B);
+  const HT = 'translate(0,-57) scale(1.28,1.18) translate(0,57)', cl = zClothes(c, T, B);
   let s = `<g class="zch zflat"><ellipse cx="0" cy="0" rx="14" ry="3.6" fill="#1d3b12" opacity=".16" filter="url(#blur2)"/>`;
   const backHair = zHair(c, 'back', acc);
   s += zBack(c) + `<g transform="${HT}">${full ? `<g clip-path="url(#zHatClip)">${backHair}</g>` : backHair}</g>` + cl.back;
   if (work === 'school') s += `<path d="M-11,-50 h22 v19 q-11,4 -22,0Z" fill="#FF8A3D"/>`;
   // the body and everything it wears, cut to the body outline
-  s += `<path d="${BODY_D2}" fill="${sk}"/><g clip-path="url(#zBodyClip2)">${cl.inB}<path d="${BODY_D2}" fill="url(#zBodyShade)"/>${[-1, 1].map(sd => `<path d="M${sd * 3.8},-14 q${sd * 1.6},.9 ${sd * 3},0" stroke="${shade(sk, -.18)}" stroke-width=".45" fill="none" opacity=".5"/>`).join('')}</g>`;
+  s += `<path d="${BODY_D2}" fill="${sk}"/><g clip-path="url(#zBodyClip2)">${cl.inB}<path d="${BODY_D2}" fill="url(#zBodyShade)" opacity=".45"/>${[-1, 1].map(sd => `<path d="M${sd * 3.8},-14 q${sd * 1.6},.9 ${sd * 3},0" stroke="${shade(sk, -.18)}" stroke-width=".45" fill="none" opacity=".5"/>`).join('')}</g>`;
   s += cl.over + zShoes(c);
   if (work && WORKPROP[work]) s += `<g transform="translate(17.6,-26.4)"><g>${zWorkAnim(work).replace(/ 13 -49/g, ' 0 0')}${WORKPROP[work]}</g></g>`;
   let h = [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74.6" rx="2.5" ry="3.6" fill="${shade(sk, -.04)}"/><path d="M${sd * 15.4},-76 q${sd * .9},1.4 0,2.8" stroke="${shade(sk, -.16)}" stroke-width=".5" fill="none"/>`).join('');
@@ -10596,6 +10596,17 @@ const _renderReadme = render; render = function(){ const r = _renderReadme.apply
 // the runway reads its theme out loud as soon as it opens
 const _drawRoomRun = drawRoom;
 drawRoom = function(){ const r = _drawRoomRun.apply(this, arguments); try { const u = ui.room; if (u && u.tab === 'runway' && RA() && G.run && G.run.theme && G._runSaid !== G.run.theme.name){ G._runSaid = G.run.theme.name; setTimeout(() => tapSay(`Today's theme is ${G.run.theme.name}! Pick clothes that match ${G.run.theme.name}, then walk the runway.`), 500); } } catch (e) {} try { readmeSync(); } catch (e) {} return r; };
+
+// ---------- v29 STYLE C: wide head, small dot eyes, clean flat hair and clothes ----------
+function zEyes(c, mood){
+  const m = c.mk || {};
+  if (mood === 'tired') return [-7, 7].map(x => `<path d="M${x - 2.2},-73.4 Q${x},-71.8 ${x + 2.2},-73.4" stroke="#2B2230" stroke-width="1.1" fill="none" stroke-linecap="round"/>`).join('');
+  let s = '';
+  if (m.shadow) s += [-7, 7].map(x => `<ellipse cx="${x}" cy="-75.6" rx="3.6" ry="2.4" fill="${m.shadow}" opacity="${f1(.85 * (m.shadowA == null ? 1 : m.shadowA))}" filter="url(#zSoftBlur)"/>`).join('');
+  s += `<g class="blink">` + [-7, 7].map((x, i) => { const sd = i ? 1 : -1;
+    return `<ellipse cx="${x}" cy="-73.6" rx="1.65" ry="2.25" fill="#2B2230"/><circle cx="${x + .6}" cy="-74.4" r=".58" fill="#fff"/>` + (c.lashes || m.lash ? `<path d="M${x + sd * 1.3},-75.4 l${sd * 1.2},-.9 M${x + sd * 1.7},-74.4 l${sd * 1.2},-.2" stroke="#2B2230" stroke-width=".55" stroke-linecap="round"/>` : '') + (m.liner ? `<path d="M${x - sd * 1.4},-75.6 Q${x},-76.4 ${x + sd * 2},-75.2 l${sd * 1.2},-.7" stroke="#1E1620" stroke-width=".7" fill="none" stroke-linecap="round"/>` : ''); }).join('') + `</g>`;
+  return s;
+}
 
 injectDefs();
 injectDefs2();
