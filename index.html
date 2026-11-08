@@ -1036,6 +1036,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
 .bdots i{width:8px;height:8px;border-radius:50%;background:#D9D2F5}
 .bdots i.on{background:#7B5CFA}
 .hearmini{margin-right:4px;font-size:13px}
+.zdrip{animation:zdrip .5s linear infinite;transform-box:fill-box}
+@keyframes zdrip{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(110px);opacity:0}}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -1068,7 +1070,8 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function shade(hex, amt){
-  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255;
+  if (typeof hex !== 'string' || hex[0] !== '#') return hex; if (hex.length === 4) hex = '#' + hex.slice(1).split('').map(c => c + c).join('');
+  const n = parseInt(hex.slice(1, 7), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255;
   const f = v => clamp(Math.round(amt < 0 ? v * (1 + amt) : v + (255 - v) * amt), 0, 255);
   return '#' + [f(r), f(g), f(b)].map(v => v.toString(16).padStart(2, '0')).join('');
 }
@@ -8776,7 +8779,7 @@ const choreMe = (c, x, y, s, prop, mv) => `<g>${mv || ''}<g transform="translate
 const handProp = (inner, anim) => `<g transform="translate(25,-44)">${anim ? `<g>${anim}${inner}</g>` : inner}</g>`;
 const wig = (a, d) => `<animateTransform attributeName="transform" type="rotate" values="${-a};${a};${-a}" dur="${d}s" repeatCount="indefinite"/>`;
 const slide = (dx, d) => `<animateTransform attributeName="transform" type="translate" values="0 0;${dx} 0;0 0" dur="${d}s" repeatCount="indefinite"/>`;
-const tilesBg = (wall, floor) => `<rect width="360" height="270" fill="${wall}"/>${[...Array(10)].map((_, i) => `<path d="M${i * 40},0 V190" stroke="#fff" stroke-width="2" opacity=".5"/>`).join('')}${[...Array(5)].map((_, i) => `<path d="M0,${i * 40} H360" stroke="#fff" stroke-width="2" opacity=".5"/>`).join('')}<rect y="190" width="360" height="80" fill="${floor}"/><rect y="188" width="360" height="5" fill="#fff" opacity=".7"/>`;
+const tilesBg = (wall, floor) => zTiles(wall, floor);
 const ICON_SCENES = {
   tooth: { place: 'the bathroom', verb: 'brushing teeth', unit: 'sparkly brushes', scene: (c, b) => tilesBg('#CFEFFF', '#E9F0FA') + `${rr(120, 30, 120, 90, 46, '#fff')}${rr(128, 38, 104, 74, 40, '#DFF4FF')}<path d="M150,52 l30,-12 M156,68 l18,-8" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>${rr(96, 150, 168, 18, 8, '#fff')}<ellipse cx="180" cy="152" rx="40" ry="8" fill="#BFE3FA"/><path d="M180,128 v16 q0,4 6,4" stroke="#B9C2D6" stroke-width="5" fill="none" stroke-linecap="round"/>${rr(110, 168, 140, 40, 10, '#F3D7E4')}${rr(222, 128, 14, 22, 4, '#FF8FB8')}<rect x="226" y="116" width="3" height="16" fill="#34B2F0"/><rect x="231" y="114" width="3" height="18" fill="#3EC46B"/>` + choreMe(c, 180, 258, 1.05, `<g transform="translate(0,-47)"><g>${slide(8, .35)}<rect x="-2" y="-2" width="26" height="4" rx="2" fill="#34B2F0"/><rect x="-4" y="-4" width="7" height="8" rx="2" fill="#fff"/></g></g>${[0, 1, 2].map(k => `<circle class="rise ${['', 'd2', 'd3'][k]}" cx="${-6 + k * 6}" cy="-44" r="${2 + k}" fill="#fff" stroke="#BFE3FA"/>`).join('')}`) + grp(318, 262, .7, buddySVG(b, { cheer: 1 }), 'class="jump"'), dyn: n => [...Array(Math.min(12, n))].map((_, k) => `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(150 + (k * 29) % 70, 150 + (k * 17) % 40 - 60, 4, 1.6)}" fill="#fff"/>`).join('') },
   toy: { place: 'the bedroom', verb: 'putting toys away', unit: 'toys put away', scene: (c, b) => roomShell({ wall: '#FFE3EC', wp: 'stars', floor: '#E2B98A', fp: 'wood' }) + IP.window(40, 30, 70, 60, { curtain: '#FF8FB8' }) + grp(250, 236, .9, FURN.bed.d()) + grp(310, 254, .8, FURN.toychest.d()) + choreMe(c, 110, 258, .95, handProp(rr(-8, -8, 16, 16, 4, '#FF5A8C')), `<animateTransform attributeName="transform" type="translate" values="0 0;150 0;150 0;0 0;0 0" keyTimes="0;.35;.5;.85;1" dur="5s" repeatCount="indefinite"/>`) + grp(46, 262, .7, buddySVG(b, { cheer: 1 }), 'class="jump"'), dyn: n => { const left = Math.max(0, 7 - Math.floor(n / 1.4)); return [[150, 258, '#E8414F', 'b'], [190, 266, '#34B2F0', 'c'], [220, 252, '#FFC63A', 'b'], [80, 266, '#3EC46B', 't'], [130, 266, '#B58CFF', 'c'], [240, 266, '#FF8A3D', 'b'], [60, 250, '#5FE0C0', 't']].slice(0, left).map(([x, y, col, k]) => k === 'b' ? rr(x - 7, y - 14, 14, 14, 3, col) + `<text x="${x}" y="${y - 4}" text-anchor="middle" font-size="9" font-weight="900" fill="#fff">A</text>` : k === 'c' ? `<circle cx="${x}" cy="${y - 7}" r="7" fill="${col}"/><circle cx="${x - 2}" cy="${y - 9}" r="2" fill="#fff" opacity=".6"/>` : `<g transform="translate(${x},${y})">${SPR.teddy.replace('#D9A06A', col)}</g>`).join('') + (left === 0 ? `<g class="bubble-pop">${rr(110, 120, 140, 30, 15, '#fff')}${TX(180, 141, 'All tidy! 🎉', 16, '#7B5CFA')}</g>` : ''); } },
@@ -9233,6 +9236,356 @@ ARCADE.crabrace.minG = 2;
 const _drawRoomMinG = drawRoom;
 drawRoom = function(){ const r = ui.room; if (!r || !ROOMS[r.t] || !S) return _drawRoomMinG(); const def = ROOMS[r.t], all = def.tabs, g = GR(); const vis = all.filter(t => !(ARCADE[t[0]] && ARCADE[t[0]].minG > g)); if (vis.length === all.length || !vis.length) return _drawRoomMinG(); if (!vis.some(t => t[0] === r.tab)) r.tab = vis[0][0]; def.tabs = vis; try { _drawRoomMinG(); } finally { def.tabs = all; } };
 
+
+// ---------- v21 PRETTY ROOMS: smooth, shaded, detailed interiors ----------
+const zf = v => (+v).toFixed(1);
+function zRP(x, y, w, h, r){ r = Math.max(0, Math.min(r, w / 2, h / 2)); return `M${zf(x + r)},${zf(y)}H${zf(x + w - r)}A${r},${r} 0 0 1 ${zf(x + w)},${zf(y + r)}V${zf(y + h - r)}A${r},${r} 0 0 1 ${zf(x + w - r)},${zf(y + h)}H${zf(x + r)}A${r},${r} 0 0 1 ${zf(x)},${zf(y + h - r)}V${zf(y + r)}A${r},${r} 0 0 1 ${zf(x + r)},${zf(y)}Z`; }
+const ZD = (d, c, ex = '') => `<path d="${d}" fill="${c}" stroke="${shade(c, -.2)}" stroke-width="1.1" stroke-linejoin="round" ${ex}/><path d="${d}" fill="url(#zSoft)" pointer-events="none"/>`;
+const ZR = (x, y, w, h, r, c, ex) => ZD(zRP(x, y, w, h, r), c, ex);
+const ZE = (cx, cy, rx, ry, c, ex = '') => `<ellipse cx="${zf(cx)}" cy="${zf(cy)}" rx="${rx}" ry="${ry}" fill="${c}" stroke="${shade(c, -.2)}" stroke-width="1.1" ${ex}/><ellipse cx="${zf(cx)}" cy="${zf(cy)}" rx="${rx}" ry="${ry}" fill="url(#zBall)" pointer-events="none"/>`;
+const zShadow = (cx, cy, rx) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${zf(Math.max(3, rx * .16))}" fill="#3a2048" opacity=".2" filter="url(#blur3)"/>`;
+const zHeart = (x, y, s, c, ex = '') => `<path transform="translate(${zf(x)},${zf(y)}) scale(${s})" d="M0,6 C-9,0 -9,-8 -3,-8 C-1,-8 0,-6.5 0,-5 C0,-6.5 1,-8 3,-8 C9,-8 9,0 0,6Z" fill="${c}" ${ex}/>`;
+const zFlower = (x, y, r, c) => [0, 1, 2, 3, 4].map(k => `<circle cx="${zf(x + Math.cos(k * 1.2566) * r)}" cy="${zf(y + Math.sin(k * 1.2566) * r)}" r="${zf(r * .85)}" fill="${c}"/>`).join('') + `<circle cx="${x}" cy="${y}" r="${zf(r * .7)}" fill="#FFE36B"/>`;
+const pillowPath = r => `M${-r},${-r + 3} Q${-r},${-r} ${-r + 3},${-r} Q0,${-r + 4} ${r - 3},${-r} Q${r},${-r} ${r},${-r + 3} Q${r - 4},0 ${r},${r - 3} Q${r},${r} ${r - 3},${r} Q0,${r - 4} ${-r + 3},${r} Q${-r},${r} ${-r},${r - 3} Q${-r + 4},0 ${-r},${-r + 3}Z`;
+
+function injectDefsZ(){
+  const d = $('#defs defs'); if (!d || d.querySelector('#zSoft')) return;
+  d.insertAdjacentHTML('beforeend', `
+  <linearGradient id="zSoft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".42"/><stop offset=".3" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#2a1640" stop-opacity=".16"/></linearGradient>
+  <radialGradient id="zBall" cx=".36" cy=".28" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".38" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#2a1640" stop-opacity=".22"/></radialGradient>
+  <radialGradient id="zPool"><stop offset="0" stop-color="#FFF6D6" stop-opacity=".7"/><stop offset="1" stop-color="#FFF6D6" stop-opacity="0"/></radialGradient>
+  <radialGradient id="zVig" cx=".5" cy=".45" r=".78"><stop offset=".62" stop-color="#2a1640" stop-opacity="0"/><stop offset="1" stop-color="#2a1640" stop-opacity=".2"/></radialGradient>
+  <linearGradient id="zGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#fff" stop-opacity=".18"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="zChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7F9FD"/><stop offset=".45" stop-color="#C6CFE0"/><stop offset=".55" stop-color="#EEF2F8"/><stop offset="1" stop-color="#A9B4C9"/></linearGradient>
+  <linearGradient id="zSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7CC8FF"/><stop offset="1" stop-color="#E2F5FF"/></linearGradient>
+  <linearGradient id="zOven" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD58A"/><stop offset="1" stop-color="#FF8A3D"/></linearGradient>
+  <clipPath id="zFloorClip"><polygon points="0,214 34,176 326,176 360,214 360,270 0,270"/></clipPath>
+  <pattern id="zDamask" width="32" height="32" patternUnits="userSpaceOnUse"><g fill="#fff" opacity=".5"><circle cx="8" cy="5.5" r="2"/><circle cx="8" cy="10.5" r="2"/><circle cx="5.5" cy="8" r="2"/><circle cx="10.5" cy="8" r="2"/><circle cx="24" cy="24" r="1.4"/></g><circle cx="8" cy="8" r="1.2" fill="#FFB3CC"/></pattern>
+  <pattern id="zStarsWP" width="36" height="36" patternUnits="userSpaceOnUse"><path d="${starPath(9, 9, 4, 1.7)}" fill="#fff" opacity=".6"/><circle cx="27" cy="26" r="1.6" fill="#fff" opacity=".6"/><path d="M24,10 a4,4 0 1 0 5,5 a3,3 0 1 1 -5,-5z" fill="#fff" opacity=".45"/></pattern>
+  <pattern id="zBubbles" width="40" height="40" patternUnits="userSpaceOnUse"><g fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.4"><circle cx="10" cy="12" r="6"/><circle cx="30" cy="30" r="4"/><circle cx="32" cy="8" r="2.4"/></g><path d="M7,9 a4,4 0 0 1 4,-1.6" stroke="#fff" stroke-width="1.2" fill="none"/></pattern>
+  <pattern id="zGingham" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="8" height="16" fill="#fff" opacity=".35"/><rect width="16" height="8" fill="#fff" opacity=".35"/></pattern>
+  <pattern id="zSubway" width="24" height="24" patternUnits="userSpaceOnUse"><g fill="none" stroke="#C9E2EC" stroke-width="1.2"><rect x=".6" y=".6" width="23" height="11" rx="2"/><rect x="-11.4" y="12.6" width="23" height="11" rx="2"/><rect x="12.6" y="12.6" width="23" height="11" rx="2"/></g><path d="M3,3 h8 M-9,15 h8 M15,15 h8" stroke="#fff" stroke-width="1.2" opacity=".9"/></pattern>
+  <pattern id="zQuilt" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M0,8 L8,0 L16,8 L8,16Z" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1" stroke-dasharray="2 2"/></pattern>`);
+}
+const _injectDefs2Z = injectDefs2; injectDefs2 = function(){ _injectDefs2Z(); injectDefsZ(); };
+
+// ---- walls and floors ----
+const zWid = y => 292 + (y - 176) * 68 / 38;
+const zX = (xb, y) => 180 + (xb - 180) * zWid(y) / 292;
+function zRoomBg(o){
+  const wall = o.wall, low = o.low || shade(wall, .3), fl = o.floor, trim = o.trim || '#FFFFFF';
+  let s = `<rect width="360" height="270" fill="${shade(wall, -.2)}"/><rect x="34" y="0" width="292" height="176" fill="${wall}"/>`;
+  if (o.wp) s += `<rect x="34" y="0" width="292" height="176" fill="url(#${o.wp})"/>`;
+  const L = '0,0 34,0 34,176 0,214', R = '360,0 326,0 326,176 360,214';
+  s += `<polygon points="${L}" fill="${shade(wall, -.07)}"/><polygon points="${R}" fill="${shade(wall, -.12)}"/>`;
+  if (o.wp) s += `<polygon points="${L}" fill="url(#${o.wp})" opacity=".6"/><polygon points="${R}" fill="url(#${o.wp})" opacity=".5"/>`;
+  if (!o.noLow){
+    const ly = o.lowY || 118, lyS = zf(ly * 214 / 176);
+    s += `<rect x="34" y="${ly}" width="292" height="${176 - ly}" fill="${low}"/><polygon points="0,${lyS} 34,${ly} 34,176 0,214" fill="${shade(low, -.06)}"/><polygon points="360,${lyS} 326,${ly} 326,176 360,214" fill="${shade(low, -.1)}"/>`;
+    if (o.tiles) s += `<rect x="34" y="${ly}" width="292" height="${176 - ly}" fill="url(#zSubway)"/><polygon points="0,${lyS} 34,${ly} 34,176 0,214" fill="url(#zSubway)" opacity=".6"/><polygon points="360,${lyS} 326,${ly} 326,176 360,214" fill="url(#zSubway)" opacity=".6"/>`;
+    else for (let i = 0; i < 5; i++){ const x = 41 + i * 57.4; s += `<rect x="${zf(x + 1.2)}" y="${ly + 11.2}" width="50" height="${176 - ly - 24}" rx="5" fill="none" stroke="${shade(low, -.2)}" stroke-opacity=".35" stroke-width="1.2"/><rect x="${zf(x)}" y="${ly + 10}" width="50" height="${176 - ly - 24}" rx="5" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="1.8"/>`; }
+    s += `<rect x="34" y="${ly - 4}" width="292" height="7" rx="2" fill="${trim}"/><rect x="34" y="${ly + 3}" width="292" height="2" fill="#3a2048" opacity=".08"/><polygon points="0,${zf(lyS - 5)} 34,${ly - 4} 34,${ly + 3} 0,${zf(+lyS + 3)}" fill="${trim}" opacity=".92"/><polygon points="360,${zf(lyS - 5)} 326,${ly - 4} 326,${ly + 3} 360,${zf(+lyS + 3)}" fill="${trim}" opacity=".85"/>`;
+  }
+  s += `<rect x="34" y="0" width="292" height="9" fill="${trim}"/><rect x="34" y="9" width="292" height="3" fill="#3a2048" opacity=".07"/><polygon points="0,0 34,0 34,9 0,11" fill="${trim}" opacity=".9"/><polygon points="360,0 326,0 326,9 360,11" fill="${trim}" opacity=".85"/>`;
+  s += `<rect x="34" y="0" width="292" height="176" fill="url(#wallShade)"/><path d="M34,0 V176 M326,0 V176" stroke="#3a2048" stroke-opacity=".08" stroke-width="2"/>`;
+  const F = '0,214 34,176 326,176 360,214 360,270 0,270';
+  s += `<polygon points="${F}" fill="${fl}"/><g clip-path="url(#zFloorClip)">`;
+  if (o.ft === 'check'){
+    const ys = [176, 183, 192, 203, 217, 234, 255, 280], n = 10, c2 = o.floor2 || shade(fl, -.1);
+    for (let r = 0; r < ys.length - 1; r++) for (let c = -4; c < n + 4; c++){ if ((r + c + 40) % 2) continue; const xa = 34 + c * 292 / n, xb = 34 + (c + 1) * 292 / n, y0 = ys[r], y1 = ys[r + 1]; s += `<polygon points="${zf(zX(xa, y0))},${y0} ${zf(zX(xb, y0))},${y0} ${zf(zX(xb, y1))},${y1} ${zf(zX(xa, y1))},${y1}" fill="${c2}"/>`; }
+  } else if (o.ft === 'carpet'){ s += `<polygon points="${F}" fill="url(#fl-carpet)"/>`; }
+  else {
+    const n = 12;
+    for (let i = -5; i <= n + 5; i++){ const xa = 34 + i * 292 / n, xb = 34 + (i + 1) * 292 / n; if ((i + 20) % 2 === 0) s += `<polygon points="${zf(xa)},176 ${zf(xb)},176 ${zf(zX(xb, 270))},270 ${zf(zX(xa, 270))},270" fill="#3a2010" opacity=".04"/>`; s += `<path d="M${zf(xa)},176 L${zf(zX(xa, 270))},270" stroke="#5a3a20" stroke-opacity=".17" stroke-width="1.1"/>`; }
+    [184, 196, 211, 230, 254].forEach((y, r) => { for (let i = -5; i <= n + 5; i++){ if ((i + r * 2 + 30) % 3) continue; const xa = zX(34 + i * 292 / n, y), xb = zX(34 + (i + 1) * 292 / n, y); s += `<path d="M${zf(xa)},${y} L${zf(xb)},${y}" stroke="#5a3a20" stroke-opacity=".14" stroke-width="1"/>`; } });
+    s += `<polygon points="${F}" fill="url(#zSoft)" opacity=".5"/>`;
+  }
+  s += `</g><polygon points="${F}" fill="url(#floorShade)"/>`;
+  s += `<rect x="34" y="167" width="292" height="10" fill="${trim}"/><rect x="34" y="167" width="292" height="2" fill="#fff" opacity=".7"/><rect x="34" y="177" width="292" height="2" fill="#3a2048" opacity=".1"/><polygon points="0,203 34,167 34,177 0,215" fill="${trim}" opacity=".93"/><polygon points="360,203 326,167 326,177 360,215" fill="${trim}" opacity=".86"/>`;
+  if (o.pool) s += `<ellipse cx="${o.pool[0]}" cy="${o.pool[1]}" rx="${o.pool[2]}" ry="${zf(o.pool[2] * .26)}" fill="url(#zPool)"/>`;
+  return s;
+}
+const zVignette = () => `<rect width="360" height="270" fill="url(#zVig)" pointer-events="none"/>`;
+function zTiles(wall, floor){ return zRoomBg({ wall, low: '#FFFFFF', tiles: true, lowY: 104, floor, ft: 'check', floor2: shade(floor, -.08), trim: shade(wall, -.12) }); }
+// every shop and room that uses the shared shell gets the new walls and floors
+function roomShell(o = {}){ const fp = o.fp; return zRoomBg({ wall: o.wall || '#FFE9D6', wp: o.wp ? 'wp-' + o.wp : null, floor: o.floor || '#E8C49A', ft: fp === 'check' || fp === 'tile' ? 'check' : fp === 'carpet' ? 'carpet' : 'wood', floor2: fp === 'tile' ? shade(o.floor || '#E8C49A', .18) : null, low: o.low }); }
+
+// ---- props ----
+function zWindow(night, cur, w = 80, h = 84, o = {}){
+  const arch = h >= w * .75, r = w / 2, id = 'zw' + Math.round(w) + 'x' + Math.round(h) + (night ? 'n' : 'd');
+  const outer = arch ? `M0,${h} V${r} A${r},${r} 0 0 1 ${w},${r} V${h}Z` : zRP(0, 0, w, h, 10);
+  const inner = arch ? `M6,${h - 4} V${r} A${r - 6},${r - 6} 0 0 1 ${w - 6},${r} V${h - 4}Z` : zRP(6, 6, w - 12, h - 10, 6);
+  let s = ZD(outer, '#FFFFFF') + `<path d="${inner}" fill="${night ? 'url(#nightSky)' : 'url(#zSky)'}"/><clipPath id="${id}"><path d="${inner}"/></clipPath><g clip-path="url(#${id})">`;
+  if (night){
+    const mx = w * .7, my = h * .3; s += `<circle cx="${zf(mx)}" cy="${zf(my)}" r="14" fill="#FFF6C9" opacity=".15"/><path d="M${zf(mx)},${zf(my - 8)} a8,8 0 1 0 0,16 a6.5,6.5 0 1 1 0,-16z" fill="#FFF6C9"/>`;
+    [[.22, .3], [.4, .5], [.15, .62], [.55, .18], [.85, .55], [.32, .16]].forEach(([a, b], k) => { s += `<path class="twinkle ${['', 'd2', 'd3'][k % 3]}" d="${starPath(w * a, h * b, 2.6, 1.1)}" fill="#fff"/>`; });
+    s += `<path d="M0,${h} V${zf(h * .78)} Q${zf(w * .35)},${zf(h * .66)} ${zf(w * .6)},${zf(h * .76)} Q${zf(w * .8)},${zf(h * .68)} ${w},${zf(h * .74)} V${h}Z" fill="#3B3F87"/>`;
+  } else {
+    const sx = w * .72, sy = h * .28; s += `<circle cx="${zf(sx)}" cy="${zf(sy)}" r="16" fill="#FFF3A6" opacity=".45"/><circle cx="${zf(sx)}" cy="${zf(sy)}" r="9" fill="#FFE36B"/>`;
+    s += `<g fill="#fff" opacity=".95"><circle cx="${zf(w * .26)}" cy="${zf(h * .42)}" r="6"/><circle cx="${zf(w * .36)}" cy="${zf(h * .38)}" r="8"/><circle cx="${zf(w * .46)}" cy="${zf(h * .43)}" r="5.5"/><rect x="${zf(w * .2)}" y="${zf(h * .42)}" width="${zf(w * .3)}" height="6" rx="3"/></g>`;
+    s += `<path d="M0,${h} V${zf(h * .72)} Q${zf(w * .3)},${zf(h * .6)} ${zf(w * .55)},${zf(h * .7)} Q${zf(w * .8)},${zf(h * .6)} ${w},${zf(h * .68)} V${h}Z" fill="#A5E08C"/><path d="M0,${h} V${zf(h * .84)} Q${zf(w * .5)},${zf(h * .72)} ${w},${zf(h * .86)} V${h}Z" fill="#7FCB66"/>`;
+    s += `<g transform="translate(${zf(w * .24)},${zf(h * .74)})"><rect x="-1.2" y="-2" width="2.4" height="7" fill="#9A6340"/><circle cy="-6" r="6" fill="#5DBB5A"/><circle cx="-2" cy="-8" r="2.5" fill="#fff" opacity=".25"/></g>`;
+  }
+  if (o.snow) for (let k = 0; k < 10; k++) s += `<circle class="snowf" style="animation-delay:-${(rnd(k) * 4).toFixed(1)}s" cx="${zf(8 + rnd(k + 3) * (w - 16))}" cy="8" r="1.6" fill="#fff"/>`;
+  s += `</g><path d="M${r},6 V${h - 4} M6,${zf(h * .56)} H${w - 6}" stroke="#fff" stroke-width="3"/><path d="${inner}" fill="url(#zGlass)" opacity=".55" pointer-events="none"/>` + ZR(-8, h - 4, w + 16, 8, 3.5, '#FFFFFF');
+  if (cur){
+    s += ZR(-20, -10, w + 40, 5, 2.5, '#D49A62') + ZE(-21, -7.5, 4, 4, '#E8B27A') + ZE(w + 21, -7.5, 4, 4, '#E8B27A');
+    const Lp = `M-16,-6 C-10,${zf(h * .3)} -19,${zf(h * .62)} -7,${h + 14} Q0,${h + 17} 7,${h + 14} C1,${zf(h * .6)} 10,${zf(h * .3)} 8,-6Z`;
+    const Rp = `M${w + 16},-6 C${w + 10},${zf(h * .3)} ${w + 19},${zf(h * .62)} ${w + 7},${h + 14} Q${w},${h + 17} ${w - 7},${h + 14} C${w - 1},${zf(h * .6)} ${w - 10},${zf(h * .3)} ${w - 8},-6Z`;
+    s += ZD(Lp, cur) + ZD(Rp, shade(cur, -.04)) + (o.gingham ? `<path d="${Lp}" fill="url(#zGingham)"/><path d="${Rp}" fill="url(#zGingham)"/>` : '');
+    s += `<g stroke="${shade(cur, -.2)}" stroke-width="1.1" fill="none" opacity=".55"><path d="M-6,-2 C-2,${zf(h * .35)} -8,${zf(h * .66)} -2,${h + 12}"/><path d="M${w + 6},-2 C${w + 2},${zf(h * .35)} ${w + 8},${zf(h * .66)} ${w + 2},${h + 12}"/></g>`;
+    s += `<path d="M-14,-6 Q${zf(w * .25)},10 ${zf(w / 2)},-2 Q${zf(w * .75)},10 ${w + 14},-6Z" fill="${shade(cur, .1)}" stroke="${shade(cur, -.2)}" stroke-width="1"/>`;
+  }
+  return s;
+}
+function zPlant(x, y, sc = 1){
+  let s = zShadow(0, 0, 18);
+  [[-34, 38], [30, 40], [0, 46], [-62, 30], [60, 32], [-14, 42], [15, 43]].forEach(([a, L], k) => { s += `<g transform="translate(0,-34) rotate(${a})"><path d="M0,0 C-11,${-L * .3} -10,${-L * .8} 0,${-L} C10,${-L * .8} 11,${-L * .3} 0,0Z" fill="${['#4CBF58', '#3FAF4F', '#5ACB64'][k % 3]}" stroke="#2F8F40" stroke-width="1"/><path d="M0,-3 V${-L + 6}" stroke="#2F8F40" stroke-width="1" opacity=".6"/><path d="M-3,${zf(-L * .3)} Q-5,${zf(-L * .6)} -1,${zf(-L * .8)}" stroke="#fff" stroke-width="1.4" opacity=".3" fill="none"/></g>`; });
+  s += ZD('M-15,-34 H15 L11,0 H-11Z', '#F29B84') + ZR(-17, -38, 34, 8, 3.5, '#E7826B') + `<path d="M-9,-20 h18" stroke="#fff" stroke-width="2" opacity=".55" stroke-dasharray="3 3"/>`;
+  return grp(x, y, sc, s);
+}
+function zRug(cx, cy, rx, ry, c, c2){
+  let s = '';
+  for (let k = 0; k < 40; k++){ const a = k / 40 * Math.PI * 2; s += `<path d="M${zf(cx + Math.cos(a) * (rx - 1))},${zf(cy + Math.sin(a) * (ry - 1))} L${zf(cx + Math.cos(a) * (rx + 6))},${zf(cy + Math.sin(a) * (ry + 3.5))}" stroke="${shade(c, .2)}" stroke-width="1.6" stroke-linecap="round"/>`; }
+  s += `<ellipse cx="${cx}" cy="${cy + 2.5}" rx="${rx}" ry="${ry}" fill="#3a2048" opacity=".1"/><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${c}"/><ellipse cx="${cx}" cy="${cy}" rx="${zf(rx * .84)}" ry="${zf(ry * .78)}" fill="none" stroke="${c2}" stroke-width="3"/><ellipse cx="${cx}" cy="${cy}" rx="${zf(rx * .66)}" ry="${zf(ry * .58)}" fill="${shade(c, .14)}"/><ellipse cx="${cx}" cy="${cy}" rx="${zf(rx * .74)}" ry="${zf(ry * .67)}" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 4" opacity=".85"/>`;
+  [-.42, 0, .42].forEach(t => { s += `<g transform="translate(${zf(cx + t * rx)},${cy}) scale(1,.5)">${zFlower(0, 0, 3.4, c2)}</g>`; });
+  return s;
+}
+function zFrame(x, y, w, h, col, art){ return `<g transform="translate(${x},${y})">${zShadow(w / 2, h + 3, w * .4)}${ZR(0, 0, w, h, 4, col)}${ZR(4, 4, w - 8, h - 8, 2, '#FFF8EC')}<g transform="translate(${w / 2},${h / 2})">${art}</g></g>`; }
+function zFrameRound(cx, cy, r, col, art){ return `${ZE(cx, cy, r, r, col)}${ZE(cx, cy, r - 4, r - 4, '#FFF8EC')}<g transform="translate(${cx},${cy})">${art}</g>`; }
+const zArtRainbow = () => ['#FF8A8A', '#FFC07A', '#FFE680', '#A6E88C', '#8FD0FF'].map((c, k) => `<path d="M${-14 + k * 2.4},6 a${14 - k * 2.4},${14 - k * 2.4} 0 0 1 ${28 - k * 4.8},0" stroke="${c}" stroke-width="2.4" fill="none"/>`).join('') + `<circle cx="-14" cy="7" r="3.6" fill="#fff"/><circle cx="14" cy="7" r="3.6" fill="#fff"/>`;
+const zArtFlower = () => `<path d="M0,12 V0" stroke="#3FAF4F" stroke-width="1.6"/><ellipse cx="4" cy="7" rx="3" ry="1.6" fill="#4CBF58"/>${zFlower(0, -3, 3.6, '#FF8FB8')}`;
+function zFish(c){ return `<path d="M-8,0 C-8,-6 4,-7 8,0 C4,7 -8,6 -8,0Z" fill="${c}" stroke="${shade(c, -.2)}" stroke-width=".8"/><path d="M-7,0 L-13,-5 Q-11,0 -13,5Z" fill="${shade(c, -.08)}"/><circle cx="4" cy="-1" r="1.4" fill="#2B2550"/><circle cx="4.4" cy="-1.5" r=".5" fill="#fff"/><path d="M-1,-4 q2,4 0,8" stroke="#fff" stroke-width="1" opacity=".6" fill="none"/>`; }
+
+// ---- living room pieces ----
+function zSofa(c, p1, p2){
+  const dk = shade(c, -.08), lt = shade(c, .12);
+  let s = zShadow(0, 0, 78) + [-58, 58].map(x => `<path d="M${x - 3},-12 L${x - 4.5},0 H${x + 2} L${x + 3},-12Z" fill="#A86F42"/>`).join('');
+  s += ZD('M-62,-34 C-62,-74 -52,-78 -30,-78 H30 C52,-78 62,-74 62,-34Z', c);
+  s += [[-34, -60], [0, -62], [34, -60], [-17, -48], [17, -48]].map(([x, y]) => `<path d="M${x - 5},${y + 3} q5,-3 10,0" stroke="${shade(c, -.18)}" stroke-width=".9" fill="none"/><circle cx="${x}" cy="${y}" r="1.8" fill="${shade(c, -.25)}"/>`).join('');
+  s += ZR(-64, -38, 128, 28, 10, dk) + ZR(-58, -47, 57, 18, 8, lt) + ZR(1, -47, 57, 18, 8, lt);
+  s += ZD('M-77,-10 V-48 C-77,-63 -55,-63 -55,-48 V-10Z', c) + ZD('M77,-10 V-48 C77,-63 55,-63 55,-48 V-10Z', c);
+  s += `<ellipse cx="-66" cy="-52" rx="6" ry="2.4" fill="#fff" opacity=".4"/><ellipse cx="66" cy="-52" rx="6" ry="2.4" fill="#fff" opacity=".4"/>`;
+  s += `<g transform="translate(-36,-57) rotate(-12)">${ZD(pillowPath(13), p1)}${zHeart(0, 0, .8, '#fff', 'opacity=".85"')}</g>`;
+  s += `<g transform="translate(38,-56) rotate(10)">${ZD(pillowPath(12), p2)}<path d="M-8,-4 h16 M-9,1 h18 M-8,6 h16" stroke="#fff" stroke-width="1.6" opacity=".7"/></g>`;
+  return s;
+}
+function zArmchair(c){ const lt = shade(c, .12); return zShadow(0, 0, 40) + [-26, 26].map(x => `<path d="M${x - 3},-12 L${x - 4},0 H${x + 2} L${x + 3},-12Z" fill="#A86F42"/>`).join('') + ZD('M-28,-34 C-28,-70 -22,-74 0,-74 C22,-74 28,-70 28,-34Z', c) + `<circle cx="0" cy="-58" r="1.8" fill="${shade(c, -.25)}"/>` + ZR(-32, -38, 64, 28, 10, shade(c, -.08)) + ZR(-26, -47, 52, 18, 8, lt) + ZD('M-42,-10 V-46 C-42,-60 -22,-60 -22,-46 V-10Z', c) + ZD('M42,-10 V-46 C42,-60 22,-60 22,-46 V-10Z', c); }
+function zTV(on, bud){
+  const wood = '#EDB67F';
+  let s = zShadow(0, 0, 50) + [-36, 36].map(x => `<path d="M${x - 3},-9 L${x - 5},0 H${x + 1} L${x + 3},-9Z" fill="#B97E4A"/>`).join('');
+  s += ZR(-46, -40, 92, 32, 8, wood) + ZR(-40, -34, 38, 20, 5, shade(wood, .12)) + ZR(2, -34, 38, 20, 5, shade(wood, .12));
+  s += ZE(-21, -24, 2.6, 2.6, '#FFD36B') + ZE(21, -24, 2.6, 2.6, '#FFD36B') + ZR(-9, -48, 18, 9, 3, '#4A4468');
+  s += ZR(-43, -106, 86, 60, 10, '#403A62') + `<rect x="-37" y="-100" width="74" height="48" rx="6" fill="${on ? 'url(#zSky)' : '#2A2646'}"/>`;
+  if (on) s += `<path d="M-37,-64 Q-18,-74 0,-65 Q18,-76 37,-64 V-58 a6,6 0 0 1 -6,6 H-31 a6,6 0 0 1 -6,-6Z" fill="#8DD474"/><circle cx="24" cy="-88" r="6" fill="#FFE36B"/><g transform="translate(-6,-56)"><g class="jump">${grp(0, 0, .3, buddySVG(bud, { cheer: 1 }))}</g></g>`;
+  s += `<path d="M-33,-96 h22 l-18,38 h-5 a2,2 0 0 1 -2,-2z" fill="#fff" opacity=".1"/><circle cx="36" cy="-49.5" r="1.5" fill="${on ? '#7CFF9B' : '#FF6B6B'}"/>`;
+  return s;
+}
+function zRadio(on){
+  let s = ZR(-20, -26, 40, 26, 10, '#FF8A6B') + ZE(-8, -13, 8, 8, '#FFE9DC') + `<path d="M-13,-16 h10 M-14,-13 h12 M-13,-10 h10" stroke="#E0705A" stroke-width="1" opacity=".7"/>`;
+  s += ZR(4, -21, 12, 5, 2.5, '#FFF6EA') + ZE(7, -9, 3, 3, '#FFF6EA') + ZE(14, -9, 3, 3, '#FFF6EA') + `<path d="M12,-26 Q16,-34 22,-40" stroke="#8A8FA6" stroke-width="1.6" fill="none"/><circle cx="22" cy="-40" r="2.2" fill="#FF5A8C"/>`;
+  if (on) s += [[-26, -34, '♪', ''], [26, -44, '♫', 'd2'], [2, -48, '♪', 'd3']].map(([x, y, t, d]) => `<g class="rise ${d}">${TX(x, y, t, 14, ['#7B5CFA', '#FF5A8C', '#34B2F0'][Math.abs(x) % 3])}</g>`).join('');
+  return s;
+}
+function zFloorLamp(lit, sc){
+  let s = lit ? `<circle cx="0" cy="-118" r="46" fill="url(#bulb)" opacity=".55"/>` : '';
+  s += zShadow(0, 0, 16) + ZE(0, -3, 14, 4, '#D3A665') + `<rect x="-1.8" y="-114" width="3.6" height="112" rx="1.8" fill="#C79A5B"/><rect x="-.6" y="-110" width="1.2" height="104" fill="#fff" opacity=".4"/>`;
+  const c = lit ? sc : '#D8CFC4';
+  s += ZD('M-20,-110 L-14,-140 H14 L20,-110Z', c) + [...Array(9)].map((_, k) => `<circle cx="${-18 + k * 4.5}" cy="-109" r="2.4" fill="${shade(c, -.12)}"/>`).join('');
+  return s;
+}
+function zSideTable(x, y, c){ return grp(x, y, 1, zShadow(0, 0, 22) + `<path d="M-14,-36 L-18,0 M14,-36 L18,0" stroke="${shade(c, -.25)}" stroke-width="3.2" stroke-linecap="round"/>` + ZR(-22, -42, 44, 8, 4, shade(c, -.05)) + ZE(0, -42, 24, 6, c)); }
+function zFishbowl(fed){
+  let s = `<ellipse cx="0" cy="-1" rx="14" ry="3" fill="#3a2048" opacity=".18"/><circle cx="0" cy="-22" r="22" fill="#E3F7FF" opacity=".8" stroke="#A9DDF2" stroke-width="1.4"/><path d="M-20.6,-30 A22,22 0 1 0 20.6,-30 Q0,-26 -20.6,-30Z" fill="#7FD3FF" opacity=".75"/>`;
+  s += [[-10, -5, '#FFB3CC'], [-3, -3.5, '#FFE08A'], [5, -4, '#B9A2FF'], [12, -6.5, '#9EDC85']].map(([x, y, c]) => `<ellipse cx="${x}" cy="${y}" rx="3.4" ry="2.2" fill="${c}"/>`).join('');
+  s += `<path d="M-12,-5 q-5,-10 1,-18 M-8,-5 q4,-8 -1,-14" stroke="#3EC46B" stroke-width="2.4" fill="none" stroke-linecap="round"/><g transform="translate(${fed ? 6 : -1},-20)"><g class="hover">${zFish('#FF8A3D')}</g></g>`;
+  if (fed) s += [[-4, -32], [2, -34], [7, -31]].map(([x, y], k) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#E8B070" class="rise ${['', 'd2', 'd3'][k]}"/>`).join('');
+  s += `<ellipse cx="0" cy="-43" rx="10" ry="2.6" fill="#EAF8FF" stroke="#A9DDF2"/><path d="M-15,-33 A16,16 0 0 1 -5,-40" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".9"/><circle cx="12" cy="-12" r="2" fill="#fff" opacity=".6"/>`;
+  return s;
+}
+function zShelf(x, y, w){ return ZR(x, y, w, 6, 3, '#D9A06A') + `<path d="M${x + 10},${y + 6} q0,9 8,11 M${x + w - 10},${y + 6} q0,9 -8,11" stroke="#B97E4A" stroke-width="2.2" fill="none" stroke-linecap="round"/>`; }
+
+// ---- bedroom pieces ----
+function zBed(sleep){
+  let s = zShadow(0, 0, 74) + [-60, 60].map(x => ZR(x - 4, -12, 8, 12, 3, '#A88BEA')).join('');
+  s += ZD('M-62,-40 V-92 C-62,-106 -48,-108 -40,-100 C-30,-120 -10,-120 0,-104 C10,-120 30,-120 40,-100 C48,-108 62,-106 62,-92 V-40Z', '#C7B3FF');
+  s += zHeart(0, -92, 1, '#fff', 'opacity=".7"') + `<path d="M-50,-90 Q-40,-96 -30,-92 M30,-92 Q40,-96 50,-90" stroke="#fff" stroke-width="1.6" fill="none" opacity=".5"/>`;
+  s += ZR(-64, -30, 128, 20, 7, '#B39CF2') + ZR(-60, -48, 120, 20, 8, '#FFFFFF');
+  s += ZR(-52, -64, 46, 19, 9.5, '#FFFFFF') + ZR(6, -64, 46, 19, 9.5, '#FFF0F6') + `<path d="M-44,-58 q15,4 30,0 M14,-58 q15,4 30,0" stroke="#E5DDF2" stroke-width="1" fill="none"/>`;
+  const duvet = 'M-63,-46 Q0,-52 63,-46 L67,-9 Q0,-1 -67,-9Z';
+  s += ZD(duvet, '#FF9EC0') + `<path d="${duvet}" fill="url(#zQuilt)"/>` + [-40, -14, 14, 40].map((x, k) => zHeart(x, -26 + (k % 2) * 6, .7, '#fff', 'opacity=".75"')).join('');
+  s += ZD('M-63,-47 Q0,-53 63,-47 L64,-38 Q0,-44 -64,-38Z', '#FFFFFF') + `<path d="M-60,-40 Q0,-46 60,-40" stroke="#FF9EC0" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>`;
+  s += `<g transform="translate(36,-60)">${ZE(0, 0, 9, 8, '#FFFFFF')}${ZE(-4, -12, 2.6, 7, '#FFFFFF')}${ZE(4, -12, 2.6, 7, '#FFFFFF')}<ellipse cx="-4" cy="-12" rx="1.2" ry="4.5" fill="#FFB3CC"/><ellipse cx="4" cy="-12" rx="1.2" ry="4.5" fill="#FFB3CC"/><circle cx="-3" cy="-1" r="1" fill="#2B2550"/><circle cx="3" cy="-1" r="1" fill="#2B2550"/><circle cx="0" cy="1.5" r=".9" fill="#FF8FB8"/></g>`;
+  s += ZR(-70, -38, 11, 38, 5, '#C7B3FF') + ZR(59, -38, 11, 38, 5, '#C7B3FF') + ZE(-64.5, -40, 6.5, 6.5, '#D8C9FF') + ZE(64.5, -40, 6.5, 6.5, '#D8C9FF');
+  if (sleep) s += `<g class="rise">${TX(30, -100, 'Z', 18, '#7B5CFA')}</g><g class="rise d2">${TX(46, -118, 'z', 14, '#7B5CFA')}</g>`;
+  return s;
+}
+function zWardrobe(open){
+  const c = '#FFE4F0', dk = shade(c, -.12);
+  let s = zShadow(0, 0, 36) + [-24, 24].map(x => ZR(x - 4, -8, 8, 8, 3, '#D9A06A')).join('');
+  if (open){
+    s += ZD('M-32,-10 L-48,-2 V-124 L-32,-128Z', dk) + ZD('M32,-10 L48,-2 V-124 L32,-128Z', dk);
+    s += ZD('M-32,-6 V-118 Q-32,-142 0,-144 Q32,-142 32,-118 V-6Z', c) + ZD('M-27,-12 V-116 Q-27,-136 0,-138 Q27,-136 27,-116 V-12Z', '#F6E7D8');
+    s += `<path d="M-26,-116 H26" stroke="#B9A08A" stroke-width="2.4" stroke-linecap="round"/>` + [['#FF8FB8', -16], ['#7FD3FF', 0], ['#FFD36B', 16]].map(([col, x]) => `<path d="M${x},-116 v3 M${x - 7},-108 L${x},-113 L${x + 7},-108" stroke="#8A8FA6" stroke-width="1.2" fill="none"/>` + ZD(`M${x - 6},-109 Q${x},-106 ${x + 6},-109 L${x + 9},-74 Q${x},-70 ${x - 9},-74Z`, col)).join('');
+    s += ZR(-24, -40, 48, 22, 4, '#FFFFFF') + `<path d="M-20,-28 h12 M-4,-28 h12 M12,-28 h8" stroke="#B9A2FF" stroke-width="5" stroke-linecap="round"/>`;
+  } else {
+    s += ZD('M-32,-6 V-118 Q-32,-142 0,-144 Q32,-142 32,-118 V-6Z', c);
+    s += ZD('M-27,-36 V-112 Q-27,-130 -2,-134 V-36Z', shade(c, .3)) + ZD('M27,-36 V-112 Q27,-130 2,-134 V-36Z', shade(c, .3));
+    s += zHeart(-14, -104, .9, '#FF9EC0') + zHeart(14, -104, .9, '#FF9EC0') + ZE(-6, -72, 2.6, 2.6, '#FFD36B') + ZE(6, -72, 2.6, 2.6, '#FFD36B');
+    s += ZR(-27, -30, 54, 20, 5, shade(c, .3)) + ZE(0, -20, 2.6, 2.6, '#FFD36B');
+  }
+  s += ZD('M-36,-118 Q-36,-148 0,-150 Q36,-148 36,-118 L32,-118 Q32,-142 0,-144 Q-32,-142 -32,-118Z', '#FF9EC0');
+  return s;
+}
+function zToybox(out){
+  let s = zShadow(0, 0, 38);
+  if (out) s += `<g class="jump">${ZR(-30, -86, 15, 15, 4, '#FF5A8C')}${TX(-22.5, -74, 'A', 10, '#fff')}${ZE(2, -90, 9, 9, '#34B2F0')}<path d="M-6,-90 h16" stroke="#fff" stroke-width="2" opacity=".7"/><g transform="translate(26,-78) scale(.9)">${SPR.teddy}</g></g>`;
+  else s += ZE(-14, -50, 5, 5, '#D9A06E') + ZE(-2, -51, 5, 5, '#D9A06E') + ZE(18, -50, 7, 7, '#34B2F0');
+  s += ZR(-34, -40, 68, 40, 8, '#FF9F6B') + ZD('M-37,-36 Q-37,-54 0,-56 Q37,-54 37,-36Z', '#FF8A50');
+  s += `<path d="${starPath(-16, -20, 7, 3)}" fill="#FFE36B" stroke="#E8B83A" stroke-width=".8"/>` + zHeart(16, -21, 1, '#FFFFFF') + ZR(-5, -40, 10, 10, 2.5, '#FFD36B');
+  return s;
+}
+function zNightstand(lit){
+  let s = zShadow(0, 0, 18) + ZR(-16, -32, 32, 32, 6, '#FFE4F0') + ZR(-12, -26, 24, 11, 3, '#FFF4F9') + ZE(0, -20.5, 2, 2, '#FFD36B') + ZR(-12, -13, 24, 9, 3, '#FFF4F9');
+  if (lit) s += `<circle cx="0" cy="-50" r="28" fill="url(#bulb)" opacity=".6"/>`;
+  s += ZE(0, -33, 8, 2.6, '#C7B3FF') + `<rect x="-2" y="-46" width="4" height="13" rx="2" fill="#FFFFFF" stroke="#D8CFE6"/>` + ZD('M-15,-44 Q-15,-62 0,-62 Q15,-62 15,-44Z', lit ? '#FFE7A3' : '#E3D8F2') + [[-7, -50], [4, -55], [8, -47]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2" fill="#fff" opacity=".8"/>`).join('');
+  return s;
+}
+// ---- bathroom pieces ----
+function zToilet(flush){
+  let s = zShadow(0, 0, 26) + ZR(-18, -86, 36, 38, 7, '#FFFFFF') + ZR(-21, -90, 42, 8, 4, '#FFFFFF') + ZR(-16, -80, 9, 3.4, 1.7, '#C9D2E3');
+  s += ZD('M-24,-48 H24 Q24,-26 10,-20 L9,0 H-9 L-10,-20 Q-24,-26 -24,-48Z', '#FFFFFF') + ZE(0, -48, 25, 6, '#F4F7FB') + `<ellipse cx="0" cy="-48" rx="17" ry="3.4" fill="${flush ? '#9BDDFB' : '#DCEBF4'}"/>`;
+  if (flush) s += `<path class="spin" d="M-9,-48 a9,3 0 1 1 18,0" stroke="#3AAEE8" stroke-width="2.4" fill="none"/>`;
+  return s;
+}
+function zSink(brush){
+  let s = ZE(0, -146, 22, 28, '#F2C46B') + ZE(0, -146, 17, 23, '#DDF4FF') + `<path d="M-9,-158 l8,-6 M-8,-150 l7,-5" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`;
+  s += zShadow(0, 0, 18) + ZD('M-8,-48 Q-6,-22 -13,0 H13 Q6,-22 8,-48Z', '#FFFFFF') + ZD('M-30,-62 H30 Q30,-44 0,-42 Q-30,-44 -30,-62Z', '#FFFFFF') + ZR(-33, -67, 66, 7, 3.5, '#FFFFFF');
+  s += `<path d="M-2,-67 V-77 Q-2,-82 6,-82 H10" stroke="url(#zChrome)" stroke-width="4.4" fill="none" stroke-linecap="round"/>` + ZE(-15, -70, 3.6, 2.4, '#D9E1EE') + ZE(15, -70, 3.6, 2.4, '#D9E1EE');
+  s += ZR(19, -80, 10, 13, 3, '#FF9EC0') + `<path d="M22,-80 l-2,-12 M26,-80 l3,-11" stroke-width="2.4" stroke-linecap="round" stroke="#34B2F0"/><path d="M26,-80 l3,-11" stroke-width="2.4" stroke-linecap="round" stroke="#7B5CFA"/>`;
+  if (brush) s += [0, 1, 2].map(k => `<path class="twinkle ${['', 'd2', 'd3'][k]}" d="${starPath(-12 + k * 12, -150 + (k % 2) * 8, 4.4, 1.7)}" fill="#fff"/>`).join('');
+  return s;
+}
+function zTub(on){
+  let s = zShadow(0, 0, 74) + [-52, 52].map(x => ZD(`M${x - 5},-14 Q${x - 8},-3 ${x - 11},0 H${x + 5} Q${x + 3},-6 ${x + 5},-14Z`, '#F2C46B')).join('');
+  s += ZD('M-70,-58 H70 Q68,-14 40,-10 H-40 Q-68,-14 -70,-58Z', '#FFB3CC') + `<path d="M-60,-46 Q-56,-22 -36,-18" stroke="#fff" stroke-width="3" fill="none" opacity=".45" stroke-linecap="round"/>`;
+  s += ZR(-75, -63, 150, 9, 4.5, '#FFFFFF') + `<path d="M62,-63 V-76 Q62,-83 54,-83 H49" stroke="url(#zChrome)" stroke-width="4.4" fill="none" stroke-linecap="round"/>` + ZE(70, -70, 3.4, 2.4, '#D9E1EE');
+  if (on) s += [...Array(14)].map((_, k) => `<circle cx="${-66 + k * 10}" cy="${-64 - (k % 3) * 5}" r="${7 + (k % 3) * 2.2}" fill="#fff" stroke="#BFE3FA" stroke-width="1"/><circle cx="${-68 + k * 10}" cy="${-67 - (k % 3) * 5}" r="1.6" fill="#E3F4FF"/>`).join('') + `<g transform="translate(30,-74)">${ZE(0, 0, 10, 7, '#FFD23F')}${ZE(7, -7, 5.5, 5.5, '#FFD23F')}<path d="M12,-7 l6,1 l-6,2.4z" fill="#FF8A3D"/><circle cx="8.5" cy="-8.5" r="1" fill="#2B2550"/></g>` + [...Array(5)].map((_, k) => `<circle class="rise ${['', 'd2', 'd3'][k % 3]}" cx="${-40 + k * 18}" cy="-84" r="${2 + k % 2}" fill="#fff" stroke="#BFE3FA" stroke-width=".8"/>`).join('');
+  return s;
+}
+function zShower(on){
+  let s = `<path d="M30,-34 V-8 Q30,2 20,2 H6" stroke="url(#zChrome)" stroke-width="4.4" fill="none" stroke-linecap="round"/>` + ZR(-3, 0, 6, 8, 2, '#C9D2E3') + ZE(0, 10, 14, 4.6, '#D9E1EE');
+  s += [-8, -4, 0, 4, 8].map(x => `<circle cx="${x}" cy="12" r=".9" fill="#8A93AA"/>`).join('');
+  if (on) s += [...Array(11)].map((_, k) => `<path class="zdrip" style="animation-delay:-${(k * .13).toFixed(2)}s" d="M${-11 + k * 2.2},16 l${zf((k - 5) * .6)},16" stroke="#6EC6FF" stroke-width="1.8" stroke-linecap="round"/>`).join('');
+  return s;
+}
+// ---- kitchen pieces ----
+function zFridge(open){
+  const c = '#A8E6D6';
+  let s = zShadow(0, 0, 36) + [-22, 22].map(x => ZR(x - 4, -6, 8, 6, 2, '#8A93AA')).join('');
+  if (open){
+    s += ZD('M-32,-148 L-52,-140 V-12 L-32,-6Z', shade(c, -.1)) + ZR(-32, -150, 64, 146, 16, c) + ZR(-27, -145, 54, 136, 12, '#EEFAFF');
+    s += [-110, -74, -40].map(y => `<path d="M-26,${y} H26" stroke="#BFE3F2" stroke-width="2.4"/>`).join('');
+    s += [['🍎', -14, -114], ['🥛', 8, -114], ['🧀', -14, -78], ['🍓', 8, -78], ['🥕', -14, -44], ['🍰', 8, -44]].map(([e, x, y]) => `<text x="${x}" y="${y}" font-size="17" text-anchor="middle">${e}</text>`).join('');
+  } else {
+    s += ZR(-32, -150, 64, 146, 16, c) + `<path d="M-32,-98 H32" stroke="${shade(c, -.22)}" stroke-width="1.6"/><path d="M-31,-96 H31" stroke="#fff" stroke-width="1" opacity=".6"/>`;
+    s += ZR(20, -138, 6, 30, 3, '#E3E9F2') + ZR(20, -88, 6, 40, 3, '#E3E9F2');
+    s += `<g transform="rotate(-4 -10 -70)">${ZR(-24, -82, 26, 22, 2, '#FFFFFF')}<circle cx="-16" cy="-74" r="3.4" fill="#FFD23F"/><path d="M-12,-64 l5,-6 l5,6z" fill="#FF8FB8"/><path d="M-20,-64 h18" stroke="#7FCB66" stroke-width="1.6"/></g>` + ZE(-11, -82, 2.6, 2.6, '#FF5A8C') + ZE(-20, -126, 4, 4, '#FFD23F') + ZE(-8, -120, 4, 4, '#7B5CFA') + zHeart(-14, -40, .9, '#FF5A8C');
+  }
+  s += zPlant(-8, -150, .5);
+  return s;
+}
+function zHood(){ return ZR(-10, 0, 20, 36, 2, '#FFC49A') + ZD('M-36,62 H36 L26,34 H-26Z', '#FFB37A') + ZR(-38, 60, 76, 6, 3, '#FF9C7A'); }
+function zStove(pot, oven){
+  let s = zShadow(0, 0, 48) + ZR(-42, -76, 84, 76, 8, '#FFFFFF') + ZR(-42, -86, 84, 14, 6, '#FF9C7A') + [-28, -14, 14, 28].map(x => ZE(x, -79, 3.6, 3.6, '#FFFFFF')).join('') + `<rect x="-6" y="-82" width="12" height="6" rx="2" fill="#2B2550"/><text x="0" y="-77.3" font-size="4.6" fill="#7CFF9B" text-anchor="middle" font-family="monospace">12:00</text>`;
+  s += ZR(-35, -64, 70, 48, 7, '#F2F6FB') + ZR(-24, -68, 48, 4, 2, '#D9E1EE') + `<rect x="-27" y="-56" width="54" height="28" rx="6" fill="${oven ? 'url(#zOven)' : '#3B3550'}"/>`;
+  if (oven) s += [-12, 0, 12].map(x => `<circle cx="${x}" cy="-37" r="5" fill="#E8B070" stroke="#B97E4A"/><circle cx="${x - 1.5}" cy="-38" r=".9" fill="#5B3424"/><circle cx="${x + 2}" cy="-36" r=".9" fill="#5B3424"/>`).join('') + `<path d="M-22,-32 H22" stroke="#8A93AA" stroke-width="1.4"/>`;
+  s += `<path d="M-23,-53 h14 l-10,22 h-4z" fill="#fff" opacity=".12"/>` + ZR(-35, -12, 70, 8, 3, '#F2F6FB');
+  s += ZR(-44, -91, 88, 6, 3, '#5F6A86') + ZE(-20, -92, 13, 2.6, '#454B63') + ZE(20, -92, 13, 2.6, '#454B63');
+  s += ZD('M-34,-93 V-110 Q-34,-114 -30,-114 H-10 Q-6,-114 -6,-110 V-93Z', '#FF6B6B') + ZR(-41, -108, 8, 4, 2, '#E8414F') + ZR(-7, -108, 8, 4, 2, '#E8414F') + ZE(-20, -114, 15, 3.6, '#FF8A8A') + ZE(-20, -118, 3.2, 2.2, '#FFFFFF');
+  if (pot) s += [0, 1, 2].map(k => `<circle class="smoke s${k + 1}" cx="${-26 + k * 6}" cy="-124" r="5" fill="#fff" opacity=".75"/>`).join('');
+  s += ZD('M8,-93 Q6,-110 20,-112 Q34,-110 32,-93Z', '#7FD3C9') + `<path d="M31,-102 q8,-2 9,-9" stroke="#5CBDB1" stroke-width="3.4" fill="none" stroke-linecap="round"/><path d="M12,-108 Q20,-122 28,-108" stroke="#454B63" stroke-width="2.4" fill="none"/>` + ZE(20, -113, 3, 2, '#FFFFFF');
+  return s;
+}
+function zCounter(x0, x1, y){ const w = x1 - x0; let s = zShadow((x0 + x1) / 2, 222, w * .45) + ZR(x0, y + 6, w, 222 - y - 6, 4, '#A8E6D6'); const n = Math.max(1, Math.round(w / 60)), dw = (w - 8) / n; for (let i = 0; i < n; i++){ s += ZR(x0 + 4 + i * dw + 2, y + 13, dw - 4, 222 - y - 22, 6, '#BDEEE1') + ZR(x0 + 4 + i * dw + dw / 2 - 7, y + 18, 14, 3.4, 1.7, '#E3E9F2'); } return s + ZR(x0 - 4, y - 2, w + 8, 10, 4, '#FFF8F0') + `<path d="M${x0 + 6},${y + 1} q20,3 40,-1 M${x0 + 70},${y + 2} q20,-3 40,1" stroke="#E8DCCD" stroke-width="1" fill="none"/>`; }
+function zToaster(toast){
+  let s = zShadow(0, 0, 22);
+  s += toast ? `<g class="jump">${ZD('M-14,-46 Q-14,-53 -8,-53 Q-2,-53 -2,-46 V-24 H-14Z', '#E8B070')}${ZD('M2,-48 Q2,-55 8,-55 Q14,-55 14,-48 V-26 H2Z', '#E8B070')}<path d="M-12,-46 Q-8,-50 -4,-46 M4,-48 Q8,-52 12,-48" stroke="#F7D9A8" stroke-width="2" fill="none"/></g>` : ZD('M-13,-30 Q-13,-34 -8,-34 Q-3,-34 -3,-30Z', '#E8B070') + ZD('M3,-30 Q3,-34 8,-34 Q13,-34 13,-30Z', '#E8B070');
+  s += ZR(-23, -30, 46, 30, 12, '#E7ECF4') + `<path d="M-14,-29 h10 M4,-29 h10" stroke="#5F6A86" stroke-width="2.4" stroke-linecap="round"/><path d="M-17,-22 q0,-4 4,-5" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>` + ZR(20, -19, 8, 4, 2, '#FF9C7A') + ZE(-12, -9, 2.4, 2.4, '#FF9C7A');
+  return s;
+}
+function zCookieJar(crumbs){
+  let s = zShadow(0, 0, 15) + `<path d="M-14,0 V-26 Q-14,-34 -8,-34 H8 Q14,-34 14,-26 V0 Q14,2 12,2 H-12 Q-14,2 -14,0Z" fill="#DFF4FF" opacity=".75" stroke="#A9DDF2" stroke-width="1.2"/>`;
+  s += (crumbs ? [[-4, -5]] : [[-6, -6], [5, -8], [-3, -16], [6, -19], [-6, -25]]).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5.5" fill="#E8B070" stroke="#C98E5E" stroke-width=".8"/><circle cx="${x - 2}" cy="${y - 1}" r=".9" fill="#5B3424"/><circle cx="${x + 2}" cy="${y + 1.4}" r=".9" fill="#5B3424"/>`).join('');
+  s += `<path d="M-10,-28 Q-10,-32 -6,-32" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>` + ZR(-12, -40, 24, 7, 3.5, '#FF9EC0') + ZE(0, -42, 3.6, 2.6, '#FF9EC0');
+  return s;
+}
+function zClock(cx, cy){ return ZE(cx, cy, 15, 15, '#FF9C7A') + ZE(cx, cy, 11.5, 11.5, '#FFFFFF') + [0, 1, 2, 3].map(k => `<circle cx="${zf(cx + Math.cos(k * 1.5708) * 8.5)}" cy="${zf(cy + Math.sin(k * 1.5708) * 8.5)}" r="1.2" fill="#5F6A86"/>`).join('') + `<path d="M${cx},${cy} v-7 M${cx},${cy} l5,3" stroke="#2B2550" stroke-width="1.8" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="1.4" fill="#FF5A8C"/>`; }
+
+// ---- the house ----
+const ZPOS = { living: { kx: 118, ky: 258, bx: 252, by: 262 }, bed: { kx: 150, ky: 258, bx: 296, by: 262 }, bath: { kx: 112, ky: 260, bx: 196, by: 262 }, kitchen: { kx: 116, ky: 260, bx: 252, by: 262 } };
+function houseScene(){
+  const H = houseState(), on = H.on, kid = K(), r = H.room, P = H.pos[r] || ZPOS[r] || ZPOS.living; let s = '';
+  if (r === 'living'){
+    s = zRoomBg({ wall: '#FFD6E4', low: '#FFF0F5', wp: 'zDamask', floor: '#E0AE7C', pool: [196, 228, 92] });
+    s += zShelf(40, 46, 88) + IP.books(48, 46, 4, 20) + hsObj('radio', 104, 46, zRadio(on.radio), 'radio');
+    s += hsObj('window', 156, 18, zWindow(on.night, '#FF9EC0', 80, 84), 'window');
+    s += zFrameRound(292, 40, 17, '#E7B26C', zHeart(0, 1, 1.1, '#FF6F9F'));
+    s += zRug(190, 240, 112, 22, '#FFB9CF', '#FF8FB0');
+    s += hsObj('tv', 82, 190, zTV(on.tv, kid.buddy), 'TV') + grp(196, 204, .9, zSofa('#8ED9C8', '#FFB3CC', '#FFE08A'));
+    s += hsObj('lamp', 284, 212, zFloorLamp(!on.lampOff, '#FFE7A3'), 'lamp') + zSideTable(328, 230, '#E8B27A') + hsObj('fish', 328, 188, zFishbowl(on.fishFed), 'fish bowl');
+    s += zPlant(18, 270, 1.1);
+  } else if (r === 'bed'){
+    s = zRoomBg({ wall: '#E3D9FF', low: '#F5F0FF', wp: 'zStarsWP', floor: '#E8C9A6', pool: [90, 226, 70] });
+    s += hsObj('window', 44, 24, zWindow(on.night, '#B58CFF', 68, 76), 'window') + IP.lights(36, 126, 10);
+    s += IP.bunting(204, 316, 30) + zFrame(240, 68, 40, 32, '#E7B26C', zArtRainbow());
+    s += zRug(150, 244, 84, 18, '#C9B6FF', '#A88BEA');
+    s += hsObj('wardrobe', 154, 198, zWardrobe(on.wardrobe), 'wardrobe') + hsObj('bed', 258, 230, zBed(on.sleep), 'bed') + hsObj('nightlamp', 338, 228, zNightstand(!on.lampOff), 'night lamp');
+    s += hsObj('toybox', 62, 256, zToybox(on.toys), 'toy box');
+  } else if (r === 'bath'){
+    s = zRoomBg({ wall: '#CDEFF7', low: '#FFFFFF', tiles: true, lowY: 100, trim: '#9EDCEB', wp: 'zBubbles', floor: '#FFFFFF', ft: 'check', floor2: '#C4E8F4' });
+    s += `<path d="M46,70 H88" stroke="url(#zChrome)" stroke-width="3.4" stroke-linecap="round"/>` + ZD('M48,72 H86 V112 Q67,117 48,112Z', '#9EDCF2') + `<path d="M48,84 H86 M48,100 H86" stroke="#fff" stroke-width="3" opacity=".8"/>`;
+    s += ZR(98, 148, 16, 4, 2, '#C9D2E3') + ZE(106, 158, 7.5, 7.5, '#FFFFFF') + `<path d="M99,158 V172 H106 V158" fill="#fff" stroke="#DCE3EE"/>`;
+    s += ZR(186, 20, 150, 4, 2, '#C9D2E3') + ZD('M314,24 Q306,60 316,100 Q308,140 318,176 H340 Q334,140 340,100 Q332,60 338,24Z', '#FFD6E8') + `<path d="M314,24 Q306,60 316,100 Q308,140 318,176 H340 Q334,140 340,100 Q332,60 338,24Z" fill="url(#wp-dots)"/>` + [318, 326, 334].map(x => `<circle cx="${x}" cy="22" r="3" fill="none" stroke="#B9C2D6" stroke-width="1.4"/>`).join('');
+    s += `<ellipse cx="262" cy="252" rx="54" ry="10" fill="#3a2048" opacity=".08"/>` + [...Array(18)].map((_, k) => { const a = k / 18 * Math.PI * 2; return `<circle cx="${zf(262 + Math.cos(a) * 50)}" cy="${zf(250 + Math.sin(a) * 9)}" r="4" fill="#FFC9DD"/>`; }).join('') + `<ellipse cx="262" cy="250" rx="50" ry="9" fill="#FFC9DD"/><ellipse cx="262" cy="250" rx="38" ry="6" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+    s += hsObj('shower', 266, 34, zShower(on.shower), 'shower') + hsObj('sink', 152, 214, zSink(on.brush), 'sink') + hsObj('toilet', 64, 228, zToilet(on.flush), 'toilet') + hsObj('tub', 262, 238, zTub(on.tub), 'bathtub');
+    s += zPlant(340, 272, .75);
+  } else {
+    s = zRoomBg({ wall: '#FFF2DC', low: '#FFFFFF', tiles: true, lowY: 112, trim: '#FFC49A', wp: 'zGingham', floor: '#FFFFFF', ft: 'check', floor2: '#FFD9BC' });
+    s += hsObj('window', 238, 24, zWindow(on.night, '#FF9C8A', 76, 66, { gingham: 1 }), 'window') + zClock(118, 44) + grp(160, 22, 1, zHood());
+    s += zCounter(206, 336, 160) + hsObj('toaster', 246, 158, zToaster(on.toast), 'toaster') + hsObj('cookies', 312, 158, zCookieJar(on.crumbs), 'cookie jar') + `<g transform="translate(281,158)">${ZD('M-10,-8 Q0,0 10,-8Z', '#7FD3FF')}${ZE(-4, -11, 4, 4, '#FF5A5A')}${ZE(4, -12, 4, 4, '#FFD23F')}${ZE(0, -15, 3.6, 3.6, '#7FCB66')}</g>`;
+    s += hsObj('fridge', 62, 224, zFridge(on.fridge), 'fridge') + hsObj('stove', 160, 224, zStove(on.pot, on.oven), 'stove');
+  }
+  const night = (r === 'living' || r === 'bed') && on.lampOff && on.night;
+  s += `<g class="hkid" data-hd="kid" transform="translate(${P.kx},${P.ky})">${charSVG(kid.char, { mood: on.sleep && r === 'bed' ? 'tired' : 'cheer' })}</g><g class="hkid" data-hd="bud" transform="translate(${P.bx},${P.by}) scale(.7)">${buddySVG(kid.buddy, { cheer: 1 })}</g>`;
+  s += zVignette();
+  if (night || (r === 'bed' && on.sleep)) s += `<rect width="360" height="270" fill="#1E2450" opacity=".45" pointer-events="none"/>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`;
+}
+
+// ---- shared props everywhere get the smoother look ----
+IP.window = function(x, y, w, h, o = {}){ return `<g transform="translate(${x - 6},${y - 6})">${zWindow(o.night, o.curtain, w + 12, h + 10, o)}</g>`; };
+IP.plant = (x, y, s = 1) => zPlant(x, y, s);
+IP.rug = (x, y, rx, ry, col) => zRug(x, y, rx, ry, col, shade(col, -.15));
+IP.frame = function(x, y, w, h, col, inner){ return zShadow(x + w / 2, y + h + 7, w * .4) + ZR(x - 5, y - 5, w + 10, h + 10, 4, col.startsWith('#') ? col : '#C98A55') + ZR(x, y, w, h, 2, '#FFFDF6') + (inner || ''); };
+FURN.sofa.d = () => grp(0, 0, .86, zSofa('#7FD8C6', '#FFB3CC', '#FFE08A'));
+FURN.armchair.d = () => grp(0, 0, .9, zArmchair('#FFC63A'));
+FURN.bed.d = () => grp(0, 0, .9, zBed(false));
+FURN.toychest.d = () => zToybox(false);
+FURN.lamp.d = () => grp(0, 0, .75, zFloorLamp(true, '#FFE7A3'));
+FURN.dresser.d = () => zShadow(0, 0, 34) + ZR(-34, -58, 68, 58, 8, '#FFFFFF') + [-52, -34, -16].map(y => ZR(-28, y, 56, 14, 4, '#FFE0EA') + ZE(0, y + 7, 2.2, 2.2, '#FFC63A')).join('') + zPlant(18, -58, .45);
+
+
+// ---- smoother shared props (books, boards, shelves, counters, flags, lamps) ----
+IP.books = function(x, y, n, h = 22){ let s = '', cx = x; const C = ['#FF7FA8', '#5CC2F2', '#FFCB4D', '#5CCF83', '#B99BFF', '#FF9A5C']; for (let k = 0; k < n; k++){ const w = 6 + rnd(k + x) * 5, hh = h - rnd(k * 3 + x) * 7, c = C[(k + Math.round(x)) % 6]; s += ZR(cx, y - hh, w, hh, 2, c) + `<rect x="${zf(cx + 1)}" y="${zf(y - hh + 3)}" width="${zf(w - 2)}" height="2" rx="1" fill="#fff" opacity=".65"/><rect x="${zf(cx + 1)}" y="${zf(y - 6)}" width="${zf(w - 2)}" height="1.6" rx=".8" fill="${shade(c, -.25)}" opacity=".6"/>`; cx += w + 1; } return s; };
+IP.chalk = function(x, y, w, h, lines){ return zShadow(x + w / 2, y + h + 10, w * .42) + ZR(x - 6, y - 6, w + 12, h + 12, 8, '#C8915E') + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#2F5D50"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="url(#zSoft)" opacity=".5"/><path d="M${x + 8},${y + h - 8} q${w * .2},-6 ${w * .35},-2" stroke="#fff" stroke-width="1.4" opacity=".15" fill="none"/>` + lines.map((l, k) => TX(x + w / 2, y + 20 + k * 20, l.t, l.s || 15, l.c || '#fff', 'opacity=".95"')).join('') + ZR(x + 10, y + h + 1, 24, 5, 2.5, '#FFFFFF') + ZR(x + 38, y + h + 1, 10, 5, 2.5, '#FF9EC0'); };
+IP.shelf = function(x, y, w, items = ''){ return zShelf(x, y, w) + items; };
+IP.counter = function(x0, x1, y, col, top = '#F5EDE3'){ const w = x1 - x0; let s = ZR(x0, y, w, 270 - y + 8, 4, col); const n = Math.max(1, Math.round(w / 70)), dw = w / n; for (let i = 0; i < n; i++) s += `<rect x="${zf(x0 + i * dw + 6)}" y="${y + 12}" width="${zf(dw - 12)}" height="${270 - y - 16}" rx="6" fill="#fff" opacity=".14" stroke="${shade(col, -.2)}" stroke-opacity=".35"/>`; return s + ZR(x0 - 4, y - 8, w + 8, 12, 5, top.startsWith('#') ? top : '#F5EDE3'); };
+IP.bunting = function(x0, x1, y, cols = ['#FF7FA8', '#FFCB4D', '#5CCF83', '#5CC2F2', '#B99BFF']){
+  let s = `<path d="M${x0},${y} Q${(x0 + x1) / 2},${y + 18} ${x1},${y}" stroke="#fff" stroke-width="1.6" fill="none"/>`; const n = Math.round((x1 - x0) / 22);
+  for (let k = 0; k < n; k++){ const t = (k + .5) / n, px = x0 + (x1 - x0) * t, py = y + 18 * 4 * t * (1 - t) * .5 * 2; s += ZD(`M${zf(px - 7)},${zf(py)} H${zf(px + 7)} Q${zf(px + 4)},${zf(py + 8)} ${zf(px)},${zf(py + 14)} Q${zf(px - 4)},${zf(py + 8)} ${zf(px - 7)},${zf(py)}Z`, cols[k % cols.length]) + `<circle cx="${zf(px)}" cy="${zf(py + 5)}" r="1.4" fill="#fff" opacity=".8"/>`; }
+  return s; };
+IP.pendant = function(x, len, col){ const c = col.startsWith('#') ? col : '#FFC63A'; return `<path d="M${x},0 v${len}" stroke="#5B5470" stroke-width="1.6"/><circle cx="${x}" cy="${len + 20}" r="20" fill="url(#bulb)" opacity=".75"/>` + ZD(`M${x - 15},${len + 15} Q${x - 14},${len - 2} ${x},${len - 2} Q${x + 14},${len - 2} ${x + 15},${len + 15}Z`, c) + `<ellipse cx="${x}" cy="${len + 16}" rx="7" ry="3" fill="#FFF8D6"/>`; };
 
 injectDefs();
 injectDefs2();
