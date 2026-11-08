@@ -10436,6 +10436,114 @@ function zChar(c, o = {}){
 }
 charSVG = function(c, o = {}){ return zChar(c, o); };
 
+// ---------- v26 SMOOTH BODIES: one smooth body outline, clothes cut to the body so they look worn ----------
+function zSpline(pts){ const n = pts.length; let d = `M${f1(pts[0][0])},${f1(pts[0][1])}`;
+  for (let i = 0; i < n; i++){ const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+    d += ` C${f1(p1[0] + (p2[0] - p0[0]) / 6)},${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)},${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])},${f1(p2[1])}`; }
+  return d + 'Z'; }
+// right half of the body from the neck to the crotch; the left half is its mirror
+const ZBODY_R = [[0, -61], [3.4, -61], [3.6, -56], [6.6, -53.6], [10.8, -52.4], [13.6, -50.6], [15, -47], [16, -42.4], [16.7, -38.6], [17.1, -34.4], [17.3, -31.2], [18, -29], [18.1, -26.6], [17.1, -24.9], [15.8, -25.1], [15.1, -26.8], [15, -29.4], [15.2, -31.4], [14.9, -35], [14.2, -39.4], [13.4, -43], [12.3, -46], [11.6, -42.6], [10.7, -37.6], [11.4, -32], [11.6, -28], [11, -22], [10.1, -16.4], [9.3, -12.8], [9.5, -9], [8.5, -4.6], [8.3, -2.8], [3.4, -2.8], [3.3, -4.6], [2.8, -9], [2.7, -12.8], [2, -18], [1.2, -23], [0, -25.4]];
+const ZBODY_PTS = [...ZBODY_R.slice(1, -1), [0, -25.4], ...ZBODY_R.slice(1, -1).reverse().map(([x, y]) => [-x, y]), [0, -61]];
+const BODY_D = zSpline(ZBODY_PTS);
+function zcDefs5(){ const d = $('#defs defs'); if (!d || d.querySelector('#zBodyClip')) return; d.insertAdjacentHTML('beforeend', `<clipPath id="zBodyClip"><path d="${BODY_D}"/></clipPath><linearGradient id="zBodyShade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2a1640" stop-opacity=".18"/><stop offset=".22" stop-color="#2a1640" stop-opacity="0"/><stop offset=".42" stop-color="#fff" stop-opacity=".16"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset=".8" stop-color="#2a1640" stop-opacity=".04"/><stop offset="1" stop-color="#2a1640" stop-opacity=".2"/></linearGradient><filter id="zSoftBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4"/></filter>`); }
+const _injDefsZ11 = injectDefsZ; injectDefsZ = function(){ _injDefsZ11(); zcDefs5(); };
+// garment regions (they get clipped to the body outline)
+const REG = {
+  top(hem, sleeve, neck){ const nk = neck === 'v' ? 'L0,-49.4 L4.6,-57.2' : neck === 'high' ? 'Q0,-55.6 4.2,-58' : 'Q0,-52.4 4.8,-57.2'; const n0 = neck === 'high' ? '-4.2,-58' : '-4.8,-57.2'; const sy = sleeve == null ? -47.2 : sleeve;
+    return `M${n0} ${nk} L14,-58.6 L40,-58.6 L40,${sy} L12.5,${sy} L12.5,${hem} L-12.5,${hem} L-12.5,${sy} L-40,${sy} L-40,-58.6 L-14,-58.6Z`; },
+  tank(hem){ return `M-10.6,-47.6 Q0,-42.6 10.6,-47.6 L12.5,-47.6 L12.5,${hem} L-12.5,${hem} L-12.5,-47.6Z M-8.6,-54.4 L-6.8,-54.4 L-6.2,-47 L-8.2,-47Z M8.6,-54.4 L6.8,-54.4 L6.2,-47 L8.2,-47Z`; },
+  pants(end){ return `M-12.8,-32.4 H12.8 V${end} H-12.8Z`; }
+};
+const LINE = (d, c, w = .6, op = .55) => `<path d="${d}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="${op}"/>`;
+function zClothes(c, T, B){
+  const sk = c.skin || '#FFE0C7', col = T.col || c.shirt || '#34B2F0', dk = shade(col, -.18); let inB = '', over = '', back = '';
+  const sleeveY = T.sl === 'long' ? -31.2 : T.sl === 'short' || T.sl === 'puff' ? -41.4 : null;
+  // ---- bottoms (inside the body) ----
+  const bot = !T.one && !T.overalls ? B : null;
+  if (bot && (bot.t === 'long' || bot.t === 'tight' || bot.t === 'wide' || bot.t === 'shorts')){
+    const bc = c.pants && c.bottom === 'pants' ? c.pants : bot.col, end = bot.t === 'shorts' ? -19.6 : -4.2, R = REG.pants(end);
+    inB += `<path d="${R}" fill="${bc}"/>` + (bot.pat ? `<path d="${R}" fill="url(#${bot.pat})"/>` : '') + LINE('M-12.8,-30.8 H12.8', shade(bc, -.25), .8, .5) + LINE(`M0,-30.6 V-26`, shade(bc, -.3), .5, .5);
+    if (bot.t !== 'shorts') inB += [-1, 1].map(sd => LINE(`M${sd * 4.4},-13.6 q${sd * 1.6},1 ${sd * 3.4},.2`, shade(bc, -.3), .5, .45) + LINE(`M${sd * 3.4},-5.2 H${sd * 8.6}`, shade(bc, -.28), .7, .5)).join('');
+    else inB += [-1, 1].map(sd => LINE(`M${sd * 1.4},-19.8 H${sd * 11.2}`, shade(bc, -.28), .7, .55)).join('');
+    if (bot.jeans) inB += [-1, 1].map(sd => LINE(`M${sd * 6.4},-28 V-6`, '#FFC46B', .45, .9) + LINE(`M${sd * 3.4},-30 q${sd * 3.2},3.6 ${sd * 7.4},1.4`, shade(bc, -.3), .5, .6)).join('');
+    if (bot.cuffs) inB += [-1, 1].map(sd => `<rect x="${sd > 0 ? 2.6 : -9.8}" y="-6.6" width="7.2" height="2.4" fill="${shade(bc, -.25)}"/>` + LINE(`M${sd * 11},-28 L${sd * 9},-8`, '#fff', .9, .7)).join('');
+    if (bot.quilt) inB += [-24, -17, -10].map(y => LINE(`M-12,${y} Q0,${y + 1.4} 12,${y}`, shade(bc, -.25), .6, .5)).join('');
+    if (bot.cargo) inB += [-1, 1].map(sd => `<path d="M${sd * 8.6},-21 h${sd * 2.8} v6 h${-sd * 2.8}Z" fill="${shade(bc, -.1)}"/>`).join('');
+  }
+  // ---- tops ----
+  if (T.one){
+    const bod = T.straps || T.off ? REG.tank(-31.4) : REG.top(-31.4, sleeveY, 'crew');
+    inB += `<path d="${bod}" fill="${col}"/>` + (T.pat ? `<path d="${bod}" fill="url(#${T.pat})"/>` : '');
+    if (T.one === 'swim'){ const sw = REG.tank(-25.2); inB += `<path d="${sw}" fill="${col}"/>` + (T.pat ? `<path d="${sw}" fill="url(#${T.pat})"/>` : '') + LINE('M-12,-25.6 Q-5,-27 -1.6,-24.6 M12,-25.6 Q5,-27 1.6,-24.6', shade(col, -.25), .7, .6); }
+    const SK = { dress: 'M-11.2,-32 Q0,-30.8 11.2,-32 Q16.4,-24 18.4,-15.4 Q12,-12.6 6,-13.4 Q0,-12.2 -6,-13.4 Q-12,-12.6 -18.4,-15.4 Q-16.4,-24 -11.2,-32Z', sun: 'M-11.2,-32 Q0,-30.8 11.2,-32 Q15.6,-24 17.2,-16.2 Q11,-13.6 5.6,-14.2 Q0,-13 -5.6,-14.2 Q-11,-13.6 -17.2,-16.2 Q-15.6,-24 -11.2,-32Z',
+      party: 'M-11.2,-32 Q0,-30.8 11.2,-32 Q18,-24 20.6,-15.6 Q16,-12.8 11.6,-14.2 Q6,-12 0,-13.2 Q-6,-12 -11.6,-14.2 Q-16,-12.8 -20.6,-15.6 Q-18,-24 -11.2,-32Z', gown: 'M-11.2,-32 Q0,-30.8 11.2,-32 Q17.6,-16 21.6,-2.4 Q11,0 0,-.4 Q-11,0 -21.6,-2.4 Q-17.6,-16 -11.2,-32Z' }[T.one];
+    if (SK){ over += `<path d="${SK}" fill="${col}"/>` + (T.pat ? `<path d="${SK}" fill="url(#${T.pat})"/>` : '') + `<path d="${SK}" fill="url(#zBodyShade)"/>` + [-7, -2.4, 2.4, 7].map(x => LINE(`M${x * .6},-30.4 Q${x * 1.1},-21 ${x * 1.55},${T.one === 'gown' ? -2 : -13.8}`, shade(col, -.2), .55, .5)).join(''); if (T.one === 'party') over += LINE('M-20.6,-15.6 Q-16,-12.8 -11.6,-14.2 Q-6,-12 0,-13.2 Q6,-12 11.6,-14.2 Q16,-12.8 20.6,-15.6', '#fff', 1.1, .8); if (T.sparkle) over += [[-8, -22], [7, -18], [-2, -10], [10, -6], [-12, -5]].filter(([, y]) => T.one === 'gown' || y < -14).map(([x, y], k) => `<path class="${k % 2 ? 'twinkle' : ''}" d="${starPath(x, y, 1.5, .6)}" fill="#fff"/>`).join(''); }
+    if (T.one === 'tutu') over += zTutu(col, -30.6);
+    if (T.belt) over += `<path d="M-11.4,-33.2 Q0,-31.8 11.4,-33.2 L11.3,-31 Q0,-29.6 -11.3,-31Z" fill="${T.belt}"/>` + (T.bowB ? `<path d="M0,-32 L-3.6,-34.2 V-29.8Z M0,-32 L3.6,-34.2 V-29.8Z" fill="#fff"/><circle cx="0" cy="-32" r="1.1" fill="${shade(col, -.1)}"/>` : '');
+  } else if (T.overalls){
+    const sc = c.shirt || '#FFFFFF', R = REG.top(-28, -41.4, 'crew'), P = REG.pants(-4.2);
+    inB += `<path d="${R}" fill="${sc}"/><path d="${P}" fill="#4A78C8"/><path d="M-7.4,-44 H7.4 V-31 H-7.4Z" fill="#4A78C8"/>` + LINE('M-7,-44 L-10.6,-52.6 M7,-44 L10.6,-52.6', '#4A78C8', 2.4, 1) + `<circle cx="-6.4" cy="-43" r="1" fill="#FFD23F"/><circle cx="6.4" cy="-43" r="1" fill="#FFD23F"/><path d="M-3.4,-40 h6.8 v5 h-6.8Z" fill="#5E8AD4"/>` + [-1, 1].map(sd => LINE(`M${sd * 3.4},-5.2 H${sd * 8.6}`, '#2F5AA0', .7, .5)).join('');
+  } else {
+    const hem = T.len === 'coat' ? -29.4 : -27.4;
+    const R = T.sl === 'none' ? REG.tank(hem) : REG.top(hem, sleeveY, T.lapel || T.neck === 'deep' ? 'v' : T.collarUp || T.zip ? 'high' : 'crew');
+    inB += `<path d="${R}" fill="${col}"/>` + (T.pat ? `<path d="${R}" fill="url(#${T.pat})"/>` : '');
+    if (T.len === 'coat') over += `<path d="M-12.4,-30.4 Q0,-29 12.4,-30.4 Q14.6,-24 15.2,-18.6 Q0,-16.4 -15.2,-18.6 Q-14.6,-24 -12.4,-30.4Z" fill="${col}"/><path d="M-12.4,-30.4 Q0,-29 12.4,-30.4 Q14.6,-24 15.2,-18.6 Q0,-16.4 -15.2,-18.6 Q-14.6,-24 -12.4,-30.4Z" fill="url(#zBodyShade)"/>` + (T.zip || T.buttons ? LINE('M0,-30 V-17.4', shade(col, -.3), .6, .7) : '');
+    if (T.puffy) inB += [-45, -39, -33].map(y => LINE(`M-14,${y} Q0,${y + 2} 14,${y}`, shade(col, -.25), .7, .55)).join('') + [-1, 1].map(sd => LINE(`M${sd * 13.6},-44 l${sd * 3},-.6 M${sd * 14.6},-37 l${sd * 2.6},-.4`, shade(col, -.25), .6, .5)).join('');
+    if (T.rainbow) inB += `<path d="M-14,-44 Q0,-41 14,-44 L14,-37 Q0,-34 -14,-37Z" fill="url(#zRainbowV)"/>`;
+    if (T.band) inB += `<path d="M-14,-44 Q0,-41.6 14,-44 L14,-41.2 Q0,-38.8 -14,-41.2Z" fill="${T.band}"/>`;
+    if (T.num) over += TX(0, -34, T.num, 8, T.band || '#fff');
+    if (T.dino) over += [-6, -2, 2, 6].map(x => `<path d="M${x - 1.6},-52.8 l1.6,-2.6 l1.6,2.6Z" fill="#3FAF8F"/>`).join('') + `<circle cx="-4" cy="-38" r="1.5" fill="#3FAF8F"/><circle cx="4" cy="-35" r="1.8" fill="#3FAF8F"/>`;
+    if (T.hero) over += `<path d="M-4.6,-44 h9.2 l-4.6,6.4z" fill="#FFD23F"/><path d="${starPath(0, -41.6, 2.6, 1.2)}" fill="#E8414F"/>` + `<path d="M-12,-30.4 H12" stroke="#FFD23F" stroke-width="2.2"/>`;
+    if (T.heart) over += `<path transform="translate(0,-39.4) scale(.55)" d="M0,6 C-9,0 -9,-8 -3,-8 C-1,-8 0,-6.5 0,-5 C0,-6.5 1,-8 3,-8 C9,-8 9,0 0,6Z" fill="#FF5A8C"/>`;
+    if (T.pocket) over += `<path d="M-6.4,-35.6 H6.4 L7.4,-30 H-7.4Z" fill="${shade(col, -.08)}"/>` + LINE('M-6.4,-35.6 H6.4', shade(col, -.3), .5, .6);
+    if (T.hood) back += `<path d="M-10.6,-52.2 Q-12.6,-57.4 -8,-59.6 Q0,-61.4 8,-59.6 Q12.6,-57.4 10.6,-52.2 Q0,-55 -10.6,-52.2Z" fill="${shade(col, -.12)}"/>`;
+    if (T.strings) over += LINE('M-2.4,-52 V-45.4 M2.4,-52 V-45.4', '#fff', .8, .95);
+    if (T.collar) over += `<path d="M-4.8,-57.2 L-1,-51.6 L-5.6,-50.6 L-8,-55.6Z M4.8,-57.2 L1,-51.6 L5.6,-50.6 L8,-55.6Z" fill="${shade(col, .14)}"/>`;
+    if (T.buttons) for (let k = 0; k < T.buttons; k++) over += `<circle cx="0" cy="${-47 + k * 4.4}" r=".7" fill="${shade(col, -.35)}"/>`;
+    if (T.zip && T.len !== 'coat') over += LINE('M0,-55.4 V-27.8', shade(col, -.3), .6, .7);
+    if (T.pockets) over += `<path d="M-10.6,-40 h5 v4.2 h-5Z M5.6,-40 h5 v4.2 h-5Z" fill="${shade(col, -.06)}"/>`;
+    if (T.lapel){ over += `<path d="M-4.4,-57 L0,-44 L4.4,-57Z" fill="${T.inner}"/><path d="M-4.8,-57 L-1.2,-45 L-7.2,-49.6 L-8.4,-55Z M4.8,-57 L1.2,-45 L7.2,-49.6 L8.4,-55Z" fill="${shade(col, -.12)}"/>`; if (T.tie) over += `<path d="M-1.3,-55 H1.3 L2,-46.4 L0,-44.2 L-2,-46.4Z" fill="${T.tie}"/>`; if (T.bowtie) over += `<path d="M0,-54.6 L-3.6,-56.4 V-52.8Z M0,-54.6 L3.6,-56.4 V-52.8Z" fill="${T.bowtie}"/>`; }
+    if (T.dbl) over += [-3.4, 3.4].map(x => [-47, -42, -37].map(y => `<circle cx="${x}" cy="${y}" r=".8" fill="#C9D2E3"/>`).join('')).join('');
+    if (T.toggles) over += [-45, -39, -33].map(y => `<rect x="-2.2" y="${y}" width="4.4" height="1.3" rx=".6" fill="#C98A55"/>`).join('');
+    if (T.sailor) inB += `<path d="M-4.8,-57.2 L0,-48.4 L4.8,-57.2 L12,-56 Q10,-48.6 0,-45 Q-10,-48.6 -12,-56Z" fill="#2B4C8C"/>` + LINE('M-9.6,-53 Q0,-47.4 9.6,-53', '#fff', .7, .9);
+    if (T.armor) over += LINE('M-12,-46 Q0,-43 12,-46 M-12,-38 Q0,-35 12,-38', '#8A93AA', .9, .8) + `<path d="M-4.6,-47.6 h9.2 v6.6 q-4.6,3.6 -9.2,0Z" fill="#E8414F"/>`;
+    if (T.astro) over += `<path d="M-5.6,-46.4 h11.2 v6.6 h-11.2Z" fill="#5A6FD8"/><circle cx="-2.8" cy="-43.1" r="1.1" fill="#FF5A8C"/><circle cx="0" cy="-43.1" r="1.1" fill="#FFD23F"/><circle cx="2.8" cy="-43.1" r="1.1" fill="#3EC46B"/>`;
+    if (T.collarUp) inB += LINE('M-4.4,-57.6 Q0,-55.2 4.4,-57.6', shade(col, -.28), .8, .6);
+  }
+  // seams and folds where cloth ends
+  if (!T.one || T.sl !== 'none'){
+    if (sleeveY != null && !T.overalls) inB += [-1, 1].map(sd => LINE(`M${sd * 12.4},${sleeveY} L${sd * 19},${sleeveY}`, shade(col, -.28), .9, .6) + (T.sl === 'long' ? LINE(`M${sd * 14.6},-39.6 q${sd * 1.2},.8 ${sd * 2.2},.2`, shade(col, -.3), .5, .5) : '')).join('');
+    if (!T.one) inB += LINE(`M-12.6,${T.len === 'coat' ? -29.6 : -27.6} H12.6`, shade(col, -.3), .8, .55);
+    if (T.sl !== 'none') inB += LINE('M-4.8,-57.2 Q0,-52.4 4.8,-57.2', shade(col, -.3), .7, .5);
+  }
+  if (T.sl === 'puff') inB += [-1, 1].map(sd => `<ellipse cx="${sd * 14.4}" cy="-47.6" rx="4.4" ry="4" fill="${shade(col, .08)}"/>`).join('');
+  return { back, inB, over };
+}
+function zChar(c, o = {}){
+  c = c || {}; const sk = c.skin || '#FFE0C7', work = o.work || '';
+  const tid = c.top || 'tee', T = ZTOPS[tid] || ZTOPS.tee, bid = c.bottom || 'pants', B = ZBOTS[bid] || ZBOTS.pants;
+  const acc = work === 'restaurant' ? 'chef' : work === 'boutique' ? 'shades' : c.acc, full = HAT_FULL.has(acc);
+  const HT = 'translate(0,-57) scale(.9) translate(0,57)', cl = zClothes(c, T, B);
+  let s = `<g class="zch zflat"><ellipse cx="0" cy="0" rx="14" ry="3.6" fill="#1d3b12" opacity=".16" filter="url(#blur2)"/>`;
+  const backHair = zHair(c, 'back', acc);
+  s += zBack(c) + `<g transform="${HT}">${full ? `<g clip-path="url(#zHatClip)">${backHair}</g>` : backHair}</g>` + cl.back;
+  if (work === 'school') s += `<path d="M-11,-50 h22 v19 q-11,4 -22,0Z" fill="#FF8A3D"/>`;
+  // the body and everything it wears, cut to the body outline
+  s += `<path d="${BODY_D}" fill="${sk}"/><g clip-path="url(#zBodyClip)">${cl.inB}<path d="${BODY_D}" fill="url(#zBodyShade)"/>${[-1, 1].map(sd => `<path d="M${sd * 3.8},-14 q${sd * 1.6},.9 ${sd * 3},0" stroke="${shade(sk, -.18)}" stroke-width=".45" fill="none" opacity=".5"/>`).join('')}</g>`;
+  s += cl.over + zShoes(c);
+  if (work && WORKPROP[work]) s += `<g transform="translate(17.4,-27)"><g>${zWorkAnim(work).replace(/ 13 -49/g, ' 0 0')}${WORKPROP[work]}</g></g>`;
+  let h = [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74.6" rx="2.5" ry="3.6" fill="${shade(sk, -.04)}"/><path d="M${sd * 15.4},-76 q${sd * .9},1.4 0,2.8" stroke="${shade(sk, -.16)}" stroke-width=".5" fill="none"/>`).join('');
+  if (c.earrings) h += [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-70.4" r="1.2" fill="${c.earrings}"/>`).join('');
+  h += `<path d="${FACE4}" fill="${sk}"/><path d="${FACE4}" fill="url(#zSkinG)" opacity=".7"/>` + zFace(c, o);
+  const fh = zHair(c, 'front', acc);
+  h += (full ? `<g clip-path="url(#zHatClip)">${fh}</g>` : fh) + zAcc(acc);
+  return s + `<g transform="${HT}">${h}</g></g>`;
+}
+// softer, blended makeup
+const _zFaceV25 = zFace;
+zFace = function(c, o){ let s = _zFaceV25(c, o); s = s.replace(/filter="url\(#blur1\)"/g, 'filter="url(#zSoftBlur)"'); s = s.replace(/rx="3\.2" ry="2\.1" fill="(#[0-9A-Fa-f]{6})" opacity="([\d.]+)"\/>/g, (m, col, op) => `rx="3.9" ry="2.6" fill="${col}" opacity="${op}" filter="url(#zSoftBlur)"/>`); return s; };
+charSVG = function(c, o = {}){ return zChar(c, o); };
+
 injectDefs();
 injectDefs2();
 injectDefs3();
