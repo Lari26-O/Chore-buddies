@@ -8677,7 +8677,7 @@ const _sayItWordX = sayItWord;
 sayItWord = function(){ const kid = K(), plan = planOf(kid), si = G.sayit; if (plan.esl && !plan.langs.length){ const row = pick(LWORDS.filter(r => r[1] !== si.last)); si.last = row[1]; const w = lword(row, plan.esl); return { e: row[0], show: row[1], rom: '', mean: `${w.nat} in ${LANGS[plan.esl][0]}`, lang: 'en', target: row[1] }; } return _sayItWordX(); };
 
 // ---------- 4. MICROPHONE: a real setting and clear help ----------
-const micOff = () => !!(S && S.settings && S.settings.micOff);
+let micOff = () => !!(S && S.settings && S.settings.micOff);
 const MIC_HELP = 'The microphone is blocked on this device. A grown-up can turn it on in Controls → Microphone, or tap ⭐ I said it!';
 function micControls(){ return `<div class="card"><div class="setrow"><div><b>Microphone</b><small>Used by Say It! (speaking practice) and the “I don’t get it” helper so kids can talk instead of type.</small></div><button class="tog" data-act="micTog" aria-pressed="${!micOff()}" aria-label="Microphone features"></button></div>
   ${!MIC ? `<p class="note-s">This browser can’t listen to speech. Kids will see an “I said it!” button instead. Safari on iPhone/iPad and Chrome support it.</p>` : `<div class="setrow"><div><b>Test the microphone</b><small id="micStatus">${esc(ui.micStatus || 'Tap Test, then say “hello”.')}</small></div><button class="btn small grape" data-act="micTest">Test</button></div>
@@ -10338,6 +10338,96 @@ function zChar(c, o = {}){
   let h = [-1, 1].map(sd => `<ellipse cx="${sd * 16.6}" cy="-74" rx="2.8" ry="3.6" fill="${shade(sk, -.04)}"/><ellipse cx="${sd * 16.9}" cy="-74" rx="1.2" ry="2" fill="${shade(sk, -.12)}"/>`).join('');
   if (c.earrings) h += [-1, 1].map(sd => `<circle cx="${sd * 16.8}" cy="-69.8" r="1.3" fill="${c.earrings}"/>`).join('');
   h += `<path d="${FACE3}" fill="${sk}"/><path d="${FACE3}" fill="url(#zSkinG)" opacity=".7"/><path d="M-13,-66 Q-7,-59 0,-58.6 Q7,-59 13,-66 Q7,-61 0,-60.6 Q-7,-61 -13,-66Z" fill="${shade(sk, -.06)}" opacity=".6"/>`;
+  h += zFace(c, o);
+  const fh = zHair(c, 'front', acc);
+  h += (full ? `<g clip-path="url(#zHatClip)">${fh}</g>` : fh) + zAcc(acc);
+  s += `<g transform="${HT}">${h}</g></g>`;
+  return s;
+}
+charSVG = function(c, o = {}){ return zChar(c, o); };
+
+// ---------- microphone inside the Claude app: it is never allowed there, so say so and use taps ----------
+const IN_FRAME = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const _micOffF = micOff;
+micOff = function(){ return IN_FRAME || _micOffF(); };
+const _micControlsF = micControls;
+micControls = function(){ if (!IN_FRAME) return _micControlsF();
+  return `<div class="card"><div class="setrow"><div><b>Microphone</b><small>🎤 The Claude app doesn’t let apps inside it use the microphone, so it can’t be turned on here, even with the iPad settings. Kids tap ⭐ <b>I said it!</b> instead, and the helper uses tap buttons.</small></div></div><p class="note-s">To use the microphone, put Chore Buddies on its own website (free, about 10 minutes) and open it in Safari. The microphone works there, after you allow it once. The steps are in the setup guide (DEPLOY.txt).</p></div>`; };
+
+// ---------- v25 NATURAL KIDS: human shapes, not circles and lines ----------
+const FACE4 = 'M-15.6,-77 C-15.6,-89.6 -8.6,-93.4 0,-93.4 C8.6,-93.4 15.6,-89.6 15.6,-77 C15.6,-69 12.8,-62.8 7.6,-59.4 Q3.8,-57.1 0,-57.1 Q-3.8,-57.1 -7.6,-59.4 C-12.8,-62.8 -15.6,-69 -15.6,-77Z';
+const EYE4 = x => `M${x - 3.5},-74.2 Q${x - 1.7},-77.2 ${x + .5},-77 Q${x + 2.7},-76.8 ${x + 3.5},-74.5 Q${x + 1.6},-72.2 ${x - .2},-72.3 Q${x - 2.5},-72.4 ${x - 3.5},-74.2Z`;
+const TORSO_N = 'M-5,-53.6 Q0,-49.6 5,-53.6 Q10,-52.9 12.6,-51.3 Q14.4,-50 14.2,-47 Q13,-40.4 11.8,-35 Q11.9,-31.4 12.6,-28.5 Q0,-26 -12.6,-28.5 Q-11.9,-31.4 -11.8,-35 Q-13,-40.4 -14.2,-47 Q-14.4,-50 -12.6,-51.3 Q-10,-52.9 -5,-53.6Z';
+const TORSO_NL = 'M-5,-53.6 Q0,-49.6 5,-53.6 Q10,-52.9 12.6,-51.3 Q14.4,-50 14.2,-47 Q13.2,-40 12.6,-34 Q13.2,-27 13.6,-20 Q0,-17.5 -13.6,-20 Q-13.2,-27 -12.6,-34 Q-13.2,-40 -14.2,-47 Q-14.4,-50 -12.6,-51.3 Q-10,-52.9 -5,-53.6Z';
+function zcDefs4(){ const d = $('#defs defs'); if (!d || d.querySelector('#zEyeL4')) return; d.insertAdjacentHTML('beforeend', `<clipPath id="zEyeL4"><path d="${EYE4(-5.9)}"/></clipPath><clipPath id="zEyeR4"><path d="${EYE4(5.9)}"/></clipPath>`); }
+const _injDefsZ10 = injectDefsZ; injectDefsZ = function(){ _injDefsZ10(); zcDefs4(); };
+function zEyes(c, mood){
+  const ic = c.eyeCol || (['#FFE0C7', '#FFE5D2'].includes(c.skin) ? '#5A8FCC' : '#6B4A2E'), lash = c.lashes, m = c.mk || {};
+  if (mood === 'tired') return [-5.9, 5.9].map(x => `<path d="M${x - 3.2},-74 Q${x},-72.2 ${x + 3.2},-74" stroke="#3A2A30" stroke-width=".9" fill="none" stroke-linecap="round"/>`).join('');
+  let s = '';
+  if (m.shadow) s += [-5.9, 5.9].map(x => `<path d="M${x - 4.2},-74 Q${x - .8},-80.4 ${x + 4.4},-74.6 Q${x + .4},-77.6 ${x - 4.2},-74Z" fill="${m.shadow}" opacity="${f1(.9 * (m.shadowA == null ? 1 : m.shadowA))}" filter="url(#blur1)"/>`).join('');
+  s += `<g class="blink">`;
+  [[-5.9, 'zEyeL4'], [5.9, 'zEyeR4']].forEach(([x, cl], i) => { const sd = i ? 1 : -1, e = EYE4(x);
+    s += `<path d="${e}" fill="#FFFDFB"/><g clip-path="url(#${cl})"><circle cx="${x + .2}" cy="-74.7" r="2.15" fill="${ic}"/><circle cx="${x + .2}" cy="-74.7" r="2.15" fill="url(#zIris)"/><circle cx="${x + .2}" cy="-74.6" r="1" fill="#1A1220"/><circle cx="${x + .9}" cy="-75.5" r=".6" fill="#fff"/><path d="M${x - 3.6},-74.4 Q${x},-77.6 ${x + 3.6},-74.8 L${x + 3.6},-77.4 L${x - 3.6},-77.4Z" fill="#000" opacity=".1"/></g>`;
+    s += `<path d="M${x - 3.7},-74.1 Q${x - 1.7},-77.4 ${x + .5},-77.2 Q${x + 2.8},-77 ${x + 3.7},-74.6" stroke="#3A2830" stroke-width="${lash || m.liner ? .95 : .7}" fill="none" stroke-linecap="round"/>`;
+    if (lash || m.lash) s += `<path d="M${x + sd * 3.5},-74.9 l${sd * 1.3},-.8 M${x + sd * 2.6},-76.3 l${sd * .9},-1 M${x + sd * 1.2},-77 l${sd * .4},-1" stroke="#3A2830" stroke-width=".5" stroke-linecap="round"/>`;
+    if (m.liner) s += `<path d="M${x + sd * 3.6},-74.8 l${sd * 1.8},-.9" stroke="#2A1E24" stroke-width=".9" stroke-linecap="round"/>`;
+  });
+  return s + `</g>`;
+}
+const _zFaceV24 = zFace;
+zFace = function(c, o){
+  const sk = c.skin || '#FFE0C7', hr = c.hair || '#5B3A29', m = c.mk || {}, mood = o.mood || 'happy';
+  let s = _zFaceV24(c, o);
+  // swap the button nose and round cheeks for a soft nose and blended blush
+  s = s.replace(/<ellipse cx="0" cy="-69\.6"[^>]*\/><ellipse cx="-\.5" cy="-70"[^>]*\/>/, `<path d="M.5,-72.4 Q1.4,-69.8 .9,-68.6" stroke="${shade(sk, -.16)}" stroke-width=".55" fill="none" opacity=".75"/><path d="M-1.5,-68.2 Q0,-67.2 1.5,-68.2" stroke="${shade(sk, -.24)}" stroke-width=".65" fill="none" stroke-linecap="round"/>`);
+  if (!m.blush) s = s.replace(/<ellipse cx="(-?10\.4)" cy="-69" rx="3\.2" ry="2\.1" fill="#FF8FA3" opacity="[\d.]+"\/>/g, (mm, x) => `<ellipse cx="${+x * .95}" cy="-68.4" rx="3.8" ry="2.4" fill="url(#zCheek)" opacity=".85"/>`);
+  s = s.replace(/<path d="M-9,-78\.6 Q-6\.6,-79\.8 -4\.2,-78\.8 M4\.2,-78\.8 Q6\.6,-79\.8 9,-78\.6"[^>]*\/>/, `<path d="M-9,-79.4 Q-6.2,-80.9 -3,-79.8 Q-6.2,-80.3 -9,-79.4Z M3,-79.8 Q6.2,-80.9 9,-79.4 Q6.2,-80.3 3,-79.8Z" fill="${shade(hr, -.12)}" stroke="${shade(hr, -.12)}" stroke-width=".6" stroke-linejoin="round" opacity=".85"/>`);
+  return s;
+};
+// arms with elbows and hands with a thumb (filled shapes, no round sticks)
+function zArmN(c, T, sd, up){
+  const sk = c.skin || '#FFE0C7', col = T.col || c.shirt || '#34B2F0', dk = zsh(col, -.12), X = v => f1(sd * v);
+  const arm = up ? `M${X(11.4)},-48.6 Q${X(12.6)},-53 ${X(14.8)},-52.6 Q${X(18.6)},-55.4 ${X(20.6)},-58.4 L${X(22.8)},-61.6 Q${X(21.4)},-62.8 ${X(20.2)},-62.4 L${X(18.2)},-59.4 Q${X(16.4)},-57.2 ${X(13.8)},-55.6 Q${X(13.4)},-51.6 ${X(11.4)},-48.6Z`
+    : `M${X(11.4)},-48 Q${X(12.6)},-52.4 ${X(14.6)},-51 Q${X(18.2)},-46 ${X(17.6)},-40 L${X(17.9)},-31.6 Q${X(16.5)},-30.8 ${X(15.2)},-31.6 L${X(14.4)},-40 Q${X(13.6)},-44.6 ${X(11.4)},-48Z`;
+  const sleeveShort = up ? `M${X(11.4)},-48.6 Q${X(12.6)},-53 ${X(14.8)},-52.6 Q${X(17.4)},-54.4 ${X(18.4)},-56 L${X(15.4)},-56.6 Q${X(13.6)},-52 ${X(11.4)},-48.6Z` : `M${X(11.4)},-48 Q${X(12.6)},-52.4 ${X(14.6)},-51 Q${X(17.6)},-47 ${X(17.9)},-43 L${X(14.2)},-42.6 Q${X(13.6)},-45 ${X(11.4)},-48Z`;
+  const hand = up ? `<g transform="translate(${X(21.6)},-63) rotate(${sd * 200})">` : `<g transform="translate(${X(16.6)},-31.4)${sd > 0 ? ' scale(-1,1)' : ''}">`;
+  const handD = `<path d="M-1.7,-.3 Q-2.4,2.8 -1.4,4.7 Q-.2,5.9 1.3,5 Q2.4,3 1.6,-.3Z" fill="${T.hero && T.sl === 'long' ? '#FFD23F' : T.astro ? '#FFFFFF' : sk}"/><path d="M-1.5,1 q-1.5,.5 -1.2,2 q.6,.4 1.3,-.3Z" fill="${T.hero && T.sl === 'long' ? '#FFD23F' : T.astro ? '#FFFFFF' : shade(sk, -.04)}"/></g>`;
+  let s = '';
+  if (T.sl === 'long') s += `<path d="${arm}" fill="${dk}"/><path d="${arm}" fill="url(#zCloth)"/>` + (T.puffy ? `<path d="${arm}" fill="none" stroke="${zsh(col, -.22)}" stroke-width=".6" stroke-dasharray="1 4"/>` : '');
+  else { s += `<path d="${arm}" fill="${sk}"/><path d="${arm}" fill="url(#zCloth)" opacity=".6"/>`; if (T.sl === 'short') s += `<path d="${sleeveShort}" fill="${dk}"/><path d="${sleeveShort}" fill="url(#zCloth)"/>`; if (T.sl === 'puff') s += `<ellipse cx="${X(14.6)}" cy="${up ? -52 : -48}" rx="4.6" ry="4.2" fill="${zsh(col, .08)}"/>`; }
+  if (T.sl === 'long' && !T.hero && !T.astro) s += up ? '' : `<path d="M${X(15)},-33.4 L${X(18)},-33.4 L${X(17.9)},-31.4 L${X(15.2)},-31.4Z" fill="${zsh(col, -.25)}"/>`;
+  return s + hand + handD;
+}
+const _zTopV24 = zTop;
+zTop = function(c, T, up){ const r = _zTopV24(c, T, up); r.armL = zArmN(c, T, -1, false); r.armR = zArmN(c, T, 1, up); r.body = r.body.split(TORSO_LONG).join(TORSO_NL).split(TORSO).join(TORSO_N); return r; };
+function zSkinLegs(sk){ return [-1, 1].map(sd => { const X = v => f1(sd * v); const d = `M${X(2.4)},-27 H${X(9.4)} Q${X(9.9)},-18 ${X(8.9)},-13 Q${X(8.4)},-8 ${X(8.2)},-3.6 Q${X(5.4)},-3 ${X(2.8)},-3.6 Q${X(2.6)},-9 ${X(2.9)},-13 Q${X(2.1)},-19 ${X(2.4)},-27Z`; return `<path d="${d}" fill="${sk}"/><path d="${d}" fill="url(#zCloth)" opacity=".5"/><path d="M${X(4.4)},-15.4 q${X(1.4)},.8 ${X(2.8)},0" stroke="${shade(sk, -.14)}" stroke-width=".5" fill="none" opacity=".7"/>`; }).join(''); }
+function zBigFace(c, mood, S, cx, cy, withEars = true){
+  const sk = c.skin || '#FFE0C7', ty = cy - CHX.HY * S;
+  let s = `<g transform="translate(${cx},${f1(ty)}) scale(${S})"><path d="M-4.2,-61 H4.2 V-50 Q0,-48 -4.2,-50Z" fill="${shade(sk, -.1)}"/>`;
+  if (withEars) s += [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74.6" rx="2.5" ry="3.6" fill="${shade(sk, -.04)}"/>`).join('') + (c.earrings ? [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-70.4" r="1.2" fill="${c.earrings}"/><circle cx="${sd * 15.4 - .4}" cy="-70.8" r=".35" fill="#fff"/>`).join('') : '');
+  s += `<path d="${FACE4}" fill="${sk}"/><path d="${FACE4}" fill="url(#zSkinG)" opacity=".7"/>` + zFace(c, { mood }) + `</g>`;
+  return s;
+}
+function zChar(c, o = {}){
+  c = c || {}; const sk = c.skin || '#FFE0C7', work = o.work || '', up = !!work;
+  const tid = c.top || 'tee', T = ZTOPS[tid] || ZTOPS.tee, bid = c.bottom || 'pants', B = ZBOTS[bid] || ZBOTS.pants;
+  const acc = work === 'restaurant' ? 'chef' : work === 'boutique' ? 'shades' : c.acc, full = HAT_FULL.has(acc);
+  const HT = 'translate(0,-57) scale(.9) translate(0,57)';
+  let s = `<g class="zch zflat"><ellipse cx="0" cy="0" rx="14" ry="3.6" fill="#1d3b12" opacity=".16" filter="url(#blur2)"/>`;
+  const top = zTop(c, T, up), backHair = zHair(c, 'back', acc);
+  s += zBack(c) + `<g transform="${HT}">${full ? `<g clip-path="url(#zHatClip)">${backHair}</g>` : backHair}</g>` + top.back;
+  if (work === 'school') s += zC('M-12,-50 h24 v20 q-12,4 -24,0Z', '#FF8A3D');
+  if (!T.one && !T.overalls) s += zBottom(c, B);
+  if (T.overalls) s += [-1, 1].map(sd => zC(LEG(sd), '#4A78C8')).join('');
+  s += zShoes(c) + top.armL;
+  s += `<path d="M-3.5,-60 H3.5 V-51.4 Q0,-49.8 -3.5,-51.4Z" fill="${shade(sk, -.1)}"/>`;
+  s += top.body;
+  if (work === 'restaurant') s += zC('M-9,-46 h18 v17 q-9,3 -18,0Z', '#FFFFFF');
+  s += up ? `<g>${zWorkAnim(work)}${top.armR}${WORKPROP[work] ? `<g transform="translate(22,-64)">${WORKPROP[work]}</g>` : ''}</g>` : top.armR;
+  let h = [-1, 1].map(sd => `<ellipse cx="${sd * 15.2}" cy="-74.6" rx="2.5" ry="3.6" fill="${shade(sk, -.04)}"/><path d="M${sd * 15.4},-76 q${sd * .9},1.4 0,2.8" stroke="${shade(sk, -.16)}" stroke-width=".5" fill="none"/>`).join('');
+  if (c.earrings) h += [-1, 1].map(sd => `<circle cx="${sd * 15.4}" cy="-70.4" r="1.2" fill="${c.earrings}"/>`).join('');
+  h += `<path d="${FACE4}" fill="${sk}"/><path d="${FACE4}" fill="url(#zSkinG)" opacity=".7"/>`;
   h += zFace(c, o);
   const fh = zHair(c, 'front', acc);
   h += (full ? `<g clip-path="url(#zHatClip)">${fh}</g>` : fh) + zAcc(acc);
