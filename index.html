@@ -1018,6 +1018,24 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
 .item{position:relative}
 .wishbtn{position:absolute;top:6px;left:6px;z-index:2;width:34px;height:34px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(43,37,80,.2);font-size:18px}
 .wishbtn.on{animation:stepPulse 1.6s ease-in-out infinite}
+.htools2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.htools2 .tool{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line),0 3px 0 var(--line);font-weight:800;font-size:11px;color:var(--ink-2)}
+.htools2 .tool .te{font-size:26px;line-height:1.15}
+.htools2 .tool.on{background:#F3EEFF;box-shadow:inset 0 0 0 2.5px #7B5CFA,0 3px 0 #7B5CFA;color:#7B5CFA}
+.btools{display:flex;gap:8px;justify-content:center;transition:opacity .2s}
+.btools.off{opacity:.35;pointer-events:none}
+.btools button{width:52px;height:46px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line),0 3px 0 var(--line);font-size:22px}
+.bpal{display:flex;align-items:center;gap:6px}
+.bpg{flex:none;width:44px;height:96px;border-radius:16px;background:#7B5CFA;color:#fff;font-size:22px;font-weight:900;box-shadow:0 4px 0 #5A3FD0}
+.bpg:disabled{background:#D9D2F5;box-shadow:none}
+.bgrid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bitem{display:flex;flex-direction:column;align-items:center;padding:4px 2px 5px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line),0 3px 0 var(--line)}
+.bitem svg{width:46px;height:42px}
+.bitem small{font-size:10px;font-weight:800;line-height:1.05;text-align:center;color:var(--ink-2)}
+.bdots{display:flex;gap:6px;justify-content:center}
+.bdots i{width:8px;height:8px;border-radius:50%;background:#D9D2F5}
+.bdots i.on{background:#7B5CFA}
+.hearmini{margin-right:4px;font-size:13px}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -8930,6 +8948,290 @@ render = function(){ _renderWish(); try { const kid = isKid() && K(); if (!kid |
 // stickers for chores and game goals
 const _celebrateX = celebrate; celebrate = function(c){ _celebrateX(c); confetti(60); if (c && /chore|quest|task|approved|coins are flying/i.test((c.label || '') + (c.sub || '')) && Math.random() < .6) setTimeout(() => giveSticker('For doing a great job!'), 2200); };
 const _playRewardX = playReward; playReward = function(n, label){ const g = _playRewardX(n, label); if (/goal/i.test(label || '') && Math.random() < .5) setTimeout(() => giveSticker(`For reaching a goal!`), 900); return g; };
+
+
+// =====================================================================
+//  v20 — clothes that really look different, one-piece dresses
+// =====================================================================
+const TOPCOL = { tank: '#FF8A3D', polo: '#3EC46B', flannel: '#E8414F', dino: '#5FD3A8', rainbow: '#FFFFFF', pjs: '#7B8CFF', soccer: '#34B2F0', denim: '#4A78C8', hero: '#E8414F', puffer: '#FF8FB8', skijacket: '#34B2F0', hawaii: '#FF8A3D', rashguard: '#5FE0C0', sundress: '#FFE066', swimsuit: '#FF5A8C', partydress: '#B58CFF', ballerina: '#FFC4DD', gown: '#C9A0FF', dress: '#FF8FB8', jersey: '#E8414F', sweater: '#FFC4DD', raincoat: '#FFD23F', overalls: '#FFFFFF' };
+const BOTCOL = { jeans: '#4A78C8', joggers: '#9AA3B8', leggings: '#B58CFF', snowpants: '#6EC6FF', cargo: '#C9A26A', swimtrunks: '#34B2F0', skirt: '#FF8FB8', tutu: '#FFC4DD', rainbowskirt: '#FFFFFF', shorts: '#3D5BB0', pants: '#4F6BD8' };
+const SLEEVELESS = new Set(['tank', 'swimsuit', 'sundress', 'ballerina', 'gown']);
+const SHORTSLV = new Set(['tee', 'stripes', 'dino', 'rainbow', 'polo', 'soccer', 'jersey', 'hawaii', 'sailor', 'dress', 'partydress', 'overalls', 'chefcoat']);
+const ONEPIECE = new Set(['dress', 'gown', 'sundress', 'partydress', 'ballerina', 'swimsuit']);
+// wearing a piece brings its own color (you can still recolor in Me); bottoms show under tops
+const _wearCfgY = wearCfg;
+wearCfg = function(c, id){ const [slot, v] = id.split(':'); const o = _wearCfgY(c, id);
+  if (slot === 'top' && TOPCOL[v]) o.shirt = TOPCOL[v];
+  if (slot === 'bottom'){ if (BOTCOL[v]) o.pants = BOTCOL[v]; if (ONEPIECE.has(o.top)){ o.top = 'tee'; } }
+  if (slot !== 'top' && slot !== 'bottom' && ONEPIECE.has(o.top) && slot === 'shoes'){ /* keep the dress */ }
+  return o; };
+// one-piece dresses: a single connected shape from shoulders to hem
+const _topSVGY = topSVG;
+topSVG = function(c, bodyD){
+  const t = c.top || 'tee'; if (!ONEPIECE.has(t)) return _topSVGY(c, bodyD);
+  const col = c.shirt, dk = shade(col, -.22), lt = shade(col, .25), sk = c.skin;
+  if (t === 'swimsuit') return `<path d="M-13,-43 Q-16,-30 -13,-18 Q-8,-14 -4,-19 Q0,-14 4,-19 Q8,-14 13,-18 Q16,-30 13,-43 Q0,-37 -13,-43Z" fill="${col}"/><path d="M-13,-43 Q-16,-30 -13,-18 Q-8,-14 -4,-19 Q0,-14 4,-19 Q8,-14 13,-18 Q16,-30 13,-43 Q0,-37 -13,-43Z" fill="url(#sph)"/><path d="M-9,-43 Q0,-33 9,-43" fill="${sk}"/><path d="M-14,-28 q7,-4 14,0 t14,0" stroke="#fff" stroke-width="2" fill="none"/><circle cx="-6" cy="-23" r="1.8" fill="#FFE36B"/><circle cx="6" cy="-34" r="1.5" fill="#FFE36B"/>`;
+  const hem = t === 'gown' ? -1 : t === 'ballerina' ? -10 : -5, fl = t === 'gown' ? 27 : t === 'ballerina' ? 22 : 24;
+  const D = `M-12,-43 Q-16,-31 -12,-23 Q-${fl - 4},${hem - 8} -${fl},${hem} Q0,${hem + 7} ${fl},${hem} Q${fl - 4},${hem - 8} 12,-23 Q16,-31 12,-43 Q0,-38 -12,-43Z`;
+  let s = `<path d="${D}" fill="${col}"/><path d="${D}" fill="url(#sph)" opacity=".85"/>`;
+  s += [-.5, .5].map(k => `<path d="M${k * 8},-21 Q${k * 14},${hem - 6} ${k * 20},${hem + 2}" stroke="${dk}" stroke-width="1.2" fill="none" opacity=".5"/>`).join('');
+  s += `<path d="M-12,-23 Q0,-20 12,-23" stroke="${dk}" stroke-width="2.4" fill="none"/>`;
+  if (t === 'dress') s += `<path d="M-6,-42 Q0,-36 6,-42" stroke="${lt}" stroke-width="2" fill="none"/><path d="M-6,-24 l6,3 l6,-3 l-2,5 l-4,-2 l-4,2z" fill="#FF5A8C"/><path d="M-${fl - 1},${hem - 1} Q0,${hem + 6} ${fl - 1},${hem - 1}" stroke="#fff" stroke-width="2" fill="none" stroke-dasharray="2 3"/>`;
+  if (t === 'sundress') s += `<path d="M-9,-43 Q0,-32 9,-43" fill="${sk}"/><path d="M-9,-43 v-2 M9,-43 v-2" stroke="${col}" stroke-width="2.6"/>${[[-14, hem - 5], [-4, hem - 10], [8, hem - 4], [16, hem - 8], [-8, -16], [5, -30], [-5, -34]].map(([x, y]) => `<g transform="translate(${x},${y})">${[0, 1, 2, 3, 4].map(q => `<circle cx="${f1(Math.cos(q * 1.256) * 1.6)}" cy="${f1(Math.sin(q * 1.256) * 1.6)}" r="1.2" fill="#fff"/>`).join('')}<circle r=".9" fill="#FF8A3D"/></g>`).join('')}`;
+  if (t === 'partydress') s += `<path d="M-${fl + 2},${hem + 1} Q0,${hem + 9} ${fl + 2},${hem + 1} Q${fl - 6},${hem - 8} 12,-22 Q0,-19 -12,-22 Q-${fl - 6},${hem - 8} -${fl + 2},${hem + 1}Z" fill="#fff" opacity=".35"/><path d="M-6,-25 l6,3 l6,-3 l-1,5 l-5,-2 l-5,2z" fill="#FFE36B"/>${[-16, -8, 0, 8, 16].map((x, k) => `<path d="${starPath(x, hem - 4 - (k % 2) * 6, 1.8, .7)}" fill="#fff"/>`).join('')}`;
+  if (t === 'ballerina') s += `<path d="M-9,-43 Q0,-34 9,-43" fill="${sk}"/>${[0, 1].map(k => `<path d="M-${fl + 3 - k * 3},${hem - k * 3} ${[...Array(12)].map((_, i) => `l${((fl + 3 - k * 3) * 2) / 12},${i % 2 ? -3 : 3}`).join(' ')} L12,-22 Q0,-19 -12,-22Z" fill="${k ? lt : shade(col, .1)}" opacity=".85"/>`).join('')}`;
+  if (t === 'gown') s += `<path d="M-12,-23 h24" stroke="#FFE36B" stroke-width="2.6"/><circle cx="0" cy="-23" r="2.6" fill="#FF8FB8"/><path d="M-10,-43 Q0,-34 10,-43" fill="${sk}"/>${[[-16, -6], [-6, 0], [8, -2], [18, -7], [-22, -3], [2, -12]].map(([x, y]) => `<path class="twinkle" d="${starPath(x, y, 2, .8)}" fill="#fff"/>`).join('')}`;
+  return s;
+};
+// bottoms: each one drawn its own way
+const _legsY = legsSVG;
+legsSVG = function(c){
+  const sk = c.skin, top = c.top || 'tee'; let bot = ONEPIECE.has(top) ? 'bare' : (c.bottom || 'pants'); if (top === 'overalls') bot = 'pants';
+  const pa = c.pants || '#4F6BD8', dk = shade(pa, -.16), skd = shade(sk, -.06);
+  const shoes = _legsY({ ...c, top: 'dress' }).replace(/^<rect[^>]*\/><rect[^>]*\/>/, '');
+  const skinLegs = `<rect x="-9.5" y="-20" width="7.5" height="17" rx="3.6" fill="${sk}"/><rect x="2" y="-20" width="7.5" height="17" rx="3.6" fill="${skd}"/>`;
+  let s = '';
+  switch (bot){
+    case 'jeans': s = `<rect x="-10" y="-20" width="8.5" height="17" rx="3.4" fill="#4A78C8"/><rect x="1.5" y="-20" width="8.5" height="17" rx="3.4" fill="#3F69B5"/><path d="M-6,-19 v12 M6,-19 v12" stroke="#FFC63A" stroke-width=".8" stroke-dasharray="1.4 1.4"/><rect x="-10.5" y="-8" width="9.5" height="3.2" rx="1.6" fill="#8FB4F0"/><rect x="1" y="-8" width="9.5" height="3.2" rx="1.6" fill="#8FB4F0"/>`; break;
+    case 'joggers': s = `<path d="M-10,-20 h8.5 v12 q-4,2 -8.5,0z" fill="${pa}"/><path d="M1.5,-20 h8.5 v12 q-4,2 -8.5,0z" fill="${dk}"/><rect x="-9.5" y="-8.5" width="7.5" height="4" rx="2" fill="${shade(pa, -.32)}"/><rect x="2" y="-8.5" width="7.5" height="4" rx="2" fill="${shade(pa, -.32)}"/><path d="M-10,-19 v10 M10,-19 v10" stroke="#fff" stroke-width="1.6"/>`; break;
+    case 'leggings': s = `<rect x="-8.6" y="-20" width="6.6" height="17" rx="3" fill="${pa}"/><rect x="2" y="-20" width="6.6" height="17" rx="3" fill="${dk}"/>${[[-6, -17], [-4, -11], [-7, -7], [4, -16], [6, -10], [4, -6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".9" fill="#fff" opacity=".8"/>`).join('')}`; break;
+    case 'snowpants': s = `<rect x="-11.5" y="-21" width="10.5" height="18" rx="5" fill="${pa}"/><rect x="1" y="-21" width="10.5" height="18" rx="5" fill="${dk}"/>${[-16, -11, -6].map(y => `<path d="M-11,${y} h9.5 M1.5,${y} h9.5" stroke="#fff" stroke-width="1" opacity=".55"/>`).join('')}`; break;
+    case 'shorts': case 'cargo': case 'swimtrunks': { const len = bot === 'cargo' ? 11 : 9; s = skinLegs + `<path d="M-11.5,-21 h23 v${len} h-9.5 l-2,-3 l-2,3 h-9.5z" fill="${pa}"/><path d="M-11.5,-21 h23 v${len} h-9.5 l-2,-3 l-2,3 h-9.5z" fill="url(#fsR)"/><path d="M-11.5,${-21 + len - 1} h9.5 M2,${-21 + len - 1} h9.5" stroke="${shade(pa, .25)}" stroke-width="1.6"/>`;
+      if (bot === 'cargo') s += `<rect x="-11" y="-16" width="4" height="4.5" rx="1" fill="${dk}"/><rect x="7" y="-16" width="4" height="4.5" rx="1" fill="${dk}"/>`;
+      if (bot === 'swimtrunks') s += `${[[-7, -18], [4, -17], [8, -14], [-3, -14]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.5" fill="#FFE36B"/>`).join('')}<path d="M-1,-21 l-1,4 M1,-21 l1,4" stroke="#fff" stroke-width=".8"/>`; break; }
+    case 'skirt': s = skinLegs + `<path d="M-11,-21 h22 l5,11 q-16,3 -32,0z" fill="${pa}"/>${[-7, -2, 3, 8].map(x => `<path d="M${x},-21 l${x / 3},11" stroke="${dk}" stroke-width="1.1"/>`).join('')}<path d="M-11,-21 h22 l5,11 q-16,3 -32,0z" fill="url(#fsR)"/>`; break;
+    case 'rainbowskirt': s = skinLegs + ['#E8414F', '#FFC63A', '#3EC46B', '#34B2F0'].map((col, k) => `<path d="M${-11 - k * 1.3},${-21 + k * 2.8} h${22 + k * 2.6} l1.3,2.8 h${-25.2 - k * 2.6}z" fill="${col}"/>`).join(''); break;
+    case 'tutu': s = skinLegs + [0, 1, 2].map(k => `<path d="M${-15 + k},${-14 + k * 1.2} ${[...Array(10)].map((_, i) => `l${(30 - k * 2) / 10},${i % 2 ? -3 : 3}`).join(' ')} L10,-21 h-20z" fill="${k === 1 ? shade(pa, .2) : pa}" opacity=".85"/>`).join('') + `<rect x="-11" y="-22.5" width="22" height="3" rx="1.5" fill="${shade(pa, -.25)}"/>`; break;
+    case 'bare': s = skinLegs; break;
+    default: s = `<rect x="-10" y="-20" width="8.5" height="17" rx="4" fill="${pa}"/><rect x="1.5" y="-20" width="8.5" height="17" rx="4" fill="${dk}"/>`;
+  }
+  return s + shoes;
+};
+// sleeves: short sleeves show arms, tank tops and sundresses have bare arms
+const _charSVGSleeve = charSVG;
+charSVG = function(c, o = {}){ let s = _charSVGSleeve(c, o); const t = c.top || 'tee';
+  if (SLEEVELESS.has(t) || SHORTSLV.has(t)){ const sk = c.skin, sh = t === 'chefcoat' ? '#FFFFFF' : c.shirt;
+    s = s.replace(/<ellipse cx="(-?\d+)" cy="(-?\d+)" rx="5\.6" ry="10" fill="([^"]+)" transform="rotate\(([^)]+)\)"\/>/g, (m, cx, cy, fill, rot) => `<ellipse cx="${cx}" cy="${cy}" rx="4.6" ry="9.6" fill="${shade(sk, -.04)}" transform="rotate(${rot})"/>` + (SHORTSLV.has(t) ? `<ellipse cx="${cx}" cy="${+cy - 5}" rx="6" ry="5.4" fill="${fill}" transform="rotate(${rot})"/>` : '')); }
+  return s; };
+
+// ---------- HAIR SALON 2.0: precise tools on real-looking hair ----------
+const HS = { X: 180, Y: 118, R: 52, N: 16, seg: 7.5 };
+function hairNew2(kid){ const c = kid.char, hs = c.hairStyle || 'bob', base = { long: 150, bob: 82, spiky: 26, puffs: 70, curly: 72 }[hs] || 82;
+  return { v: 2, st: [...Array(46)].map((_, k) => { const a = Math.PI * (1.0 + k / 45 * 1.0); const front = Math.abs(a - Math.PI * 1.5) < .42; const L = front ? Math.min(base, 30) : base * rf(.92, 1.06); return { a, L, curl: hs === 'curly' || hs === 'puffs' ? .8 : 0, puff: hs === 'spiky' ? .9 : hs === 'puffs' ? .7 : .08, cx: 0, cols: Array(HS.N).fill(c.hair), gl: Array(HS.N).fill(0), front }; }), deco: [], bub: [], fall: [] }; }
+// the shape of one strand: from the scalp, falling with gravity, bending with curls and combing
+function strandPts2(s){ const N = HS.N, pts = [], r0 = HS.R * .9; let x = HS.X + Math.cos(s.a) * r0, y = HS.Y + Math.sin(s.a) * r0;
+  let dx = Math.cos(s.a) * (1 + s.puff * 1.2), dy = Math.sin(s.a) * (.5 + s.puff * .6); { const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l; }
+  const seg = Math.max(0, s.L) / N; pts.push([x, y]);
+  for (let i = 1; i <= N; i++){ dy += (1 - s.puff) * .5 + .04; dx += s.cx * .06; const nx = x + dx * seg, ny = y + dy * seg; if (Math.hypot(nx - HS.X, ny - HS.Y) < HS.R * .98){ dx += (x - HS.X) / HS.R; } const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l; x += dx * seg; y += dy * seg; const w = Math.sin(i * 1.35) * s.curl * 7; pts.push([x - dy * w, y + dx * w]); }
+  return pts; }
+function segX(ax, ay, bx, by, cx, cy, dx, dy){ const d = (bx - ax) * (dy - cy) - (by - ay) * (dx - cx); if (Math.abs(d) < 1e-6) return -1; const u = ((cx - ax) * (dy - cy) - (cy - ay) * (dx - cx)) / d, v = ((cx - ax) * (by - ay) - (cy - ay) * (bx - ax)) / d; return u >= 0 && u <= 1 && v >= 0 && v <= 1 ? u : -1; }
+function strandSVG(s){ const pts = strandPts2(s), n = Math.max(1, Math.ceil(s.L / Math.max(1, s.L) * HS.N)); if (s.L < 2) return '';
+  // group runs of the same color so the hair looks smooth
+  let out = '', i = 0; const P = pts;
+  while (i < HS.N){ const col = s.cols[i]; let j = i; while (j + 1 < HS.N && s.cols[j + 1] === col) j++; const d = 'M' + P.slice(i, j + 2).map(p => f1(p[0]) + ',' + f1(p[1])).join(' L');
+    out += `<path d="${d}" stroke="${shade(col, -.28)}" stroke-width="13" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${col}" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`; i = j + 1; }
+  const hl = 'M' + P.slice(1, Math.max(3, Math.round(HS.N * .6))).map(p => f1(p[0] - 1.5) + ',' + f1(p[1])).join(' L'); out += `<path d="${hl}" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".28"/>`;
+  s.gl.forEach((g, k) => { if (g && P[k + 1]) out += `<path class="twinkle" d="${starPath(P[k + 1][0], P[k + 1][1], 3.4, 1.3)}" fill="#fff"/>`; });
+  return out; }
+function salonScene3(){
+  const H = G.hair, kid = K(), c = kid.char, sk = c.skin;
+  let s = `<rect width="360" height="270" fill="#FFE3EE"/>${[...Array(10)].map((_, k) => `<rect x="${k * 40}" width="20" height="270" fill="#fff" opacity=".25"/>`).join('')}`;
+  s += `<ellipse cx="180" cy="128" rx="128" ry="124" fill="#FFC63A"/><ellipse cx="180" cy="128" rx="118" ry="114" fill="#E8F6FF"/><path d="M98,70 q20,-36 60,-46 M96,96 q10,-24 34,-36" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>`;
+  for (let k = 0; k < 14; k++){ const a = Math.PI + k * Math.PI / 13; s += `<circle cx="${f1(180 + Math.cos(a) * 124)}" cy="${f1(128 + Math.sin(a) * 120)}" r="6" fill="#FFF6C9" stroke="#FFC63A" stroke-width="2"/>`; }
+  const back = [], front = [];
+  H.st.forEach(st => (st.front ? front : back).push(strandSVG(st)));
+  s += `<path d="M96,270 Q100,${HS.Y + 66} 180,${HS.Y + 62} Q260,${HS.Y + 66} 264,270Z" fill="#FF8FB8"/><path d="M96,270 Q100,${HS.Y + 66} 180,${HS.Y + 62} Q260,${HS.Y + 66} 264,270Z" fill="url(#fsR)"/>${[130, 160, 200, 230].map(x => `<circle cx="${x}" cy="${HS.Y + 96}" r="3" fill="#fff" opacity=".7"/>`).join('')}`;
+  s += back.join('');
+  s += `<rect x="${HS.X - 14}" y="${HS.Y + 40}" width="28" height="24" rx="10" fill="${shade(sk, -.06)}"/><path d="M${HS.X - 30},${HS.Y + 60} Q${HS.X},${HS.Y + 76} ${HS.X + 30},${HS.Y + 60}" fill="#fff"/>`;
+  s += `<circle cx="${HS.X - HS.R + 2}" cy="${HS.Y + 6}" r="10" fill="${shade(sk, -.06)}"/><circle cx="${HS.X + HS.R - 2}" cy="${HS.Y + 6}" r="10" fill="${shade(sk, -.06)}"/><circle cx="${HS.X}" cy="${HS.Y}" r="${HS.R}" fill="${sk}"/><circle cx="${HS.X}" cy="${HS.Y}" r="${HS.R}" fill="url(#sphSkin)"/>`;
+  const live = H.st.filter(st => st.L > 4); if (live.length > 6){ const w = {}; live.forEach(st => { w[st.cols[0]] = (w[st.cols[0]] || 0) + 1; }); const mc = Object.entries(w).sort((a, b) => b[1] - a[1])[0][0]; s += `<path d="M${HS.X - HS.R - 1},${HS.Y - 6} Q${HS.X - HS.R},${HS.Y - HS.R - 8} ${HS.X},${HS.Y - HS.R - 8} Q${HS.X + HS.R},${HS.Y - HS.R - 8} ${HS.X + HS.R + 1},${HS.Y - 6} Q${HS.X + 30},${HS.Y - HS.R + 14} ${HS.X},${HS.Y - HS.R + 18} Q${HS.X - 30},${HS.Y - HS.R + 14} ${HS.X - HS.R - 1},${HS.Y - 6}Z" fill="${mc}"/><path d="M${HS.X - 30},${HS.Y - HS.R} q20,-8 40,-4" stroke="#fff" stroke-width="3" fill="none" opacity=".3" stroke-linecap="round"/>`; }
+  const happy = H.tool === 'cut' || H.tool === 'wash' || H.tool === 'dry';
+  const ex = HS.X, ey = HS.Y + 6;
+  s += happy ? `<path d="M${ex - 26},${ey} q9,-10 18,0 M${ex + 8},${ey} q9,-10 18,0" stroke="#2B2550" stroke-width="3.6" fill="none" stroke-linecap="round"/>` : [-17, 17].map((dx, i) => `<ellipse cx="${ex + dx}" cy="${ey}" rx="8" ry="10" fill="#2A1E3B"/><ellipse cx="${ex + dx}" cy="${ey + 2}" rx="6" ry="6.6" fill="#6B4FB0" opacity=".55"/><circle cx="${ex + dx + 3}" cy="${ey - 4}" r="3.2" fill="#fff"/><circle cx="${ex + dx - 2.4}" cy="${ey + 4}" r="1.5" fill="#fff"/>${c.lashes ? `<path d="M${ex + dx + (i ? 6 : -6)},${ey - 8} l${i ? 4.5 : -4.5},-3.5 M${ex + dx + (i ? 7.6 : -7.6)},${ey - 4} l${i ? 4.6 : -4.6},-1.4" stroke="#2A1E3B" stroke-width="2" stroke-linecap="round"/>` : ''}`).join('');
+  s += `<path d="M${ex - 25},${ey - 16} q8,-4 15,-1 M${ex + 10},${ey - 17} q8,-3 15,1" stroke="${shade(live[0] ? live[0].cols[0] : c.hair, -.15)}" stroke-width="2.6" fill="none" stroke-linecap="round"/><ellipse cx="${ex}" cy="${ey + 10}" rx="2.4" ry="1.6" fill="${shade(sk, -.18)}"/><ellipse cx="${ex - 32}" cy="${ey + 16}" rx="8" ry="5" fill="#FF8FB8" opacity=".55"/><ellipse cx="${ex + 32}" cy="${ey + 16}" rx="8" ry="5" fill="#FF8FB8" opacity=".55"/>`;
+  s += happy ? `<path d="M${ex - 12},${ey + 18} Q${ex},${ey + 32} ${ex + 12},${ey + 18}Z" fill="#8B2F3F"/><path d="M${ex - 6},${ey + 25} q6,-3 12,0 q-6,4 -12,0z" fill="#FF7E9A"/>` : `<path d="M${ex - 10},${ey + 20} Q${ex},${ey + 28} ${ex + 10},${ey + 20}" stroke="#8B2F3F" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  s += front.join('');
+  s += H.deco.map(d => `<text x="${f1(d.x)}" y="${f1(d.y + 9)}" text-anchor="middle" font-size="26">${d.e}</text>`).join('');
+  s += H.bub.map(b => `<circle cx="${f1(b.x)}" cy="${f1(b.y)}" r="${f1(b.r)}" fill="#fff" opacity=".88" stroke="#BDEBFF"/><circle cx="${f1(b.x - b.r / 3)}" cy="${f1(b.y - b.r / 3)}" r="${f1(b.r / 4)}" fill="#fff"/>`).join('');
+  (H.fall || []).forEach(f => { const d = 'M' + f.pts.map(p => f1(p[0]) + ',' + f1(p[1] + f.dy)).join(' L'); s += `<path d="${d}" stroke="${f.col}" stroke-width="9" fill="none" stroke-linecap="round" opacity="${f1(Math.max(0, 1 - f.dy / 200))}" transform="rotate(${f1(f.rot)} ${f1(f.pts[0][0])} ${f1(f.pts[0][1] + f.dy)})"/>`; });
+  if (H.cursor) s += `<circle cx="${f1(H.cursor.x)}" cy="${f1(H.cursor.y)}" r="${H.tool === 'cut' ? 6 : 18}" fill="none" stroke="#7B5CFA" stroke-width="2" stroke-dasharray="3 3" opacity=".8" pointer-events="none"/>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg" id="hairSvg">${s}</svg>`;
+}
+function salonHTML(){
+  const kid = K(); if (!G.hair || G.hair.kid !== kid.id || G.hair.v !== 2){ G.hair = kid.salon && kid.salon.v === 2 ? JSON.parse(JSON.stringify(kid.salon)) : hairNew2(kid); G.hair.kid = kid.id; G.hair.tool = 'cut'; G.hair.col = HCOLS[5]; G.hair.dec = HDECO[0]; G.hair.fall = []; G.hair.bub = G.hair.bub || []; }
+  const H = G.hair;
+  return `<div class="rm-scene interactive" id="hairScene">${salonScene3()}</div>
+  <div class="htools2">${STOOLS.map(([k, e, n]) => `<button class="tool ${H.tool === k ? 'on' : ''}" data-act="hTool" data-v="${k}" aria-pressed="${H.tool === k}"><span class="te">${e}</span><small>${n}</small></button>`).join('')}</div>
+  ${H.tool === 'color' ? `<div class="swatches">${HCOLS.map(col => `<button class="sw" style="background:${col}" data-act="hCol" data-v="${col}" aria-pressed="${H.col === col}" aria-label="Hair color"></button>`).join('')}</div>` : ''}
+  ${H.tool === 'deco' ? `<div class="chips">${HDECO.map(e => `<button class="chip big" data-act="hDec" data-v="${e}" aria-pressed="${H.dec === e}">${e}</button>`).join('')}<button class="chip" data-act="hDecClear">Take all off</button></div>` : ''}
+  ${sayBox({ cut: 'Swipe across the hair like scissors. It only cuts where you swipe!', grow: 'Rub on the hair to make it grow longer.', comb: 'Drag to comb the hair. It follows your finger and gets smooth.', curl: 'Rub to make curls.', dry: 'Rub to blow the hair big and fluffy.', color: 'Pick a color, then rub only where you want it. Try two colors!', glitter: 'Rub on sparkles where you want them.', wash: 'Rub to make lots of bubbles.', rinse: 'Tap to rinse the bubbles away.', deco: 'Pick a clip, then tap the hair to put it on. Tap a clip to take it off.' }[H.tool])}
+  <div class="actions"><button class="btn ghost" data-act="hReset">↺ Start over</button><button class="btn grape big" style="flex:2" data-act="hDone">🪞 I love it! Save my look</button></div>`;
+}
+function salonInit(){
+  const sc = $('#hairScene'); if (!sc) return; let down = false, lx = 0, ly = 0, moved = false;
+  const pt = e => scenePt('#hairScene', e.clientX, e.clientY);
+  const act = (p, first) => {
+    const H = G.hair, t = H.tool; let ch = false; const R = t === 'cut' ? 0 : 18;
+    const segsNear = (st, r) => { const P = strandPts2(st), hits = []; for (let i = 0; i < HS.N; i++){ if (segDist(p.x, p.y, P[i][0], P[i][1], P[i + 1][0], P[i + 1][1]) < r) hits.push(i); } return hits; };
+    if (t === 'cut' && !first){ H.st.forEach(st => { if (st.L < 3) return; const P = strandPts2(st); for (let i = 0; i < HS.N; i++){ const u = segX(P[i][0], P[i][1], P[i + 1][0], P[i + 1][1], lx, ly, p.x, p.y); if (u >= 0){ const keep = (i + u) / HS.N; if (keep > .03 || true){ H.fall.push({ pts: P.slice(i + 1), col: st.cols[Math.min(HS.N - 1, i + 1)], dy: 0, vy: 0, rot: 0, vr: rf(-3, 3) }); st.L = st.L * keep; const ni = Math.floor(keep * HS.N); for (let k = ni + 1; k < HS.N; k++){ st.cols[k] = st.cols[ni]; st.gl[k] = 0; } ch = true; } break; } } }); if (ch) sfx('pop'); }
+    if (t === 'grow') H.st.forEach(st => { const tip = strandPts2(st)[HS.N], root = [HS.X + Math.cos(st.a) * HS.R, HS.Y + Math.sin(st.a) * HS.R]; if (Math.hypot(tip[0] - p.x, tip[1] - p.y) < 26 || Math.hypot(root[0] - p.x, root[1] - p.y) < 22 || segsNear(st, 14).length){ st.L = Math.min(190, st.L + 3); ch = true; } });
+    if (t === 'comb' && !first){ const dx = p.x - lx; H.st.forEach(st => { if (segsNear(st, 20).length){ st.cx = clamp(st.cx + dx * .02, -1.2, 1.2); st.curl = Math.max(0, st.curl - .05); st.puff = Math.max(0, st.puff - .04); ch = true; } }); }
+    if (t === 'curl') H.st.forEach(st => { if (segsNear(st, R).length){ st.curl = Math.min(1.5, st.curl + .06); ch = true; } });
+    if (t === 'dry') H.st.forEach(st => { if (segsNear(st, 24).length){ st.puff = Math.min(1, st.puff + .04); ch = true; } });
+    if (t === 'color') H.st.forEach(st => { segsNear(st, 14).forEach(i => { if (st.cols[i] !== H.col){ st.cols[i] = H.col; ch = true; } }); });
+    if (t === 'glitter') H.st.forEach(st => { segsNear(st, 12).forEach(i => { if (!st.gl[i]){ st.gl[i] = 1; ch = true; } }); });
+    if (t === 'wash' && H.bub.length < 70){ H.bub.push({ x: p.x + rf(-8, 8), y: p.y + rf(-8, 8), r: rf(6, 14) }); ch = true; }
+    if (t === 'rinse' && first){ let n = 0; const iv = setInterval(() => { H.bub.forEach(b => { b.y += 8; b.r *= .93; }); H.bub = H.bub.filter(b => b.y < 280 && b.r > 2); sceneRedraw('hairScene', salonScene3); if (++n > 30 || !H.bub.length) clearInterval(iv); }, 40); rmSay('Splish splash! All clean!'); }
+    if (t === 'deco' && first){ const hd = H.deco.findIndex(d => Math.hypot(d.x - p.x, d.y - p.y) < 18); if (hd >= 0) H.deco.splice(hd, 1); else if (H.deco.length < 12) H.deco.push({ e: H.dec, x: p.x, y: p.y }); sfx('pop'); ch = true; }
+    H.cursor = { x: p.x, y: p.y }; lx = p.x; ly = p.y; sceneRedraw('hairScene', salonScene3);
+  };
+  sc.addEventListener('pointerdown', e => { const p = pt(e); if (!p) return; e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} down = true; lx = p.x; ly = p.y; act(p, true); });
+  sc.addEventListener('pointermove', e => { if (!down) return; const p = pt(e); if (!p) return; if (Math.hypot(p.x - lx, p.y - ly) < 2) return; act(p, false); });
+  const up = () => { down = false; if (G.hair) G.hair.cursor = null; sceneRedraw('hairScene', salonScene3); }; sc.addEventListener('pointerup', up); sc.addEventListener('pointercancel', up);
+  G.every(() => { const H = G.hair; if (!H || !H.fall || !H.fall.length) return; H.fall.forEach(f => { f.vy += 1.4; f.dy += f.vy; f.rot += f.vr; }); H.fall = H.fall.filter(f => f.dy < 220); sceneRedraw('hairScene', salonScene3); }, 40);
+}
+Object.assign(A, {
+  hTool(el){ G.hair.tool = el.dataset.v; reBody(salonHTML()); salonInit(); },
+  hReset(){ G.hair = Object.assign(hairNew2(K()), { kid: K().id, tool: 'cut', col: HCOLS[5], dec: HDECO[0] }); reBody(salonHTML()); salonInit(); },
+  hDecClear(){ G.hair.deco = []; sceneRedraw('hairScene', salonScene3); },
+  hDone(){ const H = G.hair, kid = K(), c = kid.char, live = H.st.filter(st => st.L > 4); const avgL = live.reduce((a, st) => a + st.L, 0) / Math.max(1, H.st.length), curl = live.reduce((a, st) => a + st.curl, 0) / Math.max(1, live.length), puff = live.reduce((a, st) => a + st.puff, 0) / Math.max(1, live.length);
+    const w = {}; live.forEach(st => st.cols.forEach(col => { w[col] = (w[col] || 0) + 1; })); const top = Object.entries(w).sort((a, b) => b[1] - a[1])[0];
+    if (top) c.hair = top[0]; c.hairStyle = avgL < 32 ? 'spiky' : curl > .55 && puff > .45 ? 'puffs' : curl > .5 ? 'curly' : avgL > 100 ? 'long' : 'bob';
+    kid.salon = { v: 2, st: H.st, deco: H.deco, bub: [] }; save(); render(); sfx('win'); confetti(40); rmSay('Gorgeous! Your new hair shows up in your whole world!'); playReward(1, 'New hairdo at Star Boutique'); }
+});
+ROOMS.boutique.tabs[0] = ['salon', 'Hair salon', salonHTML, salonInit];
+
+// ---------- BUILDERS 2.0: snowman, sandcastle, fish tank ----------
+// kind: 'stack' sits on the ground or on top of another stack piece; 'free' goes anywhere; 'ground' sits on the ground; 'swim' floats in the water
+const fishArt = (body, fin, eye = '#2B2550') => `<ellipse rx="15" ry="10" fill="${body}"/><path d="M13,0 L24,-9 V9z" fill="${fin}"/><path d="M-2,-9 q6,-8 12,-2" fill="${fin}"/><circle cx="-7" cy="-2" r="2.6" fill="#fff"/><circle cx="-7.5" cy="-2" r="1.5" fill="${eye}"/><path d="M-13,3 q2,2 4,0" stroke="${shade(body, -.3)}" stroke-width="1.2" fill="none"/>`;
+const BUILD = {
+  snowman: { ground: 232, bg: () => `<rect width="360" height="270" fill="#CFE8FF"/><rect y="200" width="360" height="70" fill="#F6FBFF"/><path d="M0,200 q60,-14 120,0 t120,0 t120,0" fill="#F6FBFF"/>${pineSnow(30, 214, .55)}${pineSnow(338, 218, .6)}<g class="snowfall">${[...Array(16)].map((_, k) => `<circle cx="${(k * 67) % 360}" cy="${(k * 41) % 270}" r="2" fill="#fff" style="animation-delay:-${k % 7}s"/>`).join('')}</g>`,
+    items: [['ballL', '⚪', 'Big snowball', 'stack', 78, 72, `<ellipse cx="0" cy="-36" rx="39" ry="37" fill="#fff" stroke="#DDE9F5" stroke-width="2"/><ellipse cx="-12" cy="-50" rx="12" ry="8" fill="#fff" opacity=".9"/><path d="M-30,-14 q30,12 60,0" stroke="#E3EEF9" stroke-width="3" fill="none"/>`], ['ballM', '⚪', 'Middle snowball', 'stack', 58, 52, `<ellipse cx="0" cy="-26" rx="29" ry="27" fill="#fff" stroke="#DDE9F5" stroke-width="2"/><ellipse cx="-9" cy="-37" rx="9" ry="6" fill="#fff" opacity=".9"/>`], ['ballS', '⚪', 'Head snowball', 'stack', 42, 38, `<ellipse cx="0" cy="-19" rx="21" ry="20" fill="#fff" stroke="#DDE9F5" stroke-width="2"/>`],
+      ['eyes', '👀', 'Coal eyes', 'free', 24, 10, `<circle cx="-7" r="3.4" fill="#2B2550"/><circle cx="7" r="3.4" fill="#2B2550"/><circle cx="-6" cy="-1" r="1" fill="#fff"/><circle cx="8" cy="-1" r="1" fill="#fff"/>`], ['nose', '🥕', 'Carrot nose', 'free', 24, 8, `<path d="M-2,-3.5 L20,0 L-2,3.5z" fill="#FF8A3D"/><path d="M4,-2 v4 M10,-1.4 v2.8" stroke="#E06A1F" stroke-width="1"/>`], ['smile', '🙂', 'Smile', 'free', 24, 10, `${[-10, -5, 0, 5, 10].map((x, k) => `<circle cx="${x}" cy="${Math.abs(x) < 6 ? 3 : 0}" r="2" fill="#2B2550"/>`).join('')}`], ['buttons', '🔘', 'Buttons', 'free', 10, 30, `<circle cy="-11" r="3.4" fill="#2B2550"/><circle cy="0" r="3.4" fill="#2B2550"/><circle cy="11" r="3.4" fill="#2B2550"/>`],
+      ['tophat', '🎩', 'Top hat', 'free', 40, 34, `${rr(-20, 6, 40, 6, 3, '#2B2550')}${rr(-12, -22, 24, 30, 3, '#2B2550')}${rr(-12, -2, 24, 5, 1, '#E8414F')}`], ['beanie', '🧶', 'Winter hat', 'free', 40, 30, `<path d="M-20,8 Q-20,-20 0,-20 Q20,-20 20,8z" fill="#34B2F0"/><rect x="-21" y="4" width="42" height="8" rx="4" fill="#fff"/><circle cy="-21" r="6" fill="#fff"/>`], ['scarf', '🧣', 'Scarf', 'free', 50, 30, `<path d="M-25,-4 q25,9 50,0 v9 q-25,9 -50,0z" fill="#E8414F"/><path d="M-20,-1 h40" stroke="#fff" stroke-width="2" stroke-dasharray="4 4"/><rect x="10" y="3" width="10" height="24" rx="3" fill="#E8414F"/>`],
+      ['armL', '🌿', 'Stick arm (left)', 'free', 46, 24, `<path d="M20,6 L-22,-10 M-10,-5 l-4,-10 M-14,-6 l-10,0" stroke="#8A5634" stroke-width="4" stroke-linecap="round"/>`], ['armR', '🌿', 'Stick arm (right)', 'free', 46, 24, `<path d="M-20,6 L22,-10 M10,-5 l4,-10 M14,-6 l10,0" stroke="#8A5634" stroke-width="4" stroke-linecap="round"/>`], ['mitten', '🧤', 'Mitten', 'free', 16, 18, `<path d="M-7,8 V-4 a7,7 0 0 1 14,0 V8z" fill="#FF5A8C"/><ellipse cx="-8" cy="0" rx="3" ry="5" fill="#FF5A8C"/><rect x="-8" y="6" width="16" height="4" rx="2" fill="#fff"/>`],
+      ['shades', '🕶️', 'Sunglasses', 'free', 32, 10, `<path d="M-15,-4 h12 q-1,9 -7,9 q-6,0 -5,-9z M15,-4 h-12 q1,9 7,9 q6,0 5,-9z" fill="#2B2550"/><path d="M-3,-3 h6" stroke="#2B2550" stroke-width="2"/>`], ['earmuffs', '🎧', 'Earmuffs', 'free', 50, 26, `<path d="M-20,6 A20,22 0 0 1 20,6" stroke="#B58CFF" stroke-width="4" fill="none"/><circle cx="-21" cy="8" r="8" fill="#FFC4DD"/><circle cx="21" cy="8" r="8" fill="#FFC4DD"/>`], ['broom', '🧹', 'Broom', 'free', 30, 60, `<path d="M0,-30 V20" stroke="#8A5634" stroke-width="4"/><path d="M-12,20 h24 l4,14 h-32z" fill="#FFC63A"/>`],
+      ['pine', '🌲', 'Little tree', 'ground', 40, 60, `${pineSnow(0, 0, .55)}`], ['gift', '🎁', 'Present', 'stack', 32, 30, `${rr(-16, -30, 32, 30, 4, '#E8414F')}<path d="M0,-30 v30 M-16,-15 h32" stroke="#FFE36B" stroke-width="4"/><path d="M0,-30 q-10,-10 -12,-2 q6,4 12,2 q10,-10 12,-2 q-6,4 -12,2" fill="#FFE36B"/>`], ['sled', '🛷', 'Sled', 'ground', 60, 20, `<path d="M-30,-8 h56 q6,0 6,-6" stroke="#E8414F" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M-28,0 h60 q6,0 6,-6" stroke="#9AA3B8" stroke-width="3" fill="none"/><path d="M-20,-8 v8 M14,-8 v8" stroke="#9AA3B8" stroke-width="3"/>`], ['bird', '🐦', 'Bird friend', 'free', 26, 20, `<ellipse rx="11" ry="9" fill="#6EC6FF"/><circle cx="7" cy="-5" r="6" fill="#6EC6FF"/><circle cx="9" cy="-6" r="1.6" fill="#2B2550"/><path d="M13,-5 l5,1 l-5,2z" fill="#FFC63A"/><path d="M-4,-2 q-6,-6 -12,0" stroke="#3E9CD8" stroke-width="3" fill="none"/>`]],
+    learn: 'A snowman stacks circles from biggest to smallest. Putting things in order by size is called ordering!' },
+  castle: { ground: 238, bg: () => `<rect width="360" height="270" fill="#BFE8FF"/><circle cx="310" cy="40" r="22" fill="#FFE36B"/><rect y="118" width="360" height="44" fill="#34B2F0"/><path d="M0,128 q30,-8 60,0 t60,0 t60,0 t60,0 t60,0 t60,0" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/><path d="M0,156 Q180,144 360,158 V270 H0Z" fill="#F7DFA6"/>${[...Array(20)].map((_, k) => `<circle cx="${(k * 53) % 360}" cy="${170 + (k * 31) % 90}" r="1.4" fill="#E2C07A"/>`).join('')}`,
+    items: [['tower', '🗼', 'Tower', 'stack', 36, 54, `${rr(-18, -54, 36, 54, 4, '#E9C77A')}<ellipse cy="-54" rx="18" ry="5" fill="#F2D48F"/>${[-14, -2, 10].map(x => rr(x, -62, 8, 9, 2, '#E9C77A')).join('')}${rr(-5, -36, 10, 14, 5, '#C9A15A')}`], ['tall', '🏰', 'Tall tower', 'stack', 32, 84, `${rr(-16, -84, 32, 84, 4, '#E9C77A')}${[-12, -2, 8].map(x => rr(x, -92, 7, 9, 2, '#E9C77A')).join('')}${rr(-4, -64, 8, 12, 4, '#C9A15A')}${rr(-4, -36, 8, 12, 4, '#C9A15A')}`], ['cube', '🟫', 'Block', 'stack', 34, 32, `${rr(-17, -32, 34, 32, 3, '#E9C77A')}<path d="M-17,-32 h34" stroke="#F7E3B0" stroke-width="3"/>`],
+      ['wall', '🧱', 'Wall', 'stack', 66, 24, `${rr(-33, -24, 66, 24, 3, '#E9C77A')}${[-30, -14, 2, 18].map(x => rr(x, -32, 10, 9, 2, '#E9C77A')).join('')}`], ['cone', '🔺', 'Cone roof', 'stack', 40, 36, `<path d="M-20,0 L0,-36 L20,0z" fill="#E2B867"/><ellipse rx="20" ry="5" fill="#D9AC58"/>`], ['dome', '🟠', 'Dome roof', 'stack', 40, 24, `<path d="M-20,0 A20,22 0 0 1 20,0z" fill="#E2B867"/>`], ['arch', '🚪', 'Door', 'stack', 42, 36, `${rr(-21, -36, 42, 36, 3, '#E9C77A')}<path d="M-10,0 V-14 a10,10 0 0 1 20,0 V0z" fill="#B98A4A"/>`],
+      ['flag', '🚩', 'Flag', 'stack', 22, 42, `<path d="M0,0 V-42" stroke="#8A5634" stroke-width="2.4"/><path d="M0,-42 l18,6 l-18,6z" fill="#FF5A8C"/>`], ['flag2', '🏳️', 'Blue flag', 'stack', 22, 42, `<path d="M0,0 V-42" stroke="#8A5634" stroke-width="2.4"/><path d="M0,-42 l18,6 l-18,6z" fill="#34B2F0"/>`], ['window', '🪟', 'Window', 'free', 14, 18, `<path d="M-6,8 V-2 a6,6 0 0 1 12,0 V8z" fill="#3D5BB0"/>`], ['shell', '🐚', 'Shell', 'free', 22, 22, `<path d="M0,-11 C10,-11 13,1 0,11 C-13,1 -10,-11 0,-11Z" fill="#FFD3E4" stroke="#FF8FB8" stroke-width="1.5"/><path d="M0,-9 V9 M-6,-5 L0,9 L6,-5" stroke="#FF8FB8" stroke-width="1"/>`], ['star', '⭐', 'Starfish', 'free', 24, 24, `<path d="${starPath(0, 0, 12, 5, 5)}" fill="#FF8A3D"/>`],
+      ['crab', '🦀', 'Crab', 'ground', 30, 18, `<ellipse cy="-8" rx="12" ry="8" fill="#E8414F"/><circle cx="-4" cy="-17" r="2.6" fill="#fff"/><circle cx="4" cy="-17" r="2.6" fill="#fff"/><circle cx="-4" cy="-17" r="1.3" fill="#2B2550"/><circle cx="4" cy="-17" r="1.3" fill="#2B2550"/><path d="M-12,-8 l-6,-6 M12,-8 l6,-6" stroke="#E8414F" stroke-width="3" stroke-linecap="round"/>`], ['bucket', '🪣', 'Bucket', 'ground', 28, 28, `<path d="M-13,-26 H13 L10,0 H-10Z" fill="#34B2F0"/><path d="M-13,-26 Q0,-42 13,-26" stroke="#2B2550" stroke-width="2" fill="none"/>`], ['shovel', '⛏️', 'Shovel', 'ground', 16, 44, `<path d="M0,-44 V-14" stroke="#FFC63A" stroke-width="4"/><path d="M-8,-14 h16 l-3,14 h-10z" fill="#FF5A8C"/>`], ['moat', '💧', 'Water', 'ground', 70, 10, `<ellipse cy="-4" rx="35" ry="8" fill="#6EC6FF"/><ellipse cx="-8" cy="-6" rx="10" ry="2" fill="#fff" opacity=".6"/>`], ['seaweed', '🌿', 'Seaweed', 'ground', 20, 40, `<path d="M0,0 q-8,-12 0,-24 t0,-18 M6,0 q8,-10 0,-20" stroke="#3EC46B" stroke-width="5" fill="none" stroke-linecap="round"/>`], ['palm', '🌴', 'Little palm', 'ground', 40, 70, `${palm(0, 0, .6)}`]],
+    learn: 'Castles are built from shapes: towers are cylinders, roofs are cones and blocks are cubes!' },
+  tank: { ground: 222, bg: () => `<rect width="360" height="270" fill="#E9F6FF"/>${rr(14, 14, 332, 242, 20, '#6EC6FF')}<rect x="14" y="14" width="332" height="242" rx="20" fill="url(#water)" opacity=".5"/><rect x="14" y="212" width="332" height="44" rx="12" fill="#F2D48F"/>${[...Array(18)].map((_, k) => `<circle cx="${24 + (k * 37) % 312}" cy="${222 + (k * 13) % 26}" r="2" fill="${['#FF8FB8', '#fff', '#B58CFF'][k % 3]}"/>`).join('')}<path d="M40,50 l40,-14 M50,72 l24,-8" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".55"/>`,
+    items: [['fishO', '🐠', 'Orange fish', 'swim', 40, 22, fishArt('#FF8A3D', '#FFB46B')], ['fishB', '🐟', 'Blue fish', 'swim', 40, 22, fishArt('#34B2F0', '#7FD0FF')], ['fishY', '🐡', 'Yellow fish', 'swim', 40, 22, fishArt('#FFD23F', '#FFE98A')], ['clown', '🐠', 'Clownfish', 'swim', 40, 22, fishArt('#FF7A1A', '#fff').replace('<path d="M-13,3', '<path d="M-4,-10 v20 M5,-9 v18" stroke="#fff" stroke-width="3"/><path d="M-13,3')], ['pink', '🐟', 'Pink fish', 'swim', 40, 22, fishArt('#FF8FB8', '#FFC4DD')],
+      ['puffer', '🐡', 'Pufferfish', 'swim', 30, 30, `<circle r="13" fill="#FFD23F"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(k => `<path d="M${f1(Math.cos(k * .785) * 13)},${f1(Math.sin(k * .785) * 13)} l${f1(Math.cos(k * .785) * 5)},${f1(Math.sin(k * .785) * 5)}" stroke="#E0A800" stroke-width="2"/>`).join('')}<circle cx="-5" cy="-3" r="2.6" fill="#fff"/><circle cx="-5" cy="-3" r="1.4" fill="#2B2550"/>`], ['jelly', '🪼', 'Jellyfish', 'swim', 30, 40, `<path d="M-14,0 A14,13 0 0 1 14,0z" fill="#C9A0FF" opacity=".85"/>${[-9, -3, 3, 9].map(x => `<path d="M${x},0 q-3,8 0,16 t0,10" stroke="#C9A0FF" stroke-width="2" fill="none"/>`).join('')}<circle cx="-4" cy="-5" r="1.4" fill="#2B2550"/><circle cx="4" cy="-5" r="1.4" fill="#2B2550"/>`], ['seahorse', '🦄', 'Seahorse', 'swim', 22, 40, `<path d="M0,-16 q10,-2 10,6 q0,8 -8,10 q-8,4 -4,14 q2,6 -4,6" stroke="#FFB46B" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="3" cy="-12" r="1.6" fill="#2B2550"/>`], ['turtle', '🐢', 'Sea turtle', 'swim', 44, 28, `<ellipse rx="16" ry="11" fill="#5B8C3A"/><path d="M-8,0 h16 M-3,-8 v16 M4,-8 v16" stroke="#3E6A26" stroke-width="1.6"/><ellipse cx="-19" cy="-2" rx="6" ry="5" fill="#8BD17C"/><circle cx="-21" cy="-3" r="1.3" fill="#2B2550"/><ellipse cx="-6" cy="11" rx="6" ry="3" fill="#8BD17C"/><ellipse cx="8" cy="11" rx="6" ry="3" fill="#8BD17C"/>`], ['octo', '🐙', 'Octopus', 'swim', 34, 36, `<circle cy="-6" r="12" fill="#FF8FB8"/>${[-9, -3, 3, 9].map(x => `<path d="M${x},4 q-3,8 2,12" stroke="#FF8FB8" stroke-width="3.6" fill="none" stroke-linecap="round"/>`).join('')}<circle cx="-4" cy="-7" r="2" fill="#2B2550"/><circle cx="4" cy="-7" r="2" fill="#2B2550"/>`],
+      ['weed', '🌿', 'Seaweed', 'ground', 24, 60, `<path d="M0,0 q-10,-14 0,-28 t0,-28 M8,0 q10,-12 0,-24" stroke="#3EC46B" stroke-width="5" fill="none" stroke-linecap="round"/>`], ['coral', '🪸', 'Pink coral', 'ground', 36, 40, `<path d="M0,0 V-20 M0,-20 l-10,-12 M0,-20 l10,-14 M-10,-32 l-4,-6 M10,-34 l5,-6" stroke="#FF6F91" stroke-width="5" stroke-linecap="round" fill="none"/>`], ['coral2', '🪸', 'Orange coral', 'ground', 36, 34, `${[-10, 0, 10].map((x, k) => `<ellipse cx="${x}" cy="${-12 - k % 2 * 8}" rx="7" ry="${12 + k % 2 * 6}" fill="#FF8A3D"/>`).join('')}`], ['rock', '🪨', 'Rock', 'ground', 36, 20, `<path d="M-18,0 Q-16,-18 0,-20 Q18,-18 18,0Z" fill="#9AA3B8"/><path d="M-6,-14 q6,-4 10,0" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/>`],
+      ['chest', '💰', 'Treasure chest', 'ground', 32, 26, `${rr(-16, -20, 32, 20, 3, '#B98A4A')}<path d="M-16,-20 q16,-14 32,0" fill="#C98A55"/><rect x="-3" y="-14" width="6" height="7" fill="#FFD23F"/><circle cx="-8" cy="-24" r="2" fill="#FFD23F" class="twinkle"/>`], ['mini', '🏰', 'Tiny castle', 'ground', 34, 40, `${rr(-14, -32, 28, 32, 2, '#C9A0FF')}${[-14, -4, 6].map(x => rr(x, -38, 8, 7, 1, '#C9A0FF')).join('')}<path d="M-5,0 v-10 a5,5 0 0 1 10,0 v10z" fill="#7B5CFA"/>`], ['shellT', '🐚', 'Shell', 'ground', 22, 20, `<path d="M0,-18 C10,-18 13,-6 0,0 C-13,-6 -10,-18 0,-18Z" fill="#FFD3E4" stroke="#FF8FB8" stroke-width="1.5"/>`], ['starT', '⭐', 'Starfish', 'ground', 24, 20, `<path d="${starPath(0, -9, 11, 4.6, 5)}" fill="#FF5A8C"/>`], ['bubbler', '🫧', 'Bubble maker', 'ground', 20, 20, `${rr(-8, -16, 16, 16, 4, '#9AA3B8')}${[0, 1, 2].map(k => `<circle class="rise ${['', 'd2', 'd3'][k]}" cx="${-2 + k * 2}" cy="-24" r="3" fill="#fff" opacity=".7"/>`).join('')}`]],
+    learn: 'Fish need clean water, food and places to hide. Taking care of animals every day keeps them healthy!' }
+};
+const bItems = k => (K().toys2 = K().toys2 || {}, K().toys2[k] = K().toys2[k] || []);
+const bDef = (k, id) => BUILD[k].items.find(x => x[0] === id);
+function bScene(k){ const B = BUILD[k], items = bItems(k), sel = G.bsel && G.bsel.k === k ? G.bsel.i : -1, tm = G.bT || 0; let s = B.bg();
+  items.forEach((o, i) => { const d = bDef(k, o.id); if (!d) return; let x = o.x, y = o.y; if (d[3] === 'swim'){ x += Math.sin(tm * .9 + i) * 10; y += Math.sin(tm * 1.7 + i * 2) * 4; if (G.food && G.food.length){ const f = G.food.reduce((a, b) => Math.hypot(b.x - o.x, b.y - o.y) < Math.hypot(a.x - o.x, a.y - o.y) ? b : a); x += clamp(f.x - x, -24, 24) * .6; y += clamp(f.y - y, -20, 20) * .6; } }
+    s += `<g data-ti="${i}" transform="translate(${f1(x)},${f1(y)}) scale(${o.f ? -o.s : o.s},${o.s})">${d[6]}${i === sel ? `<rect x="${-d[4] / 2 - 6}" y="${d[3] === 'stack' || d[3] === 'ground' ? -d[5] - 6 : -d[5] / 2 - 6}" width="${d[4] + 12}" height="${d[5] + 12}" rx="10" fill="none" stroke="#7B5CFA" stroke-width="${2 / o.s}" stroke-dasharray="5 4"/>` : ''}</g>`; });
+  (G.food || []).forEach(f => s += `<circle cx="${f1(f.x)}" cy="${f1(f.y)}" r="2.6" fill="#C98A55"/>`);
+  s += `<g transform="translate(332,${k === 'tank' ? 238 : 248})" opacity="${G.bdrag ? 1 : .7}"><circle r="17" fill="${G.btrash ? '#E8414F' : '#fff'}" opacity=".95"/><text y="7" text-anchor="middle" font-size="18">🗑️</text></g>`;
+  return `<svg viewBox="0 0 360 270" class="rm-svg">${s}</svg>`; }
+const PER = 8;
+function bHTML(k){ const B = BUILD[k], pg = (G.bpage = G.bpage || {})[k] || 0, pages = Math.ceil(B.items.length / PER), sel = G.bsel && G.bsel.k === k;
+  return `<div class="rm-scene interactive" id="toyScene">${bScene(k)}</div>
+  <div class="btools ${sel ? '' : 'off'}"><button data-act="bSize" data-v="-1" aria-label="Smaller">➖</button><button data-act="bSize" data-v="1" aria-label="Bigger">➕</button><button data-act="bFlip" aria-label="Flip">↔️</button><button data-act="bFront" aria-label="Bring to front">⬆️</button><button data-act="bDel" aria-label="Remove">🗑️</button></div>
+  <div class="bpal"><button class="bpg" data-act="bPage" data-v="-1" ${pg === 0 ? 'disabled' : ''} aria-label="Previous items">◀</button><div class="bgrid">${B.items.slice(pg * PER, pg * PER + PER).map(d => `<button class="bitem" data-drag="bld:${k}|${d[0]}" aria-label="${d[2]}"><svg viewBox="${-Math.max(d[4], d[5]) / 2 - 6} ${d[3] === 'stack' || d[3] === 'ground' ? -Math.max(d[4], d[5]) - 8 : -Math.max(d[4], d[5]) / 2 - 6} ${Math.max(d[4], d[5]) + 12} ${Math.max(d[4], d[5]) + 12}">${d[6]}</svg><small>${d[2]}</small></button>`).join('')}</div><button class="bpg" data-act="bPage" data-v="1" ${pg >= pages - 1 ? 'disabled' : ''} aria-label="More items">▶</button></div>
+  <div class="bdots">${[...Array(pages)].map((_, i) => `<i class="${i === pg ? 'on' : ''}"></i>`).join('')}</div>
+  ${sayBox(k === 'tank' ? 'Tap or drag fish, plants and treasure into the tank. Drag them to move. Tap ▶ for more!' : k === 'snowman' ? 'Tap or drag snowballs to stack them, then add a face, a hat and more. Drag things to move them. Tap ▶ for more!' : 'Tap or drag towers, walls and roofs. They stack on top of each other! Drag to move. Tap ▶ for more!')}
+  <div class="actions">${k === 'tank' ? '<button class="btn sea" data-act="toyFeed">🍤 Feed the fish</button>' : ''}<button class="btn ghost" data-act="bClear" data-v="${k}">Start over</button><button class="btn grape" data-act="toyDone" data-v="${k}">🎓 All done!</button></div>`; }
+function bSnap(k, o){ const d = bDef(k, o.id), B = BUILD[k], kind = d[3]; if (kind === 'free' || kind === 'swim'){ if (k === 'tank') { o.x = clamp(o.x, 34, 326); o.y = clamp(o.y, 34, 206); } return; }
+  if (kind === 'ground'){ o.y = B.ground - (k === 'tank' ? 0 : 0); return; }
+  const items = bItems(k); let best = B.ground; const w = d[4] * o.s;
+  items.forEach(q => { if (q === o) return; const qd = bDef(k, q.id); if (!qd || qd[3] !== 'stack') return; const top = q.y - qd[5] * q.s + 4, qw = qd[4] * q.s; if (Math.abs(q.x - o.x) < (w + qw) / 2 * .55 && top < best && top > o.y - 80) best = top; });
+  o.y = best; }
+function bAdd(k, id, x, y){ const items = bItems(k), d = bDef(k, id); const o = { id, x: clamp(x, 20, 340), y: clamp(y, 30, 250), s: 1, f: false }; items.push(o); if (items.length > 50) items.shift(); bSnap(k, o); G.bsel = { k, i: items.indexOf(o) }; save(); sfx('pop'); }
+DRAG.bld = {
+  ghost(key){ const [k, id] = key.split('|'), d = bDef(k, id), m = Math.max(d[4], d[5]); return ghostSVG(d[6], `${-m / 2 - 6} ${d[3] === 'stack' || d[3] === 'ground' ? -m - 8 : -m / 2 - 6} ${m + 12} ${m + 12}`); },
+  tap(key){ const [k, id] = key.split('|'), d = bDef(k, id); const items = bItems(k), n = items.length; const lastStack = d[3] === 'stack' ? [...items].reverse().find(o => (bDef(k, o.id) || [])[3] === 'stack') : null; bAdd(k, id, lastStack ? lastStack.x : 120 + (n * 37) % 130, d[3] === 'swim' ? 80 + (n * 23) % 100 : d[3] === 'free' ? 140 : 40); bRe(k); },
+  drop(key, x, y){ const [k, id] = key.split('|'); const p = scenePt('#toyScene', x, y + 26); if (!p || p.x < 0 || p.x > 360 || p.y < 0 || p.y > 270) return; bAdd(k, id, p.x, p.y); bRe(k); }
+};
+function bRe(k){ reBody(bHTML(k)); bInit(k); }
+function bInit(k){ const sc = $('#toyScene'); if (!sc) return; let drag = null;
+  const pt = e => scenePt('#toyScene', e.clientX, e.clientY);
+  sc.addEventListener('pointerdown', e => { if (drg) return; const p = pt(e); if (!p) return; const g = e.target.closest && e.target.closest('[data-ti]');
+    if (!g){ if (G.bsel){ G.bsel = null; bRe(k); } return; } e.preventDefault(); try { sc.setPointerCapture(e.pointerId); } catch (er) {} const i = +g.dataset.ti, o = bItems(k)[i]; drag = { i, dx: p.x - o.x, dy: p.y - o.y }; G.bsel = { k, i }; G.bdrag = true; sceneRedraw('toyScene', () => bScene(k)); });
+  sc.addEventListener('pointermove', e => { if (!drag) return; const p = pt(e); if (!p) return; const o = bItems(k)[drag.i]; o.x = clamp(p.x - drag.dx, 10, 350); o.y = clamp(p.y - drag.dy, 20, 262); G.btrash = p.x > 312 && p.y > 226; sceneRedraw('toyScene', () => bScene(k)); });
+  const up = () => { if (!drag) return; const items = bItems(k), o = items[drag.i]; drag = null; G.bdrag = false; if (G.btrash){ items.splice(items.indexOf(o), 1); G.bsel = null; G.btrash = false; sfx('boop'); } else { bSnap(k, o); sfx('pop'); } save(); bRe(k); };
+  sc.addEventListener('pointerup', up); sc.addEventListener('pointercancel', up);
+  if (k === 'tank') G.every(() => { G.bT = (G.bT || 0) + .05; (G.food || []).forEach(f => { f.y += 1.3; }); G.food = (G.food || []).filter(f => f.y < 214); if (!drag) sceneRedraw('toyScene', () => bScene(k)); }, 50); }
+Object.assign(A, {
+  bPage(el){ const k = ui.room.tab === 'snowman' ? 'snowman' : ui.room.tab === 'castle' ? 'castle' : 'tank'; G.bpage[k] = (G.bpage[k] || 0) + +el.dataset.v; bRe(k); },
+  bSize(el){ const s = G.bsel; if (!s) return; const o = bItems(s.k)[s.i]; o.s = clamp(o.s + (+el.dataset.v) * .15, .55, 1.9); bSnap(s.k, o); save(); bRe(s.k); },
+  bFlip(){ const s = G.bsel; if (!s) return; const o = bItems(s.k)[s.i]; o.f = !o.f; save(); bRe(s.k); },
+  bFront(){ const s = G.bsel; if (!s) return; const items = bItems(s.k), o = items.splice(s.i, 1)[0]; items.push(o); G.bsel.i = items.length - 1; save(); bRe(s.k); },
+  bDel(){ const s = G.bsel; if (!s) return; bItems(s.k).splice(s.i, 1); G.bsel = null; save(); sfx('boop'); bRe(s.k); },
+  bClear(el){ K().toys2[el.dataset.v] = []; G.bsel = null; save(); bRe(el.dataset.v); },
+  toyFeed(){ G.food = [...Array(12)].map(() => ({ x: rf(40, 320), y: rf(24, 50) })); sfx('pop'); rmSay('Yum yum! The fish love it!'); },
+  toyDone(el){ const k = el.dataset.v, kid = K(), n = bItems(k).length; if (n < 3) return rmSay('Add a few more things first!'); kid.toyDay = kid.toyDay || {}; if (kid.toyDay[k] !== dayKey()){ kid.toyDay[k] = dayKey(); playReward(1, 'Built something in a new world'); } sfx('win'); confetti(40); rmSay(`Beautiful! What you learned: ${BUILD[k].learn}`); }
+});
+[['snowshop', 'snowman'], ['sandcastle', 'castle'], ['aquarium', 'tank']].forEach(([r, k]) => { const t = ROOMS[r].tabs.find(x => x[0] === k); if (t){ t[2] = () => { G.bsel = null; return bHTML(k); }; t[3] = () => bInit(k); } });
+HOWTO.snowman = 'Tap or drag the snowballs to stack them, biggest at the bottom. Then add eyes, a carrot nose, a hat and more! Drag things to move them, and use the buttons to make them bigger or smaller. Tap the arrow to see more things.';
+HOWTO.castle = 'Tap or drag towers, walls, blocks and roofs. They stack on top of each other! Drag to move, and use the buttons to make them bigger or smaller. Tap the arrow to see more things.';
+HOWTO.tank = 'Tap or drag fish, plants and treasure into the tank. Drag them to move them around. Tap Feed the fish and watch them swim to the food!';
+
+// ---------- DANCE PARTY: its own beat, and your taps play the song ----------
+const DSONGS = [
+  { name: 'Twinkle, Twinkle, Little Star', notes: 'C5 C5 G5 G5 A5 A5 G5:2 F5 F5 E5 E5 D5 D5 C5:2 G5 G5 F5 F5 E5 E5 D5:2 G5 G5 F5 F5 E5 E5 D5:2 C5 C5 G5 G5 A5 A5 G5:2 F5 F5 E5 E5 D5 D5 C5:2' },
+  { name: 'Ode to Joy', notes: 'E5 E5 F5 G5 G5 F5 E5 D5 C5 C5 D5 E5 E5:1.5 D5:.5 D5:2 E5 E5 F5 G5 G5 F5 E5 D5 C5 C5 D5 E5 D5:1.5 C5:.5 C5:2' },
+  { name: 'Mary Had a Little Lamb', notes: 'E5 D5 C5 D5 E5 E5 E5:2 D5 D5 D5:2 E5 G5 G5:2 E5 D5 C5 D5 E5 E5 E5 E5 D5 D5 E5 D5 C5:4' },
+  { name: 'Row, Row, Row Your Boat', notes: 'C5:1.5 C5:1.5 C5 D5 E5:1.5 E5 D5 E5 F5 G5:3 C6:.5 C6:.5 C6:.5 G5:.5 G5:.5 G5:.5 E5:.5 E5:.5 E5:.5 C5:.5 C5:.5 C5:.5 G5 F5 E5 D5 C5:3' },
+  { name: 'Frère Jacques', notes: 'C5 D5 E5 C5 C5 D5 E5 C5 E5 F5 G5:2 E5 F5 G5:2 G5:.5 A5:.5 G5:.5 F5:.5 E5 C5 G5:.5 A5:.5 G5:.5 F5:.5 E5 C5 C5 G4 C5:2 C5 G4 C5:2' }
+];
+const pitchLane = n => { const o = +n.slice(-1), l = 'CDEFGAB'.indexOf(n[0]) + o * 7; return l <= 37 ? 0 : l <= 39 ? 1 : 2; };
+MODES.rhythm.start = function(s){
+  s.lanes = [90, 180, 270]; s.song = DSONGS[(arcBest(s.key).plays || 0) % DSONGS.length]; s.beat = 60 / ([84, 96, 108, 120][s.d]); s.travel = 1.8 - s.d * .2; s.win = 30 - s.d * 4;
+  s.seq = []; let t = 1.2; s.song.notes.split(' ').forEach(tok => { const [n, d] = tok.split(':'); s.seq.push({ n, t, lane: pitchLane(n) }); t += (+d || 1) * s.beat; }); s.songEnd = t + 1; s.si = 0; s.nextBeat = 1.2; s.bi = 0;
+  s.pads = s.lanes.map((x, k) => { mk(s, `<rect x="-34" y="-260" width="68" height="300" rx="20" fill="#fff" opacity=".12"/>`, x, 240); return mk(s, `<circle r="24" fill="${['#FF5A8C', '#FFC63A', '#34B2F0'][k]}" opacity=".35"/><circle r="24" fill="none" stroke="#fff" stroke-width="3"/>`, x, 222); });
+  s.hud = `<g transform="translate(180,40)">${pill('🎵 ' + s.song.name, { fs: 12, bg: '#FFF6C9' })}</g>`; try { musicPlay(null); } catch (e) {}
+};
+MODES.rhythm.down = function(s, p){ const k = s.lanes.reduce((b, x, i) => Math.abs(x - p.x) < Math.abs(s.lanes[b] - p.x) ? i : b, 0); const pad = s.pads[k]; pad.s = 1.2; place(pad); setTimeout(() => { pad.s = 1; place(pad); }, 120);
+  const n = s.objs.filter(o => o.lane === k && !o.done).sort((a, b) => Math.abs(a.y - 222) - Math.abs(b.y - 222))[0];
+  if (n && Math.abs(n.y - 222) < s.win){ n.done = true; kill(n); playNote(n.note, .45); const perfect = Math.abs(n.y - 222) < s.win / 2.5; addScore(s, perfect ? 2 : 1, s.lanes[k], 190); if (perfect) pop(s, s.lanes[k], 170, 'Perfect!', '#7B5CFA'); } else { s.combo = 0; } };
+MODES.rhythm.step = function(s, dt){
+  const sp = 234 / s.travel;
+  while (s.si < s.seq.length && s.seq[s.si].t - s.travel <= s.t){ const q = s.seq[s.si++]; const o = mk(s, `<g>${[SPR.star, SPR.heart, SPR.gem][q.lane]}</g>`, s.lanes[q.lane], -12 + (s.t - (q.t - s.travel)) * sp, 1.2); o.lane = q.lane; o.note = q.n; s.objs.push(o); }
+  while (s.nextBeat <= s.t + .05){ const at = s.nextBeat - s.t; drumHit(s.bi % 4 === 0 ? 'kick' : s.bi % 2 ? 'hat' : 'snare', at); if (s.bi % 2 === 0) bassNote(s, at); s.bi++; s.nextBeat += s.beat; }
+  for (const o of s.objs){ o.y += sp * dt; o.r = Math.sin(s.t * 6) * 10; place(o); if (o.y > 252 && !o.done){ o.done = true; s.combo = 0; pop(s, o.x, 240, 'miss', '#9AA3B8'); kill(o); } }
+  s.objs = s.objs.filter(o => !o.dead);
+  const pulse = 1 + .08 * Math.max(0, 1 - ((s.t % s.beat) / s.beat) * 4); s.pads.forEach(p => { if (p.s < 1.1){ p.s = pulse; place(p); } });
+  if (s.t > s.songEnd){ s.score += 5; pop(s, 180, 120, 'Song complete! 🎉', '#7B5CFA'); arcEnd(s); }
+};
+function playNote(n, dur = .4){ try { if (!MUS.ctx || MUS.ctx.state !== 'running') return; voice('bell', nf(n), MUS.ctx.currentTime + .01, dur, 1, MUS.master); } catch (e) {} }
+function drumHit(kind, at = 0){ try { if (!MUS.ctx || MUS.ctx.state !== 'running') return; const t = MUS.ctx.currentTime + Math.max(0, at) + .01; if (kind === 'kick') voice('softbass', nf('C3'), t, .18, 1, MUS.master); else if (kind === 'snare') voice('softbass', nf('G3'), t, .08, .6, MUS.master); else voice('xylo', nf('C7'), t, .04, .25, MUS.master); } catch (e) {} }
+function bassNote(s, at){ const q = s.seq.find(x => x.t >= s.t + at - .01) || s.seq[s.seq.length - 1]; const root = q.n[0] + '3'; try { if (!MUS.ctx || MUS.ctx.state !== 'running') return; voice('softbass', nf(root), MUS.ctx.currentTime + Math.max(0, at) + .01, s.beat * .9, .7, MUS.master); } catch (e) {} }
+const _musicForDance = musicFor; musicFor = function(){ const s = ARC.s; if (s && s.on && s.mode === 'rhythm') return null; return _musicForDance(); };
+const _arcEndDance = arcEnd; arcEnd = function(s){ const r = s && s.mode === 'rhythm'; _arcEndDance(s); if (r) setTimeout(() => { try { musicUpdate(); } catch (e) {} }, 300); };
+ARCADE.dance.how = 'Each star, heart and gem is a note of a song. Tap its lane when it lands on the circle and you play the song yourself! The drums keep the beat.';
+ARCADE.dance.learn = s => `You played ${s.song ? s.song.name : 'a song'}! Music is made of notes and a steady beat, like counting 1, 2, 3, 4.`;
+ARCADE.dance.time = null; ARCADE.dance.goal = [20, 30, 40, 50];
+// new places get their own music
+Object.assign(ROOMSONG, { snowshop: 'jingle', skihill: 'holiday', cocoa: 'musicbox', surfshack: 'calypso', sandcastle: 'bounce', aquarium: 'lullaby' });
+
+// ---------- READ-ALOUD in the new worlds and games ----------
+const _addHearsY = addHears;
+addHears = function(){ _addHearsY(); if (!RA()) return;
+  const put = (el, text) => { if (!el || !text || el.querySelector(':scope > .hearbtn')) return; el.insertAdjacentHTML('beforeend', hearBtn(text)); el.classList.add('has-hear'); };
+  document.querySelectorAll('.arc-card:not(.end)').forEach(c => put(c, `${(c.querySelector('b') || {}).textContent || ''}. ${(c.querySelector('small') || {}).textContent || ''}`));
+  document.querySelectorAll('.rg-hint').forEach(h => put(h, h.textContent));
+  document.querySelectorAll('.shopbanner, .wishrow').forEach(b => put(b, b.textContent.trim()));
+  document.querySelectorAll('.book-text').forEach(b => put(b, b.textContent.trim()));
+};
+const _regionOpenRA = regionOpen; regionOpen = function(w){ _regionOpenRA(w); if (!RA()) return; const el = document.getElementById('region'); if (!el) return; el.querySelector('.rg-top h2').insertAdjacentHTML('beforeend', ' ' + hearBtn(WORLDS[w].name + '. ' + 'Tap the ground to walk. Tap a building to go inside!')); };
+
+// tapping a picture button says its name out loud for kids who can't read yet
+document.addEventListener('click', e => { if (!S || !RA()) return; const b = e.target.closest && e.target.closest('.htools2 .tool, .bitem, .placebtn, .funbtn, .tray2 .tool, .rg-places .chip, .bpg'); if (!b) return; const t = ((b.querySelector('b, small') || {}).textContent || b.getAttribute('aria-label') || b.textContent || '').trim(); if (t) setTimeout(() => tapSay(t), 30); }, true);
+// ---------- games that need reading wait until the right grade ----------
+ARCADE.crabrace.minG = 2;
+const _drawRoomMinG = drawRoom;
+drawRoom = function(){ const r = ui.room; if (!r || !ROOMS[r.t] || !S) return _drawRoomMinG(); const def = ROOMS[r.t], all = def.tabs, g = GR(); const vis = all.filter(t => !(ARCADE[t[0]] && ARCADE[t[0]].minG > g)); if (vis.length === all.length || !vis.length) return _drawRoomMinG(); if (!vis.some(t => t[0] === r.tab)) r.tab = vis[0][0]; def.tabs = vis; try { _drawRoomMinG(); } finally { def.tabs = all; } };
 
 
 injectDefs();
