@@ -1084,6 +1084,8 @@ body{background:linear-gradient(165deg,#FFF0F7 0%,#F1F0FF 32%,#EAF7FF 58%,#EFFFF
 .hdot{width:22px;height:22px;border-radius:50%;background:#FF8FB8;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
 .hdot.b{background:#7FD3FF}.hdot.gone{opacity:.35;position:relative}.hdot.gone::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#E8414F;font-weight:900}
 .hplus{font-size:22px;color:#7B5CFA;margin:0 4px}
+.movecode{width:100%;font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;min-height:96px;margin:8px 0}
+#bringBtn{margin-top:6px;width:100%}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -10897,6 +10899,115 @@ const _helpSheetX2 = helpSheet;
 helpSheet = function(){ let h = _helpSheetX2(); try { const les = ui.lesson && ui.lesson.cur; if (!les) return h; const ex = explainQ(les.q); if (!ex.viz) return h; const [x, y, op] = ex.viz; if (x > 20 || y > 20) return h;
   const dots = op === '−' ? [...Array(x)].map((_, i) => `<span class="hdot ${i >= x - y ? 'gone' : ''}"></span>`).join('') : [...Array(x)].map(() => '<span class="hdot"></span>').join('') + '<b class="hplus">+</b>' + [...Array(y)].map(() => '<span class="hdot b"></span>').join('');
   return h.replace('<div class="helpchips">', `<div class="helpviz">${dots}</div><p class="note-s" style="text-align:center">${esc(ex.say)} <button class="hearbtn" data-act="hear" data-v="${esc(ex.say)}" aria-label="Hear it">${SPK}</button></p><div class="helpchips">`); } catch (er) { return h; } };
+
+// ---------- v32 ACCOUNTS SAVED ON CLOUDFLARE: sign in on any device and your family comes back ----------
+const CF = { ok: false, pushT: 0, pushing: false, dirty: false, pending: false };
+const cfHash = (email, pw) => hashPw(pw, 'chorebuddies-cloud:' + email);
+async function cfApi(path, o = {}){
+  const acc = DB.accounts[DB.current], tok = o.token || (acc && acc.cf && acc.cf.token);
+  const r = await fetch('/api' + path, { method: o.method || 'GET', headers: { 'content-type': 'application/json', ...(tok ? { authorization: 'Bearer ' + tok } : {}) }, body: o.body ? JSON.stringify(o.body) : undefined });
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  return { status: r.status, ...j };
+}
+// find out if this copy of the app has the account server (the website does; the Claude preview does not)
+(async () => { if (typeof IN_FRAME !== 'undefined' && IN_FRAME) return; try { const r = await cfApi('/ping'); CF.ok = !!r.ok; } catch (e) { CF.ok = false; } if (CF.ok){ cfAutoLink(); cfPull(); } })();
+function cfLocalSave(){ try { localStorage.setItem(DBKEY, JSON.stringify(DB)); } catch (e) {} }
+async function cfPush(){
+  const acc = DB.accounts[DB.current]; if (!CF.ok || !acc || !acc.cf || !acc.cf.token || !S) return;
+  if (CF.pushing){ CF.dirty = true; return; } CF.pushing = true; CF.dirty = false;
+  try { const r = await cfApi('/data', { method: 'PUT', body: { data: JSON.stringify(S) } }); if (r.ver){ acc.cf.ver = r.ver; cfLocalSave(); } else if (r.status === 401){ acc.cf.token = null; cfLocalSave(); } } catch (e) { CF.dirty = true; }
+  CF.pushing = false; if (CF.dirty){ clearTimeout(CF.pushT); CF.pushT = setTimeout(cfPush, 3000); } else CF.pending = false;
+}
+const _saveCF = save;
+save = function(){ _saveCF.apply(this, arguments); const acc = DB.accounts[DB.current]; if (CF.ok && acc && acc.cf && acc.cf.token){ CF.pending = true; clearTimeout(CF.pushT); CF.pushT = setTimeout(cfPush, 2000); } };
+async function cfPull(force){
+  const acc = DB.accounts[DB.current]; if (!CF.ok || !acc || !acc.cf || !acc.cf.token || CF.pushing || (CF.pending && !force)) return;
+  try { const v = await cfApi('/ver'); if (v.status === 401){ acc.cf.token = null; cfLocalSave(); return; } if (!v.ver || v.ver <= (acc.cf.ver || 0)) return;
+    const d = await cfApi('/data'); if (!d.data) return; const fam = JSON.parse(d.data); acc.fam = fam; acc.cf.ver = d.ver; S = fam; newDay(); cfLocalSave();
+    if (!ui.room && !ui.sheet) render(); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') cfPull(); });
+setInterval(() => cfPull(), 45000);
+// accounts made before this (on this device) get saved online the next time the app opens
+async function cfAutoLink(){ const acc = DB.accounts[DB.current]; if (!acc || acc.demo || !acc.cfPend || (acc.cf && acc.cf.token)) return; await cfConnect(DB.current, null, acc.cfPend); }
+// sign up or sign in online with an already-made password hash; then upload or download the family
+async function cfConnect(email, pw, h){
+  h = h || await cfHash(email, pw); const acc = DB.accounts[email];
+  let r = await cfApi('/login', { method: 'POST', body: { email, hash: h } });
+  if (r.error === 'nouser'){ r = await cfApi('/signup', { method: 'POST', body: { email, hash: h } }); if (r.token){ acc.cf = { token: r.token, ver: 0 }; delete acc.cfPend; cfLocalSave(); await cfPush(); return 'up'; } return 'fail'; }
+  if (r.token){ acc.cf = { token: r.token, ver: r.ver || 0 }; delete acc.cfPend; cfLocalSave();
+    const d = await cfApi('/data', { token: r.token });
+    if (d.data){ const fam = JSON.parse(d.data); acc.fam = fam; acc.cf.ver = d.ver; if (DB.current === email){ S = fam; newDay(); } cfLocalSave(); return 'down'; }
+    await cfPush(); return 'up'; }
+  return r.error === 'wrong' ? 'wrong' : r.error === 'locked' ? 'locked' : 'fail';
+}
+// sign up and sign in use the online account when this is the website
+document.addEventListener('submit', async e => {
+  const f = e.target.dataset && e.target.dataset.form; if (!CF.ok || (f !== 'signup' && f !== 'login')) return;
+  e.preventDefault(); e.stopPropagation();
+  const val = id => ($(id) ? $(id).value.trim() : '');
+  if (f === 'signup'){
+    const name = val('#suName'), email = val('#suEmail').toLowerCase(), pw = $('#suPw').value;
+    ui.err = !name ? 'Add your name.' : !/^\S+@\S+\.\S+$/.test(email) ? 'That email doesn’t look right.' : pw.length < 8 ? 'Use a password with at least 8 characters.' : !$('#suAgree').checked ? 'Please confirm you are the parent or guardian.' : DB.accounts[email] && !DB.accounts[email].demo ? 'There is already an account with that email. Try signing in.' : '';
+    if (ui.err) return render();
+    const h = await cfHash(email, pw); let r;
+    try { r = await cfApi('/signup', { method: 'POST', body: { email, hash: h } }); } catch (er) { r = { error: 'offline' }; }
+    if (r.error === 'exists'){ ui.err = 'There is already an account with that email. Try signing in.'; return render(); }
+    const salt = uid() + uid();
+    DB.accounts[email] = { salt, hash: await hashPw(pw, salt), fam: newFamily(name, email), ...(r.token ? { cf: { token: r.token, ver: 0 } } : { cfPend: h }) };
+    DB.current = email; S = DB.accounts[email].fam; DB.session = { role: 'parent' }; ui.err = ''; sim.kid = null; save();
+    if (r.token) cfPush(); else toast('No internet right now, so your family is saved on this device. It will be saved online next time you are connected.', { title: 'Saved here' });
+    render(); setTimeout(() => A.addKid(), 250);
+  }
+  if (f === 'login'){
+    const email = val('#liEmail').toLowerCase(), pw = $('#liPw').value, acc = DB.accounts[email];
+    const localOK = acc && !acc.demo && acc.salt && (await hashPw(pw, acc.salt)) === acc.hash;
+    let res;
+    if (!localOK){
+      try { const h = await cfHash(email, pw); const r = await cfApi('/login', { method: 'POST', body: { email, hash: h } });
+        if (r.token){ const salt = uid() + uid(); DB.accounts[email] = { salt, hash: await hashPw(pw, salt), fam: (acc && acc.fam) || null, cf: { token: r.token, ver: r.ver || 0 } }; const d = await cfApi('/data', { token: r.token }); if (d.data){ DB.accounts[email].fam = JSON.parse(d.data); DB.accounts[email].cf.ver = d.ver; } res = 'ok'; }
+        else res = r.error === 'locked' ? `Too many tries. Please wait ${r.minutes || 15} minutes and try again.` : 'Email or password is not right.';
+      } catch (er) { res = acc ? 'Email or password is not right.' : 'Can’t reach the internet. Connect to Wi-Fi and try again.'; }
+      if (res !== 'ok'){ ui.err = res; return render(); }
+      if (!DB.accounts[email].fam){ ui.err = 'Your account has no family saved yet.'; return render(); }
+    } else if (!(acc.cf && acc.cf.token)){ try { await cfConnect(email, pw); } catch (er) {} }
+    DB.current = email; S = DB.accounts[email].fam; newDay(); DB.session = null; ui.err = ''; sim.kid = null; cfLocalSave(); render();
+    if (!localOK) toast('Welcome back! Your family came back from your online account.', { title: 'Signed in', ms: 3000 });
+    else cfPull(true);
+  }
+}, true);
+// deleting an account also deletes it online
+const _wipeAccountCF = wipeAccount;
+wipeAccount = function(email){ const acc = DB.accounts[email]; if (CF.ok && acc && acc.cf && acc.cf.token){ const tok = acc.cf.token; fetch('/api/account', { method: 'DELETE', headers: { authorization: 'Bearer ' + tok } }).catch(() => {}); } return _wipeAccountCF(email); };
+
+// ---------- MOVE MY FAMILY: a code to bring a family from the Claude app (or any device) to the website ----------
+async function famPack(o){ const txt = JSON.stringify(o); try { const cs = new Blob([txt]).stream().pipeThrough(new CompressionStream('gzip')); const buf = await new Response(cs).arrayBuffer(); let b = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 32768) b += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return 'CB1.' + btoa(b); } catch (e) { return 'CB0.' + btoa(unescape(encodeURIComponent(txt))); } }
+async function famUnpack(code){ code = String(code || '').replace(/\s+/g, ''); if (code.startsWith('CB0.')) return JSON.parse(decodeURIComponent(escape(atob(code.slice(4))))); if (!code.startsWith('CB1.')) throw new Error('bad');
+  const bin = atob(code.slice(4)), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); const ds = new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip')); return JSON.parse(await new Response(ds).text()); }
+A.famMakeCode = async () => { const acc = DB.accounts[DB.current]; if (!acc || acc.demo) return toast('Sign in to your own family first.'); const code = await famPack({ v: 1, email: DB.current, salt: acc.salt, hash: acc.hash, fam: S });
+  openSheet(`<div class="grab"></div><h3>Move my family</h3><p class="sub">1. Tap <b>Copy code</b>. 2. Open your Chore Buddies website. 3. On the first screen tap <b>Bring my family here</b>, paste the code and type your password.</p><textarea class="text movecode" id="moveCode" readonly rows="5">${code}</textarea><div class="actions"><button class="btn grape big" data-act="famCopy">📋 Copy code</button></div><p class="note-s">The code has your whole family in it. Only paste it into your own Chore Buddies website.</p>`); };
+A.famCopy = async () => { const t = $('#moveCode'); if (!t) return; let ok = false; try { await navigator.clipboard.writeText(t.value); ok = true; } catch (e) {} if (!ok){ t.focus(); t.select(); try { ok = document.execCommand('copy'); } catch (e) {} } toast(ok ? 'Copied! Now open your website and paste it there.' : 'Press and hold the code, tap Select All, then Copy.', { title: ok ? 'Copied' : 'Copy it' }); };
+A.famBring = () => { ui.err = ''; openSheet(`<div class="grab"></div><h3>Bring my family here</h3><p class="sub">Paste the code from the other device, then type the password for that family.</p><textarea class="text movecode" id="bringCode" rows="5" placeholder="Paste the code here"></textarea><div class="field"><label for="bringPw">Password</label><input class="text" id="bringPw" type="password" autocomplete="current-password"></div><p class="err" id="bringErr" role="alert"></p><div class="actions"><button class="btn grape big" data-act="famBringGo">Bring my family</button></div>`); };
+A.famBringGo = async () => { const err = t => { const e = $('#bringErr'); if (e) e.textContent = t; };
+  let o; try { o = await famUnpack(($('#bringCode') || {}).value); } catch (e) { return err('That code doesn’t look right. Copy the whole code again.'); }
+  const pw = ($('#bringPw') || {}).value || ''; if (!o || !o.fam || !o.email) return err('That code doesn’t look right.');
+  if ((await hashPw(pw, o.salt)) !== o.hash) return err('That password is not right for this family.');
+  DB.accounts[o.email] = { salt: o.salt, hash: o.hash, fam: o.fam }; DB.current = o.email; S = o.fam; newDay(); DB.session = null; sim.kid = null; ui.screen = 'app'; cfLocalSave();
+  if (CF.ok){ try { const acc = DB.accounts[o.email], h = await cfHash(o.email, pw); let r = await cfApi('/signup', { method: 'POST', body: { email: o.email, hash: h } }); if (r.error === 'exists') r = await cfApi('/login', { method: 'POST', body: { email: o.email, hash: h } }); if (r.token){ acc.cf = { token: r.token, ver: r.ver || 0 }; cfLocalSave(); await cfPush(); } } catch (e) {} }
+  closeSheet(); render(); confetti(50); toast(CF.ok ? 'Your family is here, and it is saved online too. Sign in on any device!' : 'Your family is here!', { title: 'Welcome back', ms: 3600 }); };
+// buttons: on the website's welcome/login screens, and in Controls
+const _renderMove = render;
+render = function(){ const r = _renderMove.apply(this, arguments); try { if (!S && (ui.screen === 'login' || ui.screen === 'welcome' || !ui.screen)){ const f = document.querySelector('form[data-form="login"]') || document.querySelector('.welcome, .auth, #view .card'); if (f && !document.getElementById('bringBtn')) f.insertAdjacentHTML('beforeend', `<button class="btn ghost" id="bringBtn" type="button" data-act="famBring">📦 Bring my family here</button>`); } } catch (e) {} return r; };
+const _soundCtlMove = soundControls;
+soundControls = function(){ const acc = DB.accounts[DB.current] || {}, online = CF.ok && acc.cf && acc.cf.token;
+  return _soundCtlMove() + `<div class="card"><div class="setrow"><div><b>${online ? '☁️ Saved online' : 'Move my family'}</b><small>${online ? 'Your family is saved in your online account. Sign in with your email and password on any phone, iPad or computer and everything comes back.' : CF.ok ? 'Type your password once to save this family online, so you can sign in on any device.' : 'Your family is saved inside this app only. Make a code to bring it to your Chore Buddies website, where it is saved online.'}</small></div>${online ? '' : CF.ok ? '<button class="btn small grape" data-act="cfLinkNow">Save online</button>' : '<button class="btn small grape" data-act="famMakeCode">Make code</button>'}</div></div>`; };
+// the old Supabase card is not needed on the website
+const _cloudControlsCF = cloudControls;
+cloudControls = function(){ return CF.ok ? '' : _cloudControlsCF(); };
+
+A.cfLinkNow = () => openSheet(`<div class="grab"></div><h3>Save my family online</h3><p class="sub">Type the password for <b>${esc(DB.current || '')}</b>.</p><div class="field"><input class="text" id="linkPw" type="password" autocomplete="current-password"></div><p class="err" id="linkErr" role="alert"></p><div class="actions"><button class="btn grape big" data-act="cfLinkGo">Save online</button></div>`);
+A.cfLinkGo = async () => { const acc = DB.accounts[DB.current], pw = ($('#linkPw') || {}).value || '', e = $('#linkErr'); if (!acc) return; if ((await hashPw(pw, acc.salt)) !== acc.hash){ if (e) e.textContent = 'That password is not right.'; return; }
+  let r = 'fail'; try { r = await cfConnect(DB.current, pw); } catch (er) {} if (r === 'up' || r === 'down'){ closeSheet(); render(); toast('Saved online! Sign in on any device with this email and password.', { title: 'Saved', ms: 3200 }); } else if (e) e.textContent = r === 'wrong' ? 'This email already has an online account with a different password.' : 'Could not reach the internet. Try again.'; };
 
 injectDefs();
 injectDefs2();

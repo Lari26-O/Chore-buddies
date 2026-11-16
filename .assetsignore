@@ -8,3 +8,6 @@ supabase
 *.md
 DEPLOY.txt
 house-preview.png
+worker.js
+node_modules
+.wrangler

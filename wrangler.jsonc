@@ -1,11 +1,18 @@
 {
-  // Chore Buddies is a static website: Cloudflare serves these files as they are.
+  // Chore Buddies on Cloudflare: the app's files, plus a small server that keeps family accounts.
   "name": "chore-buddies",
+  "main": "worker.js",
   "compatibility_date": "2025-11-01",
   "workers_dev": true,
   "preview_urls": true,
   "assets": {
     "directory": "./",
-    "not_found_handling": "single-page-application"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ACCOUNTS", "class_name": "Accounts" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Accounts"] }]
 }
