@@ -1,0 +1,10 @@
+.git
+.github
+.assetsignore
+wrangler.jsonc
+build.sh
+tools
+supabase
+*.md
+DEPLOY.txt
+house-preview.png
