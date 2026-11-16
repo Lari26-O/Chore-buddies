@@ -1,3 +1,5 @@
+The full, up-to-date setup guide (website + saved accounts) is in SETUP.md in this folder.
+
 Chore Buddies — put it on its own website (works on any phone, no Claude needed)
 
 EASIEST: Cloudflare Pages connected to GitHub (free, about 10 minutes, works from an iPad)
