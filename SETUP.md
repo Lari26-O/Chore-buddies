@@ -11,14 +11,13 @@ Two free accounts, about 20 minutes, all doable from an iPad:
 
 1. Go to **dash.cloudflare.com** and make a free account.
 2. Tap **Workers & Pages → Create → Pages → Connect to Git**.
-3. Sign in with GitHub and allow access to the **Weeklan** repository.
+3. Sign in with GitHub and allow access to the **Chore-buddies** repository.
 4. Use these settings:
-   - Production branch: **claude/chore-buddies**
+   - Production branch: **main**
    - Framework preset: **None**
    - Build command: *(leave empty)*
-   - Build output directory: **chore-buddies**
-5. Tap **Save and Deploy**. You get an address like `https://weeklan.pages.dev`.
-   (You can rename the project, for example to get `https://chore-buddies.pages.dev`.)
+   - Build output directory: *(leave empty, the app is at the top of the repository)*
+5. Tap **Save and Deploy**. You get an address like `https://chore-buddies.pages.dev`.
 6. On each phone or iPad: open the address in **Safari → Share → Add to Home Screen**.
    It opens full screen like a real app and keeps working with no internet.
 
@@ -30,11 +29,11 @@ The app works now. Each device keeps its own family until you do Part 2.
 
 1. Go to **supabase.com**, make a free account, and tap **New project**.
    Pick any name and a database password, and save the password somewhere safe.
-2. Open **SQL Editor → New query**. Paste the whole file `chore-buddies/supabase/002_cloud_sync.txt`
+2. Open **SQL Editor → New query**. Paste the whole file `supabase/002_cloud_sync.txt`
    from GitHub into it and tap **Run**. (You don't need `001_family_accounts.txt`; it's an older design.)
 3. **Authentication → Sign In / Providers → Email**: keep **Confirm email** turned ON.
 4. **Authentication → URL Configuration**:
-   - Site URL: your Cloudflare address from Part 1 (for example `https://weeklan.pages.dev`)
+   - Site URL: your Cloudflare address from Part 1 (for example `https://chore-buddies.pages.dev`)
    - Redirect URLs: add the same address
 5. **Project Settings → API** (also shown as "Data API" or "API Keys"): copy the **Project URL** and the **anon public** key.
    The anon key is meant to be public; the database rules from step 2 protect each family's data.

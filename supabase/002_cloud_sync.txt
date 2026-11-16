@@ -13,7 +13,7 @@
 --   4. Authentication → URL Configuration: set Site URL to where the app lives,
 --      e.g. https://chore-buddies.pages.dev (and add it to Redirect URLs).
 --   5. Project Settings → API: copy the Project URL and the anon public key.
---   6. Host chore-buddies/index.html on Cloudflare Pages (drag and drop the file),
+--   6. Host this repository on Cloudflare Pages (see SETUP.md),
 --      open it, then Parent → Controls → "Use on several phones" → paste URL + key → Connect.
 --      (Or paste them into SUPA_URL / SUPA_KEY at the top of the cloud section in index.html.)
 --   Cloud accounts do not work inside the Claude preview, because it blocks network access.

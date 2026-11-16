@@ -6,13 +6,13 @@ EASIEST: Cloudflare Pages connected to GitHub (free, about 10 minutes, works fro
   It updates itself every time new changes are pushed to GitHub.
   1. Go to dash.cloudflare.com and make a free account.
   2. Workers & Pages → Create → Pages → Connect to Git → sign in with GitHub
-     → pick the repository "Weeklan".
+     → pick the repository "Chore-buddies".
   3. Settings:
-       Production branch:      claude/chore-buddies   (or main, once it is merged)
+       Production branch:      main
        Framework preset:       None
        Build command:          (leave empty)
-       Build output directory: chore-buddies
-  4. Save and Deploy. You get an address like https://weeklan.pages.dev
+       Build output directory: (leave empty)
+  4. Save and Deploy. You get an address like https://chore-buddies.pages.dev
      (you can rename the project to get e.g. https://chore-buddies.pages.dev).
 
 ON MOM'S PHONE (iPhone)
