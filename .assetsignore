@@ -11,3 +11,4 @@ house-preview.png
 worker.js
 node_modules
 .wrangler
+voice-kit
