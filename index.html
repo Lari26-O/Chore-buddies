@@ -1086,6 +1086,19 @@ body{background:linear-gradient(165deg,#FFF0F7 0%,#F1F0FF 32%,#EAF7FF 58%,#EFFFF
 .hplus{font-size:22px;color:#7B5CFA;margin:0 4px}
 .movecode{width:100%;font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;min-height:96px;margin:8px 0}
 #bringBtn{margin-top:6px;width:100%}
+/* calmer, cleaner screens */
+.rm-title small{display:none}
+.btn.big::after,.btn.grape::after{display:none!important;animation:none!important}
+#tabs button[aria-current="page"] .ti{animation:none!important}
+.tapfx{display:none!important}
+.hpulse,.howbtn,.pulse,.pulse-soft{animation:none!important}
+#readme{width:52px;height:52px;padding:0;border-radius:50%;justify-content:center;bottom:calc(84px + env(safe-area-inset-bottom,0px));box-shadow:0 4px 0 #3C74D6,0 8px 16px -8px rgba(43,37,80,.45)}
+#readme small{display:none}
+.te:empty{display:none}
+.htools2 .tool small,.mktools .tool small{font-size:13px;font-weight:800}
+.wordbtn{font-size:12.5px!important;font-weight:800;line-height:1.1}
+.btools .wordbtn{padding:8px 6px}
+.toast{max-width:min(92vw,420px)}
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001s!important;animation-iteration-count:1!important;transition:none!important}}
 </style>
 
@@ -11008,6 +11021,43 @@ cloudControls = function(){ return CF.ok ? '' : _cloudControlsCF(); };
 A.cfLinkNow = () => openSheet(`<div class="grab"></div><h3>Save my family online</h3><p class="sub">Type the password for <b>${esc(DB.current || '')}</b>.</p><div class="field"><input class="text" id="linkPw" type="password" autocomplete="current-password"></div><p class="err" id="linkErr" role="alert"></p><div class="actions"><button class="btn grape big" data-act="cfLinkGo">Save online</button></div>`);
 A.cfLinkGo = async () => { const acc = DB.accounts[DB.current], pw = ($('#linkPw') || {}).value || '', e = $('#linkErr'); if (!acc) return; if ((await hashPw(pw, acc.salt)) !== acc.hash){ if (e) e.textContent = 'That password is not right.'; return; }
   let r = 'fail'; try { r = await cfConnect(DB.current, pw); } catch (er) {} if (r === 'up' || r === 'down'){ closeSheet(); render(); toast('Saved online! Sign in on any device with this email and password.', { title: 'Saved', ms: 3200 }); } else if (e) e.textContent = r === 'wrong' ? 'This email already has an online account with a different password.' : 'Could not reach the internet. Try again.'; };
+
+// ---------- v33 CLEAN LOOK: no decorative emojis, calmer screens ----------
+const EMO_RE = /(?![▶◀←-↕‹›])[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}]️?(‍[\p{Extended_Pictographic}]️?)*|[️⃣]/gu;
+const HAS_WORD = /[A-Za-z0-9À-ɏ]/;
+function cleanTextNode(n){
+  const t = n.nodeValue; if (!t || !EMO_RE.test(t)) return; EMO_RE.lastIndex = 0;
+  const p = n.parentElement; if (!p) return;
+  const stripped = t.replace(EMO_RE, '').replace(/\s{2,}/g, ' ');
+  // emojis next to words are decoration: drop them. Emoji on its own is a picture: keep it,
+  // except tool icons and emoji-only buttons, which get their name instead.
+  if (HAS_WORD.test(stripped)){ n.nodeValue = /^\s/.test(t) && !/^\s/.test(stripped) ? stripped : stripped.replace(/^\s+/, p.firstChild === n ? '' : ' '); return; }
+  if (p.closest('.te')){ n.nodeValue = ''; return; }
+  const btn = p.closest('button, .chip');
+  if (btn && !btn.closest('.answers, .lesson, .arc, .rm-scene, .ordrow, .wtile, .bitem, .furbtn') && btn.getAttribute('aria-label') && !HAS_WORD.test(btn.textContent.replace(EMO_RE, ''))){ n.nodeValue = btn.getAttribute('aria-label'); btn.classList.add('wordbtn'); }
+}
+function cleanTree(root){
+  if (!root) return; if (root.nodeType === 3) return cleanTextNode(root);
+  if (root.nodeType !== 1 || root.closest && root.closest('svg, script, style, textarea, input')) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => n.parentElement && n.parentElement.closest('svg, script, style, textarea') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const list = []; while (w.nextNode()) list.push(w.currentNode); list.forEach(cleanTextNode);
+}
+// counters drawn in pictures (like "4/6" or a timer) lose their emoji too
+function cleanSvgText(root){ (root.querySelectorAll ? root.querySelectorAll('svg text') : []).forEach(tx => { const t = tx.textContent; if (EMO_RE.test(t)){ EMO_RE.lastIndex = 0; const s = t.replace(EMO_RE, '').trim(); if (HAS_WORD.test(s)) tx.textContent = s; } EMO_RE.lastIndex = 0; }); }
+let cleanQ = null, cleanSet = new Set();
+const cleanObs = new MutationObserver(muts => {
+  for (const m of muts){ if (m.type === 'characterData'){ const p = m.target.parentElement; if (p && !p.closest('svg')) cleanSet.add(m.target); } else m.addedNodes.forEach(n => { if (n.nodeType === 3 ? (n.parentElement && !n.parentElement.closest('svg')) : (n.nodeType === 1 && n.tagName !== 'svg' && !(n.closest && n.closest('svg')))) cleanSet.add(n); else if (n.nodeType === 1 && n.tagName === 'svg') cleanSet.add(n); }); }
+  if (cleanSet.size && !cleanQ) cleanQ = requestAnimationFrame(() => { cleanQ = null; const list = [...cleanSet]; cleanSet.clear(); list.forEach(n => { if (!n.isConnected) return; if (n.nodeType === 1 && n.tagName === 'svg'){ cleanSvgText(n.parentElement || n); return; } cleanTree(n); if (n.nodeType === 1) cleanSvgText(n); }); });
+});
+cleanObs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+setTimeout(() => { cleanTree(document.body); cleanSvgText(document.body); }, 0);
+// spoken text never reads emoji names either
+const _toastClean = toast;
+toast = function(html, o = {}){ document.querySelectorAll('.toast').forEach(t => t.remove()); o = { ...o }; o.ms = o.btn ? Math.min(o.ms || 5000, 5000) : Math.min(o.ms || 3000, 3200); return _toastClean(html, o); };
+// a smaller "read to me" button
+const SPK_ICON = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+const _readmeSyncC = readmeSync;
+readmeSync = function(){ _readmeSyncC(); const b = document.getElementById('readme'); if (b && !b.dataset.clean){ b.dataset.clean = 1; b.innerHTML = SPK_ICON; } };
 
 injectDefs();
 injectDefs2();
